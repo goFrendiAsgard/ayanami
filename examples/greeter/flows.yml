@@ -1,0 +1,30 @@
+serviceTemplates:
+    bin: service-bin
+    go: service-go
+    node: service-node
+    python: service-python
+
+triggers:
+    - Req-GreetEn
+    - Req-GreetId
+    - Req-GreetJp
+    - Req-Cal
+
+triggerConfigs:
+    http:
+        template: trigger-http
+        config:
+            port: 80
+            routes:
+                GET /greet/en/{name}: Req-GreetEn
+                GET /greet/id/{name}: Req-GreetId
+                GET /greet/jp/{name}: Req-GreetJp
+                GET /cal/{year}: Req-GreetCal
+
+components:
+    cal:
+        path: cal.sh
+    greetEn:
+        path: greet-en.go
+    greetId:
+        path: greet-en.go
