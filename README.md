@@ -33,5 +33,57 @@ Providing an environment with minimum dependencies in order to:
 # Project Structure
 
 ```
-Projects
+examples/greeter/
+├── components/              # your functions
+│   ├── user-function.go
+│   ├── user-function.py
+│   └── user-function.sh
+├── dist/                    # generated microservices
+├── flows.yml                # flow definitions
+└── templates/               # your templates
+    ├── service-template-1/
+    ├── service-template-2/
+    ├── trigger-template-1/
+    └── trigger-template-2/
+```
+
+# Flow Definition
+
+```yml
+# filename: flows.yml
+
+serviceTemplate:
+    template1: service-template-1-location
+    template2: service-template-2-location
+
+triggerNames:
+    - trigger1
+    - trigger2
+
+triggerConfigs:
+
+    # e.g: http
+    triggerGroup1:
+        template: trigger-template1-location
+        configs: {}
+
+    # e.g: scheduler
+    triggerGroup2:
+        template: trigger-template1-location
+        configs: {}
+
+components:
+    fn-1:
+        path: user-function.go
+        functionName: Fn
+    fn-2:
+        path: user-function.sh
+    fn-3:
+        path: user-function.py
+        functionNamae: fn
+flows:
+    flow-name-1:
+        - trigger1 |> fn-1 |> trigger2
+        - trigger1 |> fn-3 |> trigger3
+        - trigger3 |> fn-4
 ```

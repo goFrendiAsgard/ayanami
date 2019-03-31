@@ -4,7 +4,7 @@ serviceTemplates:
     node: service-node
     python: service-python
 
-triggers:
+triggerNames:
     - Req-GreetEn
     - Req-GreetId
     - Req-GreetJp
@@ -13,7 +13,7 @@ triggers:
 triggerConfigs:
     http:
         template: trigger-http
-        config:
+        configs:
             port: 80
             routes:
                 GET /greet/en/{name}: Req-GreetEn
