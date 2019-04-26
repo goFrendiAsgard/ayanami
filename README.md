@@ -22,7 +22,6 @@ Providing an environment with minimum dependencies in order to:
 # Dependencies
 
 * golang 1.2
-* nats.io
 
 # How
 
@@ -31,6 +30,9 @@ Providing an environment with minimum dependencies in order to:
 * Ayanami compose flows and functions into several microservices that can talk to each other using nats messaging.
 
 # Project Structure
+
+TODO: adjust this with the new one
+TODO: flows: exposing all endpoints for each service except analytics, compose things using weather, populations, and analytics
 
 ```
 examples/greeter/
@@ -48,6 +50,8 @@ examples/greeter/
 ```
 
 # Flow Definition
+
+TODO: datatype
 
 ```yml
 # filename: flows.yml
