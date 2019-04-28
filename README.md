@@ -31,63 +31,41 @@ Providing an environment with minimum dependencies in order to:
 
 # Project Structure
 
-TODO: adjust this with the new one
-TODO: flows: exposing all endpoints for each service except analytics, compose things using weather, populations, and analytics
-
 ```
-examples/greeter/
-├── components/              # your functions
-│   ├── user-function.go
-│   ├── user-function.py
-│   └── user-function.sh
-├── dist/                    # generated microservices
-├── flows.yml                # flow definitions
-└── templates/               # your templates
-    ├── service-template-1/
-    ├── service-template-2/
-    ├── trigger-template-1/
-    └── trigger-template-2/
+.
+├── composistions
+│   └── composition.go   # Flows & Triggers definition (should be in golang).
+│
+├── dists                # Generated packages.
+│
+├── services             # Service definitions.
+│   │                    #   Service can be written in any language
+│   │                    #   as long as there is a template for it.
+│   │                    #   But functions in a particular service
+│   │                    #   should be written in the same language
+│   ├── analytics
+│   │   └── lib.js
+│   ├── cities
+│   │   └── lib.js
+│   ├── Makefile
+│   ├── populations
+│   │   └── lib.js
+│   ├── README.md
+│   ├── test.js
+│   └── weathers
+│       └── lib.js
+│
+└── templates           # templates
+    ├── composition/
+    └── nodejs/
 ```
 
-# Flow Definition
+# Terminologies
 
-TODO: datatype
-
-```yml
-# filename: flows.yml
-
-serviceTemplate:
-    template1: service-template-1-location
-    template2: service-template-2-location
-
-triggerNames:
-    - trigger1
-    - trigger2
-
-triggerConfigs:
-
-    # e.g: http
-    triggerGroup1:
-        template: trigger-template1-location
-        configs: {}
-
-    # e.g: scheduler
-    triggerGroup2:
-        template: trigger-template1-location
-        configs: {}
-
-components:
-    fn-1:
-        path: user-function.go
-        functionName: Fn
-    fn-2:
-        path: user-function.sh
-    fn-3:
-        path: user-function.py
-        functionNamae: fn
-flows:
-    flow-name-1:
-        - trigger1 |> fn-1 |> trigger2
-        - trigger1 |> fn-3 |> trigger3
-        - trigger3 |> fn-4
-```
+* Composition: The functionality definition of your program
+    - Flow: Composition of functions, usually triggered by a trigger (e.g: when there is a HTTP request to `/order` end point, the system should execute several functions from different services and return a response).
+    - Trigger: Event that trigger flows (e.g: Scheduler, HTTP request, etc)
+    - Service: Collection of functions. Usually from the same domain
+        - Function: The atomic part of your business logic. Functions from different services should be independent from each other.
+* Template: The template we use to generate package
+* Package: The final source code of your program, ready for deployment

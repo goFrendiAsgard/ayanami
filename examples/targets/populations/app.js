@@ -1,15 +1,15 @@
 const process = require('process');
 const appHelper = require('./app-helper.js');
 
-const servicename = 'cities';
+const servicename = 'populations';
 const hostname =  process.env[`${servicename}_hostname`.toUpperCase()] || '127.0.0.1';
 const port = process.env[`${servicename}_port`.toUpperCase()] || 3000;
 
 const serviceConfigs = [
     {
-        pathname: 'getCities',
-        fn: require(`${__dirname}/lib.js`).getCities,
-        inputs: [],
+        pathname: 'getPopulations',
+        fn: require(`${__dirname}/lib.js`).getPopulations,
+        inputs: ['cityNames'],
     },
 ];
 

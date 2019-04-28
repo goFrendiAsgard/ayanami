@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"github.com/state-alchemists/ayanami/cmd"
 )
 
 func main() {
-	fmt.Println("Hello world")
+	cmd.Execute()
 }
