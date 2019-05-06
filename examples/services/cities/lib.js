@@ -1,12 +1,18 @@
-const fs = require('fs');
-
 /**
  * Get available cities
  * @returns {string[]}
  */
 function getCities() {
-    const content = fs.readFileSync(`${__dirname}/data.json`);
-    const data = JSON.parse(content);
+    const data = [
+        "king's landing",
+        "braavos",
+        "volantis",
+        "asshai",
+        "old valyria",
+        "free cities",
+        "qarth",
+        "meereen"
+    ];
     return data;
 }
 
