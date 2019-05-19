@@ -3,17 +3,17 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gofrs/uuid"
 	nats "github.com/nats-io/nats.go"
 	"log"
 	"net/http"
 )
 
 // CreateHandler create handler function
-func CreateHandler(natsURL string, multipartFormLimit int64, route string) func(http.ResponseWriter, *http.Request) {
+func CreateHandler(multipartFormLimit int64, route string) func(http.ResponseWriter, *http.Request) {
+	natsURL := GetNatsURL()
 	return func(w http.ResponseWriter, r *http.Request) {
 		// create ID
-		ID, err := createID()
+		ID, err := CreateID()
 		if err != nil {
 			responseError(ID, w, 500, err)
 			return
@@ -64,6 +64,9 @@ func CreateHandler(natsURL string, multipartFormLimit int64, route string) func(
 		log.Printf("[INFO] Responding to %s: %d, %s", ID, code, content)
 		w.WriteHeader(code)
 		fmt.Fprintf(w, "%s", content)
+		// in gateway case, nats connection will only used until we get reply from flow
+		nc.Drain()
+		nc.Close()
 	}
 }
 
@@ -71,16 +74,6 @@ func responseError(ID string, w http.ResponseWriter, code int, err error) {
 	log.Printf("[ERROR] responding to %s: %d, %s", ID, code, err)
 	w.WriteHeader(code)
 	fmt.Fprintf(w, "%s", err)
-}
-
-func createID() (string, error) {
-	// create ID
-	UUID, err := uuid.NewV4()
-	if err != nil {
-		return "", err
-	}
-	ID := fmt.Sprintf("%s", UUID)
-	return ID, err
 }
 
 func publish(nc *nats.Conn, ID string, method string, route string, r *http.Request) error {
@@ -155,7 +148,7 @@ func publish(nc *nats.Conn, ID string, method string, route string, r *http.Requ
 }
 
 func publishPkg(nc *nats.Conn, ID string, method string, route string, varName string, pkg interface{}) error {
-	eventName := GetEventName(ID, ServiceTypeTrig, "request", method, route, DirectionOut, varName)
+	eventName := fmt.Sprintf("%s.trig.request.%s.%s.out.%s", ID, method, route, varName)
 	JSONByte, err := json.Marshal(&pkg)
 	if err != nil {
 		log.Printf("[ERROR] %s: %s", eventName, err)
@@ -167,8 +160,7 @@ func publishPkg(nc *nats.Conn, ID string, method string, route string, varName s
 }
 
 func consumeCode(nc *nats.Conn, ID string, method string, route string, chListen chan bool, chData chan int, chErr chan error) {
-	eventName := GetEventName(ID, ServiceTypeTrig, "response", method, route, DirectionIn, "code")
-	log.Printf("[INFO] Prepare to consume `%s`", eventName)
+	eventName := fmt.Sprintf("%s.trig.response.%s.%s.in.code", ID, method, route)
 	nc.Subscribe(eventName, func(m *nats.Msg) {
 		log.Printf("[INFO] Get code from `%s`: `%s`", eventName, string(m.Data))
 		var pkg ResponseCodePkg
@@ -188,7 +180,7 @@ func consumeCode(nc *nats.Conn, ID string, method string, route string, chListen
 }
 
 func consumeContent(nc *nats.Conn, ID string, method string, route string, chListen chan bool, chData chan string, chErr chan error) {
-	eventName := GetEventName(ID, ServiceTypeTrig, "response", method, route, DirectionIn, "content")
+	eventName := fmt.Sprintf("%s.trig.response.%s.%s.in.content", ID, method, route)
 	log.Printf("[INFO] Prepare to consume `%s`", eventName)
 	nc.Subscribe(eventName, func(m *nats.Msg) {
 		log.Printf("[INFO] Get content from `%s`: `%s`", eventName, string(m.Data))

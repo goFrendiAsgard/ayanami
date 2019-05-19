@@ -1,10 +1,5 @@
 package main
 
-import (
-	nats "github.com/nats-io/nats.go"
-	"os"
-)
-
 const serviceName = "textDecorator"
 
 var configs Configs
@@ -36,13 +31,8 @@ func init() {
 }
 
 func main() {
-	// get natsURL from environment, or use defaultURL instead
-	natsURL, ok := os.LookupEnv("NATS_URL")
-	if !ok {
-		natsURL = nats.DefaultURL
-	}
 	// consume and publish forever
 	ch := make(chan bool)
-	ConsumeAndPublish(natsURL, configs)
+	ConsumeAndPublish(configs)
 	<-ch
 }

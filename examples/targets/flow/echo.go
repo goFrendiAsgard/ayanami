@@ -16,12 +16,7 @@ func Echo(text string) string {
 func WrappedEcho(inputs Dictionary) Dictionary {
 	outputs := make(Dictionary)
 	// get text
-	form := inputs["form"].(map[string]interface{})
-	text := ""
-	if rawTexts, exists := form["text"].([]interface{}); exists {
-		rawText := rawTexts[0]
-		text = rawText.(string)
-	}
+	text := ExtractFormInterface(inputs["form"], "text")
 	// prepare outputs
 	outputs["content"] = Echo(text)
 	outputs["code"] = 200

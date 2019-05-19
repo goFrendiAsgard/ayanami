@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	nats "github.com/nats-io/nats.go"
 	"log"
 	"net/http"
 	"os"
@@ -13,6 +12,7 @@ var routes []string
 
 func init() {
 	routes = []string{
+		"/echo",
 		"/cowsay",
 		"/figlet",
 		"/",
@@ -20,11 +20,6 @@ func init() {
 }
 
 func main() {
-	// get natsURL from environment, or use defaultURL instead
-	natsURL, ok := os.LookupEnv("NATS_URL")
-	if !ok {
-		natsURL = nats.DefaultURL
-	}
 	// get port from environment, or use 8080 instead
 	port, ok := os.LookupEnv("GATEWAY_PORT")
 	if !ok {
@@ -44,7 +39,7 @@ func main() {
 	}
 	// create handlers and start server
 	for _, route := range routes {
-		handler := CreateHandler(natsURL, multipartFormLimit, route)
+		handler := CreateHandler(multipartFormLimit, route)
 		http.HandleFunc(route, handler)
 	}
 	log.Printf("Listening on %s", port)

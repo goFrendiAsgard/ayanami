@@ -8,7 +8,8 @@ import (
 )
 
 // ConsumeAndPublish consume from queue and Publish
-func ConsumeAndPublish(natsURL string, configs Configs) {
+func ConsumeAndPublish(configs Configs) {
+	natsURL := GetNatsURL()
 	nc, err := nats.Connect(natsURL)
 	if err != nil {
 		log.Print(err)
