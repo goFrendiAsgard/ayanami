@@ -10,6 +10,7 @@ The name is inspired from Evangelion-Unit-00's pilot: Ayanami Rei. The name `Rei
 * Any FaaS providers are prone to vendor lock-in
 * Having your own infrastructure (e.g: kubernetes) while developing/deploying in FaaS manner is a good solution
 * At some point, developers need to run the entire infrastructure in their local machine. In this case, installing kubernetes/minikube could be overkill
+* Generated instead of encapsulated
 
 # Goal
 
@@ -22,6 +23,7 @@ Providing an environment with minimum dependencies in order to:
 # Dependencies
 
 * golang 1.2
+* nats
 
 # How
 
@@ -31,34 +33,21 @@ Providing an environment with minimum dependencies in order to:
 
 # Project Structure
 
+# Convention
+
+## Event Name
+
 ```
-.
-├── composistions
-│   └── composition.go   # Flows & Triggers definition (should be in golang).
-│
-├── dists                # Generated packages.
-│
-├── services             # Service definitions.
-│   │                    #   Service can be written in any language
-│   │                    #   as long as there is a template for it.
-│   │                    #   But functions in a particular service
-│   │                    #   should be written in the same language
-│   ├── analytics
-│   │   └── lib.js
-│   ├── cities
-│   │   └── lib.js
-│   ├── Makefile
-│   ├── populations
-│   │   └── lib.js
-│   ├── README.md
-│   ├── test.js
-│   └── weathers
-│       └── lib.js
-│
-└── templates           # templates
-    ├── composition/
-    └── nodejs/
+<UUID|*>.<trig|srvc|flow>.<method>.[...info].<out|in>.<varName>
 ```
+
+* `<UUID|*>` is either UUID v4 or `*`
+* `<trig|srvc|flow>` is service type, either `trig` (trigger), `srvc` (service), or `flow`.
+* `<method>` is method name.
+* `[...info]` is extension of method name. So far only gateway use this segment. Gateways use `[...info]` to describe route.
+* `<out|in>` is either `out` or `in`. Typically services consume `in` event and omit `out` event. However, gateway and flow might act differently.
+* `<varName>` is variable name
+
 
 # Terminologies
 

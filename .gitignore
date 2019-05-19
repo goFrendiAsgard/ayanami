@@ -1,1 +1,4 @@
 ayanami
+examples/targets/flow/flow
+examples/targets/gateway/gateway
+examples/targets/gateway/textDecorator
