@@ -5,8 +5,8 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-// CreateID create new UUID
-func CreateID() (string, error) {
+// SrvcCreateID create new UUID
+func SrvcCreateID() (string, error) {
 	// create ID
 	UUID, err := uuid.NewV4()
 	if err != nil {

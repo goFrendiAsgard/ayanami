@@ -13,10 +13,10 @@ func Echo(text string) string {
 }
 
 // WrappedEcho implemented by user
-func WrappedEcho(inputs Dictionary) Dictionary {
-	outputs := make(Dictionary)
+func WrappedEcho(inputs SrvcDictionary) SrvcDictionary {
+	outputs := make(SrvcDictionary)
 	// get text
-	text := ExtractFormInterface(inputs["form"], "text")
+	text := SrvcExtractFormInterface(inputs["form"], "text")
 	// prepare outputs
 	outputs["content"] = Echo(text)
 	outputs["code"] = 200

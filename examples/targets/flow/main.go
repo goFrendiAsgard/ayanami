@@ -1,26 +1,34 @@
 package main
 
-var configs Configs
+var configs SrvcConfigs
 
 func init() {
-	configs = Configs{
-		"echo": SingleConfig{
-			Input: StringDictionary{
-				"trig.request.get./echo.out.form": "form",
+	configs = SrvcConfigs{
+		"echo": SrvcSingleConfig{
+			Input: []SrvcServiceIO{
+				SrvcServiceIO{
+					EventName: "trig.request.get./echo.out.form",
+					VarName:   "form",
+				},
 			},
-			Output: StringDictionary{
-				"code":    "trig.response.get./echo.in.code",
-				"content": "trig.response.get./echo.in.content",
+			Output: []SrvcServiceIO{
+				SrvcServiceIO{
+					EventName: "trig.response.get./echo.in.code",
+					VarName:   "code",
+				},
+				SrvcServiceIO{
+					EventName: "trig.response.get./echo.in.content",
+					VarName:   "content",
+				},
 			},
 			Function: WrappedEcho,
 		},
-		// TODO: add (cowsay -> pre, figlet -> pre, and figlet -> cowsay -> pre)
 	}
 }
 
 func main() {
 	// consume and publish forever
 	ch := make(chan bool)
-	ConsumeAndPublish(configs)
+	SrvcConsumeAndPublish(configs)
 	<-ch
 }

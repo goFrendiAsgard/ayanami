@@ -2,30 +2,30 @@ package main
 
 const serviceName = "textDecorator"
 
-var configs Configs
+var configs SrvcConfigs
 
 func init() {
-	configs = Configs{
-		"pre": NewServiceConfig(
+	configs = SrvcConfigs{
+		"pre": SrvcNewServiceConfig(
 			serviceName,
 			"pre",
+			[]string{"text"},
+			[]string{"text"},
 			WrappedPre,
-			[]string{"text"},
-			[]string{"text"},
 		),
-		"cowsay": NewServiceConfig(
+		"cowsay": SrvcNewServiceConfig(
 			serviceName,
 			"cowsay",
+			[]string{"text"},
+			[]string{"text"},
 			WrappedCowsay,
-			[]string{"text"},
-			[]string{"text"},
 		),
-		"figlet": NewServiceConfig(
+		"figlet": SrvcNewServiceConfig(
 			serviceName,
 			"figlet",
+			[]string{"text"},
+			[]string{"text"},
 			WrappedFiglet,
-			[]string{"text"},
-			[]string{"text"},
 		),
 	}
 }
@@ -33,6 +33,6 @@ func init() {
 func main() {
 	// consume and publish forever
 	ch := make(chan bool)
-	ConsumeAndPublish(configs)
+	SrvcConsumeAndPublish(configs)
 	<-ch
 }

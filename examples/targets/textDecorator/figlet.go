@@ -12,8 +12,8 @@ func Figlet(text string) (string, error) {
 }
 
 // WrappedFiglet implemented by user
-func WrappedFiglet(inputs Dictionary) Dictionary {
-	outputs := make(Dictionary)
+func WrappedFiglet(inputs SrvcDictionary) SrvcDictionary {
+	outputs := make(SrvcDictionary)
 	inputText := inputs["text"].(string)
 	outputText, err := Figlet(inputText)
 	outputs["text"] = outputText

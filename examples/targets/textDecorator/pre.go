@@ -10,8 +10,8 @@ func Pre(text string) string {
 }
 
 // WrappedPre implemented by user
-func WrappedPre(inputs Dictionary) Dictionary {
-	outputs := make(Dictionary)
+func WrappedPre(inputs SrvcDictionary) SrvcDictionary {
+	outputs := make(SrvcDictionary)
 	inputText := inputs["text"].(string)
 	outputText := Pre(inputText)
 	outputs["text"] = outputText

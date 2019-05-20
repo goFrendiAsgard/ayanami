@@ -1,7 +1,7 @@
 package main
 
-// ExtractFormInterface extract from form interface
-func ExtractFormInterface(formInterface interface{}, key string) string {
+// SrvcExtractFormInterface extract from form interface
+func SrvcExtractFormInterface(formInterface interface{}, key string) string {
 	// get text
 	form := formInterface.(map[string]interface{})
 	text := ""

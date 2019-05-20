@@ -1,4 +1,4 @@
 package main
 
-// WrappedFunction any function wrapped for ConsumeAndPublish
-type WrappedFunction = func(inputs Dictionary) Dictionary
+// SrvcWrappedFunction any function wrapped for SrvcConsumeAndPublish
+type SrvcWrappedFunction = func(inputs SrvcDictionary) SrvcDictionary

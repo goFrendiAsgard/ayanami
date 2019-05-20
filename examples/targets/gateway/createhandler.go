@@ -6,14 +6,15 @@ import (
 	nats "github.com/nats-io/nats.go"
 	"log"
 	"net/http"
+	"strings"
 )
 
 // CreateHandler create handler function
 func CreateHandler(multipartFormLimit int64, route string) func(http.ResponseWriter, *http.Request) {
-	natsURL := GetNatsURL()
+	natsURL := SrvcGetNatsURL()
 	return func(w http.ResponseWriter, r *http.Request) {
 		// create ID
-		ID, err := CreateID()
+		ID, err := SrvcCreateID()
 		if err != nil {
 			responseError(ID, w, 500, err)
 			return
@@ -27,21 +28,22 @@ func CreateHandler(multipartFormLimit int64, route string) func(http.ResponseWri
 		// parse form & multipart form
 		r.ParseForm()
 		r.ParseMultipartForm(multipartFormLimit)
+		method := strings.ToLower(r.Method)
 		// listen to code
 		chListenCode := make(chan bool)
 		chListenCodeErr := make(chan error)
 		chCode := make(chan int)
-		go consumeCode(nc, ID, r.Method, route, chListenCode, chCode, chListenCodeErr)
+		go consumeCode(nc, ID, method, route, chListenCode, chCode, chListenCodeErr)
 		// listen to content
 		chListenContent := make(chan bool)
 		chListenContentErr := make(chan error)
 		chContent := make(chan string)
-		go consumeContent(nc, ID, r.Method, route, chListenContent, chContent, chListenContentErr)
+		go consumeContent(nc, ID, method, route, chListenContent, chContent, chListenContentErr)
 		// start publish
 		<-chListenCode
 		<-chListenContent
 		// publish
-		err = publish(nc, ID, r.Method, route, r)
+		err = publish(nc, ID, method, route, r)
 		if err != nil {
 			responseError(ID, w, 500, err)
 			return

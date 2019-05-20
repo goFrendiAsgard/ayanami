@@ -1,7 +1,7 @@
 package main
 
-// Pkg ...
-type Pkg struct {
+// SrvcPkg ...
+type SrvcPkg struct {
 	ID   string
 	Data interface{}
 }

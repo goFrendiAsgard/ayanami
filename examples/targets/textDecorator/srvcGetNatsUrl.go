@@ -5,8 +5,8 @@ import (
 	"os"
 )
 
-// GetNatsURL getting nats URL from environment
-func GetNatsURL() string {
+// SrvcGetNatsURL getting nats URL from environment
+func SrvcGetNatsURL() string {
 	// get natsURL from environment, or use defaultURL instead
 	natsURL, ok := os.LookupEnv("NATS_URL")
 	if !ok {
