@@ -4,7 +4,8 @@ package main
 type SrvcEventFlow struct {
 	InputEvent  string
 	OutputEvent string
-	Value       interface{} // if InputName == "", the Value will be published instead
+	VarName     string      // read from inputEvent, put into var, publish into outputEvent
+	Value       interface{} // if InputEvent == "", the Value will be published instead
 }
 
 // SrvcSingleFlowConfig single flow config
