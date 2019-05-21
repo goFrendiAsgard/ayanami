@@ -9,9 +9,3 @@ type SrvcSingleConfig struct {
 
 // SrvcConfigs configuration
 type SrvcConfigs = map[string]SrvcSingleConfig
-
-// SrvcEventFlow event flow
-type SrvcEventFlow struct {
-	InputEvent  string
-	OutputEvent string
-}
