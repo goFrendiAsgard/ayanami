@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	nats "github.com/nats-io/nats.go"
+	"github.com/state-alchemists/ayanami/service"
 	"log"
 	"net/http"
 	"strings"
@@ -11,14 +11,9 @@ import (
 
 // CreateHandler create handler function
 func CreateHandler(multipartFormLimit int64, route string) func(http.ResponseWriter, *http.Request) {
-	natsURL := SrvcGetNatsURL()
 	return func(w http.ResponseWriter, r *http.Request) {
 		// create ID
-		ID, err := SrvcCreateID()
-		if err != nil {
-			responseError(ID, w, 500, err)
-			return
-		}
+		ID, err := service.CreateID()
 		// connect to nats
 		nc, err := nats.Connect(natsURL)
 		if err != nil {

@@ -1,10 +1,9 @@
 package service
 
 import (
-	"encoding/json"
 	"fmt"
-	nats "github.com/nats-io/nats.go"
-	"github.com/state-alchemists/msgbroker"
+	"github.com/state-alchemists/ayanami/msgbroker"
+	"github.com/state-alchemists/ayanami/servicedata"
 	"log"
 )
 
@@ -24,39 +23,32 @@ type FlowService struct {
 	Flows    []FlowEvent
 }
 
-// SrvcNewFlowConfig create new singleConfig for flow
-func SrvcNewFlowConfig(flowConfig FlowService) CommonService {
-	var singleConfig CommonService
+// NewFlow create new service for flow
+func NewFlow(broker msgbroker.CommonBroker, flowConfig FlowService) CommonService {
+	var service CommonService
 	// populate inputs
-	singleConfig.Input = flowConfig.Input
+	service.Input = flowConfig.Input
 	inputVarNames := GetUniqueVarNames(flowConfig.Input)
 	for _, varName := range inputVarNames {
 		eventName := fmt.Sprintf("flow.%s.in.%s", flowConfig.FlowName, varName)
-		singleConfig.Input = append(singleConfig.Input, IO{VarName: varName, EventName: eventName})
+		service.Input = append(service.Input, IO{VarName: varName, EventName: eventName})
 	}
 	// populate outputs
-	singleConfig.Output = flowConfig.Output
+	service.Output = flowConfig.Output
 	outputVarNames := GetUniqueVarNames(flowConfig.Output)
 	for _, varName := range outputVarNames {
 		eventName := fmt.Sprintf("flow.%s.in.%s", flowConfig.FlowName, varName)
-		singleConfig.Output = append(singleConfig.Output, IO{VarName: varName, EventName: eventName})
+		service.Output = append(service.Output, IO{VarName: varName, EventName: eventName})
 	}
-	singleConfig.Function = createFlowWrapper(flowConfig.Flows, outputVarNames)
-	return singleConfig
+	service.Function = createFlowWrapper(broker, flowConfig.Flows, outputVarNames)
+	return service
 }
 
-func createFlowWrapper(flows []FlowEvent, outputVarNames []string) WrappedFunction {
-	natsURL := GetNatsURL()
+func createFlowWrapper(broker msgbroker.CommonBroker, flows []FlowEvent, outputVarNames []string) WrappedFunction {
 	return func(inputs Dictionary) Dictionary {
 		var outputs Dictionary
 		// create ID
 		ID, err := CreateID()
-		if err != nil {
-			log.Print(err)
-			return outputs
-		}
-		// connect to nats
-		nc, err := nats.Connect(natsURL)
 		if err != nil {
 			log.Print(err)
 			return outputs
@@ -74,27 +66,14 @@ func createFlowWrapper(flows []FlowEvent, outputVarNames []string) WrappedFuncti
 				inputEventName := fmt.Sprintf("%s.%s", ID, flow.InputEvent)
 				outputEventName := fmt.Sprintf("%s.%s", ID, flow.OutputEvent)
 				varName := flow.VarName
-				nc.Subscribe(inputEventName, func(m *nats.Msg) {
+				broker.Consume(inputEventName, func(pkg servicedata.Package) {
 					// get the message and populate outputs based on received message
-					var pkg Package
-					JSONByte := m.Data
-					log.Printf("[INFO] Get message from `%s`: %s", inputEventName, string(JSONByte))
-					err := json.Unmarshal(JSONByte, &pkg)
-					if err != nil {
-						log.Printf("[ERROR] %s: %s", inputEventName, err)
-						return
-					}
+					log.Printf("[INFO] Get message from `%s`: %#v", inputEventName, pkg)
 					outputs[varName] = pkg.Data
 					// publish the servicedata
 					if outputEventName != "" {
-						pkg.Data = outputs[varName]
-						JSONByte, err := json.Marshal(&pkg)
-						if err != nil {
-							log.Printf("[ERROR] %s: %s", ID, err)
-							return
-						}
-						nc.Publish(outputEventName, JSONByte)
 						log.Printf("[INFO] Publish into `%s`: `%#v`", outputEventName, pkg)
+						broker.Publish(outputEventName, pkg)
 					}
 					if isOutputComplete(outputVarNames, outputs) {
 						completed <- true
@@ -111,13 +90,9 @@ func createFlowWrapper(flows []FlowEvent, outputVarNames []string) WrappedFuncti
 				log.Printf("[INFO] Set `%s` into `%#v`", varName, value)
 				if flow.OutputEvent != "" {
 					outputEventName := fmt.Sprintf("%s.%s", ID, flow.OutputEvent)
-					pkg := Package{ID: ID, Data: value}
-					JSONByte, err := json.Marshal(&pkg)
-					if err != nil {
-						log.Printf("[ERROR] %s: %s", ID, err)
-					}
-					nc.Publish(outputEventName, JSONByte)
+					pkg := servicedata.Package{ID: ID, Data: value}
 					log.Printf("[INFO] Publish into `%s`: `%#v`", outputEventName, pkg)
+					broker.Publish(outputEventName, pkg)
 				}
 			}
 		}

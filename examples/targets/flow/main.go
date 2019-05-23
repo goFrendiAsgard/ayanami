@@ -1,6 +1,10 @@
 package main
 
-var configs SrvcConfigs
+import (
+	"github.com/state-alchemists/ayanami/service"
+)
+
+var configs service.CommonService
 
 func init() {
 	configs = SrvcConfigs{

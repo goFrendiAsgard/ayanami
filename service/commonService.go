@@ -17,8 +17,8 @@ type CommonService struct {
 	Function WrappedFunction
 }
 
-// NewCommonService create new singleConfig for service
-func NewCommonService(serviceName string, methodName string, inputs []string, outputs []string, wrappedFunction WrappedFunction) CommonService {
+// NewService create new singleConfig for service
+func NewService(serviceName string, methodName string, inputs []string, outputs []string, wrappedFunction WrappedFunction) CommonService {
 	// get inputConfig
 	var inputConfig []IO
 	for _, inputName := range inputs {

@@ -1,1 +1,22 @@
 mode: count
+github.com/state-alchemists/ayanami/msgbroker/nats.go:17.69,18.51 1 1
+github.com/state-alchemists/ayanami/msgbroker/nats.go:18.51,22.17 4 1
+github.com/state-alchemists/ayanami/msgbroker/nats.go:26.3,26.16 1 1
+github.com/state-alchemists/ayanami/msgbroker/nats.go:22.17,25.4 2 0
+github.com/state-alchemists/ayanami/msgbroker/nats.go:31.72,33.16 2 1
+github.com/state-alchemists/ayanami/msgbroker/nats.go:37.2,37.40 1 1
+github.com/state-alchemists/ayanami/msgbroker/nats.go:33.16,36.3 2 0
+github.com/state-alchemists/ayanami/msgbroker/nats.go:41.38,45.16 4 1
+github.com/state-alchemists/ayanami/msgbroker/nats.go:48.2,49.21 2 1
+github.com/state-alchemists/ayanami/msgbroker/nats.go:45.16,47.3 1 0
+github.com/state-alchemists/ayanami/msgbroker/nats.go:52.26,55.9 2 1
+github.com/state-alchemists/ayanami/msgbroker/nats.go:58.2,58.16 1 1
+github.com/state-alchemists/ayanami/msgbroker/nats.go:55.9,57.3 1 1
+github.com/state-alchemists/ayanami/msgbroker/testcommonbroker.go:9.58,13.55 3 2
+github.com/state-alchemists/ayanami/msgbroker/testcommonbroker.go:20.2,21.11 2 2
+github.com/state-alchemists/ayanami/msgbroker/testcommonbroker.go:13.55,14.51 1 2
+github.com/state-alchemists/ayanami/msgbroker/testcommonbroker.go:17.3,17.18 1 2
+github.com/state-alchemists/ayanami/msgbroker/testcommonbroker.go:14.51,16.4 1 0
+github.com/state-alchemists/ayanami/msgbroker/memory.go:13.71,15.2 1 1
+github.com/state-alchemists/ayanami/msgbroker/memory.go:18.74,20.2 1 1
+github.com/state-alchemists/ayanami/msgbroker/memory.go:23.40,27.2 3 1

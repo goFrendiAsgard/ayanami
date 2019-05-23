@@ -14,7 +14,7 @@ type Nats struct {
 }
 
 // Consume nats.Consume
-func (broker Nats) Consume(eventName string, callback ConsumeFunc) {
+func (broker *Nats) Consume(eventName string, callback ConsumeFunc) {
 	broker.nc.Subscribe(eventName, func(m *nats.Msg) {
 		var pkg servicedata.Package
 		JSONByte := m.Data
@@ -28,7 +28,7 @@ func (broker Nats) Consume(eventName string, callback ConsumeFunc) {
 }
 
 // Publish nats.Publish
-func (broker Nats) Publish(eventName string, pkg servicedata.Package) {
+func (broker *Nats) Publish(eventName string, pkg servicedata.Package) {
 	JSONByte, err := json.Marshal(&pkg)
 	if err != nil {
 		log.Printf("[ERROR] Publishing %#v to %s: %s", pkg, eventName, err)
@@ -39,14 +39,14 @@ func (broker Nats) Publish(eventName string, pkg servicedata.Package) {
 
 // NewNats create new nats msgbroker
 func NewNats() (CommonBroker, error) {
-	var broker CommonBroker
+	var broker Nats
 	natsURL := getNatsURL()
 	nc, err := nats.Connect(natsURL)
 	if err != nil {
-		return broker, err
+		return &broker, err
 	}
-	broker = Nats{nc: nc}
-	return broker, err
+	broker.nc = nc
+	return &broker, err
 }
 
 func getNatsURL() string {
