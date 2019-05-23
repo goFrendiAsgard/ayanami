@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/state-alchemists/ayanami/service"
 )
 
 // Pre implemented by user
@@ -10,8 +11,8 @@ func Pre(text string) string {
 }
 
 // WrappedPre implemented by user
-func WrappedPre(inputs SrvcDictionary) SrvcDictionary {
-	outputs := make(SrvcDictionary)
+func WrappedPre(inputs service.Dictionary) service.Dictionary {
+	outputs := make(service.Dictionary)
 	inputText := inputs["text"].(string)
 	outputText := Pre(inputText)
 	outputs["text"] = outputText

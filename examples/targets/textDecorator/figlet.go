@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/state-alchemists/ayanami/service"
 	"os/exec"
 )
 
@@ -12,8 +13,8 @@ func Figlet(text string) (string, error) {
 }
 
 // WrappedFiglet implemented by user
-func WrappedFiglet(inputs SrvcDictionary) SrvcDictionary {
-	outputs := make(SrvcDictionary)
+func WrappedFiglet(inputs service.Dictionary) service.Dictionary {
+	outputs := make(service.Dictionary)
 	inputText := inputs["text"].(string)
 	outputText, err := Figlet(inputText)
 	outputs["text"] = outputText

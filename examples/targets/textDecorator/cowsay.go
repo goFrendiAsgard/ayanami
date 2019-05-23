@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/state-alchemists/ayanami/service"
 	"os/exec"
 )
 
@@ -12,8 +13,8 @@ func Cowsay(text string) (string, error) {
 }
 
 // WrappedCowsay implemented by user
-func WrappedCowsay(inputs SrvcDictionary) SrvcDictionary {
-	outputs := make(SrvcDictionary)
+func WrappedCowsay(inputs service.Dictionary) service.Dictionary {
+	outputs := make(service.Dictionary)
 	inputText := inputs["text"].(string)
 	outputText, err := Cowsay(inputText)
 	outputs["text"] = outputText

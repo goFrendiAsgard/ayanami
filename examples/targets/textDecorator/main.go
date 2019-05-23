@@ -1,26 +1,36 @@
 package main
 
+import (
+	"github.com/state-alchemists/ayanami/msgbroker"
+	"github.com/state-alchemists/ayanami/service"
+	"log"
+)
+
 const serviceName = "textDecorator"
 
-var configs SrvcConfigs
-
-func init() {
-	configs = SrvcConfigs{
-		"pre": SrvcNewServiceConfig(
+func main() {
+	// define broker
+	broker, err := msgbroker.NewNats()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// define services
+	services := service.Services{
+		"pre": service.NewService(
 			serviceName,
 			"pre",
 			[]string{"text"},
 			[]string{"text"},
 			WrappedPre,
 		),
-		"cowsay": SrvcNewServiceConfig(
+		"cowsay": service.NewService(
 			serviceName,
 			"cowsay",
 			[]string{"text"},
 			[]string{"text"},
 			WrappedCowsay,
 		),
-		"figlet": SrvcNewServiceConfig(
+		"figlet": service.NewService(
 			serviceName,
 			"figlet",
 			[]string{"text"},
@@ -28,11 +38,8 @@ func init() {
 			WrappedFiglet,
 		),
 	}
-}
-
-func main() {
 	// consume and publish forever
 	ch := make(chan bool)
-	SrvcConsumeAndPublish(configs)
+	services.ConsumeAndPublish(broker)
 	<-ch
 }

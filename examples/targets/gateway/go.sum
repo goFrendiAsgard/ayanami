@@ -34,6 +34,8 @@ github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnIn
 github.com/spf13/viper v1.3.2/go.mod h1:ZiWeW+zYFKm7srdB9IoDzzZXaJaI5eL9QjNiN/DMA2s=
 github.com/state-alchemists/ayanami v0.0.0-20190523161911-6a1752815a9e h1:fn2hda/uLPTo6M4QDwwFgLqxkswoafynS2dBfL0aBag=
 github.com/state-alchemists/ayanami v0.0.0-20190523161911-6a1752815a9e/go.mod h1:rq+QTVaxTt/t/vBsI3YY6qEgZz6dzCZM5kQKdXhDWls=
+github.com/state-alchemists/ayanami v0.0.0-20190523180534-4d3f9e0b7b60 h1:MzQPxCRQFPJo060/qD0ix0OznAaimsZ4C269vE1FG88=
+github.com/state-alchemists/ayanami v0.0.0-20190523180534-4d3f9e0b7b60/go.mod h1:rq+QTVaxTt/t/vBsI3YY6qEgZz6dzCZM5kQKdXhDWls=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=

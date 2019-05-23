@@ -1,51 +1,57 @@
 package main
 
 import (
+	"github.com/state-alchemists/ayanami/msgbroker"
 	"github.com/state-alchemists/ayanami/service"
+	"log"
 )
 
-var configs service.CommonService
-
-func init() {
-	configs = SrvcConfigs{
-		"pre": SrvcNewFlowConfig(SrvcSingleFlowConfig{
+func main() {
+	// define broker
+	broker, err := msgbroker.NewNats()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// define services
+	services := service.Services{
+		"pre": service.NewFlow(broker, service.FlowService{
 			FlowName: "pre",
-			Input: []SrvcServiceIO{
-				SrvcServiceIO{
+			Input: []service.IO{
+				service.IO{
 					EventName: "trig.request.get./pre.out.text",
 					VarName:   "form",
 				},
 			},
-			Output: []SrvcServiceIO{
-				SrvcServiceIO{
+			Output: []service.IO{
+				service.IO{
 					EventName: "trig.response.get./pre.in.code",
 					VarName:   "code",
 				},
-				SrvcServiceIO{
+				service.IO{
 					EventName: "trig.request.get./pre.in.content",
 					VarName:   "preResult",
 				},
 			},
-			Flows: []SrvcEventFlow{
-				SrvcEventFlow{
+			Flows: []service.FlowEvent{
+				service.FlowEvent{
 					VarName: "code",
 					Value:   200,
 				},
 			},
 		}),
-		"echo": SrvcSingleConfig{
-			Input: []SrvcServiceIO{
-				SrvcServiceIO{
+		"echo": service.CommonService{
+			Input: []service.IO{
+				service.IO{
 					EventName: "trig.request.get./echo.out.form",
 					VarName:   "form",
 				},
 			},
-			Output: []SrvcServiceIO{
-				SrvcServiceIO{
+			Output: []service.IO{
+				service.IO{
 					EventName: "trig.response.get./echo.in.code",
 					VarName:   "code",
 				},
-				SrvcServiceIO{
+				service.IO{
 					EventName: "trig.response.get./echo.in.content",
 					VarName:   "content",
 				},
@@ -53,11 +59,8 @@ func init() {
 			Function: WrappedEcho,
 		},
 	}
-}
-
-func main() {
 	// consume and publish forever
 	ch := make(chan bool)
-	SrvcConsumeAndPublish(configs)
+	services.ConsumeAndPublish(broker)
 	<-ch
 }
