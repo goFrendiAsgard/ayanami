@@ -1,12 +1,12 @@
-package main
+package service
 
 import (
 	"fmt"
 	"github.com/gofrs/uuid"
 )
 
-// SrvcCreateID create new UUID
-func SrvcCreateID() (string, error) {
+// CreateID create new UUID
+func CreateID() (string, error) {
 	// create ID
 	UUID, err := uuid.NewV4()
 	if err != nil {

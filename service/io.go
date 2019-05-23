@@ -1,13 +1,13 @@
-package main
+package service
 
-// SrvcServiceIO single IO configuration
-type SrvcServiceIO struct {
+// IO single IO configuration
+type IO struct {
 	VarName   string
 	EventName string
 }
 
-// SrvcGetUniqueVarNames get unique varNames from SrvcServiceIO list
-func SrvcGetUniqueVarNames(ioList []SrvcServiceIO) []string {
+// GetUniqueVarNames get unique varNames from IO list
+func GetUniqueVarNames(ioList []IO) []string {
 	var result []string
 	for _, io := range ioList {
 		if !isStringInArray(io.VarName, result) {
@@ -17,8 +17,8 @@ func SrvcGetUniqueVarNames(ioList []SrvcServiceIO) []string {
 	return result
 }
 
-// SrvcGetVarEventNames get eventNames from SrvcServiceIO list with specified varName
-func SrvcGetVarEventNames(ioList []SrvcServiceIO, varName string) []string {
+// GetVarEventNames get eventNames from IO list with specified varName
+func GetVarEventNames(ioList []IO, varName string) []string {
 	var result []string
 	for _, io := range ioList {
 		if io.VarName == varName {
@@ -28,8 +28,8 @@ func SrvcGetVarEventNames(ioList []SrvcServiceIO, varName string) []string {
 	return result
 }
 
-// SrvcGetUniqueEventNames get unique eventNames from SrvcServiceIO list
-func SrvcGetUniqueEventNames(ioList []SrvcServiceIO) []string {
+// GetUniqueEventNames get unique eventNames from IO list
+func GetUniqueEventNames(ioList []IO) []string {
 	var result []string
 	for _, io := range ioList {
 		if !isStringInArray(io.EventName, result) {
@@ -39,8 +39,8 @@ func SrvcGetUniqueEventNames(ioList []SrvcServiceIO) []string {
 	return result
 }
 
-// SrvcGetEventVarNames get varNames from SrvcServiceIO list with specified eventName
-func SrvcGetEventVarNames(ioList []SrvcServiceIO, eventName string) []string {
+// GetEventVarNames get varNames from IO list with specified eventName
+func GetEventVarNames(ioList []IO, eventName string) []string {
 	var result []string
 	for _, io := range ioList {
 		if io.EventName == eventName {

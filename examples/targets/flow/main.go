@@ -4,6 +4,31 @@ var configs SrvcConfigs
 
 func init() {
 	configs = SrvcConfigs{
+		"pre": SrvcNewFlowConfig(SrvcSingleFlowConfig{
+			FlowName: "pre",
+			Input: []SrvcServiceIO{
+				SrvcServiceIO{
+					EventName: "trig.request.get./pre.out.text",
+					VarName:   "form",
+				},
+			},
+			Output: []SrvcServiceIO{
+				SrvcServiceIO{
+					EventName: "trig.response.get./pre.in.code",
+					VarName:   "code",
+				},
+				SrvcServiceIO{
+					EventName: "trig.request.get./pre.in.content",
+					VarName:   "preResult",
+				},
+			},
+			Flows: []SrvcEventFlow{
+				SrvcEventFlow{
+					VarName: "code",
+					Value:   200,
+				},
+			},
+		}),
 		"echo": SrvcSingleConfig{
 			Input: []SrvcServiceIO{
 				SrvcServiceIO{

@@ -1,12 +1,12 @@
-package main
+package broker
 
 import (
 	nats "github.com/nats-io/nats.go"
 	"os"
 )
 
-// SrvcGetNatsURL getting nats URL from environment
-func SrvcGetNatsURL() string {
+// GetNatsURL getting nats URL from environment
+func GetNatsURL() string {
 	// get natsURL from environment, or use defaultURL instead
 	natsURL, ok := os.LookupEnv("NATS_URL")
 	if !ok {
