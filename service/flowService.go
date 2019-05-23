@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	nats "github.com/nats-io/nats.go"
+	"github.com/state-alchemists/msgbroker"
 	"log"
 )
 
@@ -84,7 +85,7 @@ func createFlowWrapper(flows []FlowEvent, outputVarNames []string) WrappedFuncti
 						return
 					}
 					outputs[varName] = pkg.Data
-					// publish the data
+					// publish the servicedata
 					if outputEventName != "" {
 						pkg.Data = outputs[varName]
 						JSONByte, err := json.Marshal(&pkg)

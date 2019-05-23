@@ -1,9 +1,9 @@
 package service
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/state-alchemists/ayanami/broker"
+	"github.com/state-alchemists/ayanami/msgbroker"
+	"github.com/state-alchemists/ayanami/servicedata"
 	"log"
 )
 
@@ -43,22 +43,16 @@ func NewCommonService(serviceName string, methodName string, inputs []string, ou
 type Services map[string]CommonService
 
 // ConsumeAndPublish consume from queue and Publish
-func (services Services) ConsumeAndPublish(broker broker.CommonBroker) {
-	natsURL := GetNatsURL()
-	nc, err := nats.Connect(natsURL)
-	if err != nil {
-		log.Print(err)
-		return
-	}
+func (services Services) ConsumeAndPublish(broker msgbroker.CommonBroker) {
 	for _, service := range services {
 		inputConfig := service.Input
 		outputConfig := service.Output
 		wrappedFunction := service.Function
-		consumeAndPublishSingle(nc, inputConfig, outputConfig, wrappedFunction)
+		consumeAndPublishSingle(broker, inputConfig, outputConfig, wrappedFunction)
 	}
 }
 
-func consumeAndPublishSingle(nc *nats.Conn, inputConfig []IO, outputConfig []IO, wrappedFunction WrappedFunction) {
+func consumeAndPublishSingle(broker msgbroker.CommonBroker, inputConfig []IO, outputConfig []IO, wrappedFunction WrappedFunction) {
 	// allInputs
 	allInputs := make(map[string]Dictionary)
 	rawInputEventNames := GetUniqueEventNames(inputConfig)
@@ -66,22 +60,14 @@ func consumeAndPublishSingle(nc *nats.Conn, inputConfig []IO, outputConfig []IO,
 	for _, rawInputEventName := range rawInputEventNames {
 		inputEventName := fmt.Sprintf("*.%s", rawInputEventName)
 		log.Printf("[INFO] Consume from `%s`", inputEventName)
-		nc.Subscribe(inputEventName, func(m *nats.Msg) {
-			var pkg Package
-			JSONByte := m.Data
-			log.Printf("[INFO] Get message from `%s`: %s", inputEventName, string(JSONByte))
-			err := json.Unmarshal(JSONByte, &pkg)
-			if err != nil {
-				log.Printf("[ERROR] %s: %s", inputEventName, err)
-				return
-			}
+		broker.Consume(inputEventName, func(pkg servicedata.Package) {
 			// prepare allInputs
 			ID := pkg.ID
 			data := pkg.Data
 			if _, exists := allInputs[ID]; !exists {
 				allInputs[ID] = Dictionary{}
 			}
-			// populate allInputs[ID] with eventInputNames and data
+			// populate allInputs[ID] with eventInputNames and servicedata
 			eventInputNames := GetEventVarNames(inputConfig, rawInputEventName)
 			for _, inputVarName := range eventInputNames {
 				allInputs[ID][inputVarName] = data
@@ -92,7 +78,7 @@ func consumeAndPublishSingle(nc *nats.Conn, inputConfig []IO, outputConfig []IO,
 			if isInputComplete(inputVarNames, inputs) {
 				log.Printf("[INFO] Inputs for %s completed", ID)
 				outputs := wrappedFunction(inputs)
-				publish(nc, ID, outputConfig, outputs)
+				publish(broker, ID, outputConfig, outputs)
 			}
 		})
 	}
@@ -107,25 +93,16 @@ func isInputComplete(inputVarNames []string, inputs Dictionary) bool {
 	return true
 }
 
-func publish(nc *nats.Conn, ID string, outputConfig []IO, outputs Dictionary) {
+func publish(msgBroker msgbroker.CommonBroker, ID string, outputConfig []IO, outputs Dictionary) {
 	outputVarNames := GetUniqueVarNames(outputConfig)
 	for _, outputVarName := range outputVarNames {
 		data := outputs[outputVarName]
-		pkg := Package{ID: ID, Data: data}
+		pkg := servicedata.Package{ID: ID, Data: data}
 		rawOutputEventNames := GetVarEventNames(outputConfig, outputVarName)
 		for _, rawOutputEventName := range rawOutputEventNames {
-			publishPkg(nc, ID, rawOutputEventName, pkg)
+			eventName := fmt.Sprintf("%s.%s", ID, rawOutputEventName)
+			msgBroker.Publish(eventName, pkg)
+			log.Printf("[INFO] Publish into `%s`: `%#v`", eventName, pkg)
 		}
 	}
-}
-
-func publishPkg(nc *nats.Conn, ID string, rawOutputEventName string, pkg Package) {
-	JSONByte, err := json.Marshal(&pkg)
-	if err != nil {
-		log.Printf("[ERROR] %s: %s", ID, err)
-		return
-	}
-	eventName := fmt.Sprintf("%s.%s", ID, rawOutputEventName)
-	nc.Publish(eventName, JSONByte)
-	log.Printf("[INFO] Publish into `%s`: `%#v`", eventName, pkg)
 }
