@@ -3,8 +3,8 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/state-alchemists/ayanami/broker"
 	"log"
-	nats "github.com/nats-io/nats.go"
 )
 
 // WrappedFunction any function wrapped for ConsumeAndPublish
@@ -40,10 +40,10 @@ func NewCommonService(serviceName string, methodName string, inputs []string, ou
 }
 
 // Services configuration
-type Services = map[string]CommonService
+type Services map[string]CommonService
 
 // ConsumeAndPublish consume from queue and Publish
-func (services Services)ConsumeAndPublish() {
+func (services Services) ConsumeAndPublish(broker broker.CommonBroker) {
 	natsURL := GetNatsURL()
 	nc, err := nats.Connect(natsURL)
 	if err != nil {

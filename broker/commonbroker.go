@@ -1,10 +1,14 @@
 package broker
 
-import(
-	"github.com/state-alchemists/ayanami/Package"
+import (
+	"github.com/state-alchemists/ayanami/data"
 )
 
-type CommonBroker interface{
-	Consume(eventName string, pkg Package)
-	Publish()
+// ConsumeFunc callback of broker's consumer
+type ConsumeFunc func(pkg data.Package)
+
+// CommonBroker interface of every broker
+type CommonBroker interface {
+	Consume(eventName string, callback ConsumeFunc)
+	Publish(eventName string, pkg data.Package)
 }

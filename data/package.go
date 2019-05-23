@@ -1,4 +1,4 @@
-package service
+package data
 
 // Package ...
 type Package struct {
