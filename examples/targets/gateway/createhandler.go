@@ -77,60 +77,46 @@ func responseError(ID string, w http.ResponseWriter, code int, err error) {
 }
 
 func publish(broker msgbroker.CommonBroker, ID string, method string, route string, r *http.Request) error {
-	var err error
-	var pkg servicedata.Package
+	data := make(map[string]interface{})
+	data["header"] = r.Header
+	data["contentLength"] = r.ContentLength
+	data["host"] = r.Host
+	data["form"] = r.Form
+	data["postForm"] = r.PostForm
+	data["multipartForm"] = r.MultipartForm
+	data["method"] = r.Method
+	data["requestURI"] = r.RequestURI
+	data["remoteAddr"] = r.RemoteAddr
 	// get json body
 	decoder := json.NewDecoder(r.Body)
 	var JSONBody map[string]interface{}
-	decoder.Decode(&JSONBody)
-	// publish header
-	pkg = servicedata.Package{ID: ID, Data: r.Header}
-	publishPkg(broker, ID, method, route, "header", pkg)
-	// publish contentLength
-	pkg = servicedata.Package{ID: ID, Data: r.ContentLength}
-	publishPkg(broker, ID, method, route, "contentLength", pkg)
-	// publish host
-	pkg = servicedata.Package{ID: ID, Data: r.Host}
-	publishPkg(broker, ID, method, route, "host", pkg)
-	// publish form
-	pkg = servicedata.Package{ID: ID, Data: r.Form}
-	publishPkg(broker, ID, method, route, "form", pkg)
-	// publish postForm
-	pkg = servicedata.Package{ID: ID, Data: r.PostForm}
-	publishPkg(broker, ID, method, route, "postForm", pkg)
-	// publish multipartForm
-	pkg = servicedata.Package{ID: ID, Data: r.MultipartForm}
-	publishPkg(broker, ID, method, route, "multipartForm", pkg)
-	// publish method
-	pkg = servicedata.Package{ID: ID, Data: r.Method}
-	publishPkg(broker, ID, method, route, "method", pkg)
-	// publish requestURI
-	pkg = servicedata.Package{ID: ID, Data: r.RequestURI}
-	publishPkg(broker, ID, method, route, "requestURI", pkg)
-	// publish remoteAddr
-	pkg = servicedata.Package{ID: ID, Data: r.RemoteAddr}
-	publishPkg(broker, ID, method, route, "remoteAddr", pkg)
-	// publish jsonBody
-	pkg = servicedata.Package{ID: ID, Data: JSONBody}
-	publishPkg(broker, ID, method, route, "JSONBody", pkg)
-	// return
-	return err
-}
-
-func publishPkg(broker msgbroker.CommonBroker, ID string, method string, route string, varName string, pkg servicedata.Package) {
-	eventName := fmt.Sprintf("%s.trig.request.%s.%s.out.%s", ID, method, route, varName)
-	broker.Publish(eventName, pkg)
+	err := decoder.Decode(&JSONBody)
+	if err != nil {
+		return err
+	}
+	data["JSONBody"] = JSONBody
+	// prepare pkg
+	pkg := servicedata.Package{ID: ID, Data: data}
+	eventName := fmt.Sprintf("%s.trig.request.%s %s.out.req", ID, method, route)
+	return broker.Publish(eventName, pkg)
 }
 
 func consumeCode(broker msgbroker.CommonBroker, ID string, method string, route string, chListen chan bool, chData chan int, chErr chan error) {
-	eventName := fmt.Sprintf("%s.trig.response.%s.%s.in.code", ID, method, route)
+	eventName := fmt.Sprintf("%s.trig.response.%s %s.in.code", ID, method, route)
 	log.Printf("[INFO] Prepare to consume `%s`", eventName)
-	broker.Consume(eventName, func(pkg servicedata.Package) {
-		chData <- pkg.Data.(int)
-		chErr <- nil
-		log.Printf("[INFO] Extract code from `%s`: `%#v`", eventName, pkg.Data)
-
-	})
+	broker.Consume(eventName,
+		// success
+		func(pkg servicedata.Package) {
+			chData <- pkg.Data.(int)
+			chErr <- nil
+			log.Printf("[INFO] Extract code from `%s`: `%#v`", eventName, pkg.Data)
+		},
+		// error
+		func(err error) {
+			chData <- 0
+			chErr <- nil
+		},
+	)
 	log.Printf("[INFO] Start to consume from `%s`", eventName)
 	chListen <- true
 }
@@ -138,14 +124,19 @@ func consumeCode(broker msgbroker.CommonBroker, ID string, method string, route 
 func consumeContent(broker msgbroker.CommonBroker, ID string, method string, route string, chListen chan bool, chData chan string, chErr chan error) {
 	eventName := fmt.Sprintf("%s.trig.response.%s.%s.in.content", ID, method, route)
 	log.Printf("[INFO] Prepare to consume `%s`", eventName)
-	broker.Consume(eventName, func(pkg servicedata.Package) {
-		chData <- pkg.Data.(string)
-		chErr <- nil
-		log.Printf("[INFO] Extract content from `%s`: `%#v`", eventName, pkg.Data)
-
-	})
-	log.Printf("[INFO] Start to consume from `%s`", eventName)
-	chListen <- true
+	broker.Consume(eventName,
+		// success
+		func(pkg servicedata.Package) {
+			chData <- pkg.Data.(string)
+			chErr <- nil
+			log.Printf("[INFO] Extract content from `%s`: `%#v`", eventName, pkg.Data)
+		},
+		// error
+		func(err error) {
+			chData <- ""
+			chErr <- nil
+		},
+	)
 	log.Printf("[INFO] Start to consume from `%s`", eventName)
 	chListen <- true
 }

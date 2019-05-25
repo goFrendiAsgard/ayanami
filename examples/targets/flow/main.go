@@ -18,17 +18,17 @@ func main() {
 			FlowName: "pre",
 			Input: []service.IO{
 				service.IO{
-					EventName: "trig.request.get./pre.out.text",
+					EventName: "trig.request.get /pre.out.text",
 					VarName:   "form",
 				},
 			},
 			Output: []service.IO{
 				service.IO{
-					EventName: "trig.response.get./pre.in.code",
+					EventName: "trig.response.get /pre.in.code",
 					VarName:   "code",
 				},
 				service.IO{
-					EventName: "trig.request.get./pre.in.content",
+					EventName: "trig.request.get /pre.in.content",
 					VarName:   "preResult",
 				},
 			},
@@ -42,17 +42,17 @@ func main() {
 		"echo": service.CommonService{
 			Input: []service.IO{
 				service.IO{
-					EventName: "trig.request.get./echo.out.form",
+					EventName: "trig.request.get /echo.out.form",
 					VarName:   "form",
 				},
 			},
 			Output: []service.IO{
 				service.IO{
-					EventName: "trig.response.get./echo.in.code",
+					EventName: "trig.response.get /echo.in.code",
 					VarName:   "code",
 				},
 				service.IO{
-					EventName: "trig.response.get./echo.in.content",
+					EventName: "trig.response.get /echo.in.content",
 					VarName:   "content",
 				},
 			},

@@ -1,5 +1,5 @@
 .idea/
 ayanami
-examples/targets/flow/flow
-examples/targets/gateway/gateway
-examples/targets/gateway/textDecorator
+examples/targets/flow/flow-example
+examples/targets/gateway/gateway-example
+examples/targets/gateway/textDecorator-example

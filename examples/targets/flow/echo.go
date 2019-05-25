@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/state-alchemists/ayanami/service"
+	"strings"
 )
 
 // Echo implemented by user
@@ -17,7 +18,8 @@ func Echo(text string) string {
 func WrappedEcho(inputs service.Dictionary) service.Dictionary {
 	outputs := make(service.Dictionary)
 	// get text
-	text := ExtractFormInterface(inputs["form"], "text")
+	texts := inputs.Get("req.form.text").([]string)
+	text := strings.Join(texts, " ")
 	// prepare outputs
 	outputs["content"] = Echo(text)
 	outputs["code"] = 200
