@@ -6,22 +6,23 @@ import (
 
 // Memory broker for mocking
 type Memory struct {
-	handlers map[string]ConsumeFunc
+	handlers map[string]ConsumeSuccessFunc
 }
 
 // Consume consume from memory broker
-func (broker *Memory) Consume(eventName string, callback ConsumeFunc) {
-	broker.handlers[eventName] = callback
+func (broker *Memory) Consume(eventName string, successCallback ConsumeSuccessFunc, errorCallback ConsumeErrorFunc) {
+	broker.handlers[eventName] = successCallback
 }
 
 // Publish publish to memory broker
-func (broker *Memory) Publish(eventName string, pkg servicedata.Package) {
+func (broker *Memory) Publish(eventName string, pkg servicedata.Package) error {
 	go broker.handlers[eventName](pkg)
+	return nil
 }
 
 // NewMemory create new memory brocker
 func NewMemory() (CommonBroker, error) {
-	handlers := make(map[string]ConsumeFunc)
+	handlers := make(map[string]ConsumeSuccessFunc)
 	broker := Memory{handlers}
 	return &broker, nil
 }

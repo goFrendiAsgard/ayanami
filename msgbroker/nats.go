@@ -4,51 +4,56 @@ import (
 	"encoding/json"
 	nats "github.com/nats-io/nats.go"
 	"github.com/state-alchemists/ayanami/servicedata"
-	"log"
 	"os"
 )
 
 // Nats msgbroker
 type Nats struct {
-	nc *nats.Conn
+	Connection *nats.Conn
 }
 
 // Consume nats.Consume
-func (broker *Nats) Consume(eventName string, callback ConsumeFunc) {
-	broker.nc.Subscribe(eventName, func(m *nats.Msg) {
+func (broker *Nats) Consume(eventName string, successCallback ConsumeSuccessFunc, errorCallback ConsumeErrorFunc) {
+	broker.Connection.Subscribe(eventName, func(m *nats.Msg) {
 		var pkg servicedata.Package
 		JSONByte := m.Data
 		err := json.Unmarshal(JSONByte, &pkg)
 		if err != nil {
-			log.Printf("[ERROR] Consuming %s from %s: %s", string(JSONByte), eventName, err)
+			errorCallback(err)
 			return
 		}
-		callback(pkg)
+		successCallback(pkg)
 	})
 }
 
 // Publish nats.Publish
-func (broker *Nats) Publish(eventName string, pkg servicedata.Package) {
+func (broker *Nats) Publish(eventName string, pkg servicedata.Package) error {
+	// marshal package into JSON Byte
 	JSONByte, err := json.Marshal(&pkg)
 	if err != nil {
-		log.Printf("[ERROR] Publishing %#v to %s: %s", pkg, eventName, err)
-		return
+		return err
 	}
-	broker.nc.Publish(eventName, JSONByte)
+	return broker.Connection.Publish(eventName, JSONByte)
 }
 
 // NewNats create new nats msgbroker
 func NewNats() (CommonBroker, error) {
-	var broker Nats
 	natsURL := getNatsURL()
+	return NewCustomNats(natsURL)
+}
+
+// NewCustomNats create new nats msgbroker
+func NewCustomNats(natsURL string) (CommonBroker, error) {
+	var broker Nats
 	nc, err := nats.Connect(natsURL)
 	if err != nil {
 		return &broker, err
 	}
-	broker.nc = nc
+	broker.Connection = nc
 	return &broker, err
 }
 
+// getNatsURL get Nats URL from environment variable
 func getNatsURL() string {
 	// get natsURL from environment, or use defaultURL instead
 	natsURL, ok := os.LookupEnv("NATS_URL")

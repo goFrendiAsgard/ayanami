@@ -4,11 +4,14 @@ import (
 	"github.com/state-alchemists/ayanami/servicedata"
 )
 
-// ConsumeFunc callback of msgbroker's consumer
-type ConsumeFunc func(pkg servicedata.Package)
+// ConsumeSuccessFunc called for every succeed consume
+type ConsumeSuccessFunc func(pkg servicedata.Package)
 
-// CommonBroker interface of every msgbroker
+// ConsumeErrorFunc called for every failed consume
+type ConsumeErrorFunc func(err error)
+
+// CommonBroker interface of every message broker
 type CommonBroker interface {
-	Consume(eventName string, callback ConsumeFunc)
-	Publish(eventName string, pkg servicedata.Package)
+	Consume(eventName string, successCallback ConsumeSuccessFunc, errorCallback ConsumeErrorFunc)
+	Publish(eventName string, pkg servicedata.Package) error
 }

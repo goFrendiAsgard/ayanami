@@ -6,8 +6,11 @@ type IO struct {
 	EventName string
 }
 
+// IOList list of IO
+type IOList []IO
+
 // GetUniqueVarNames get unique varNames from IO list
-func GetUniqueVarNames(ioList []IO) []string {
+func (ioList IOList) GetUniqueVarNames() []string {
 	var result []string
 	for _, io := range ioList {
 		if !isStringInArray(io.VarName, result) {
@@ -18,7 +21,7 @@ func GetUniqueVarNames(ioList []IO) []string {
 }
 
 // GetVarEventNames get eventNames from IO list with specified varName
-func GetVarEventNames(ioList []IO, varName string) []string {
+func (ioList IOList) GetVarEventNames(varName string) []string {
 	var result []string
 	for _, io := range ioList {
 		if io.VarName == varName {
@@ -29,7 +32,7 @@ func GetVarEventNames(ioList []IO, varName string) []string {
 }
 
 // GetUniqueEventNames get unique eventNames from IO list
-func GetUniqueEventNames(ioList []IO) []string {
+func (ioList IOList) GetUniqueEventNames() []string {
 	var result []string
 	for _, io := range ioList {
 		if !isStringInArray(io.EventName, result) {
@@ -40,7 +43,7 @@ func GetUniqueEventNames(ioList []IO) []string {
 }
 
 // GetEventVarNames get varNames from IO list with specified eventName
-func GetEventVarNames(ioList []IO, eventName string) []string {
+func (ioList IOList) GetEventVarNames(eventName string) []string {
 	var result []string
 	for _, io := range ioList {
 		if io.EventName == eventName {

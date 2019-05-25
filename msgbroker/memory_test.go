@@ -9,6 +9,7 @@ func TestMemory(t *testing.T) {
 	broker, err := NewMemory()
 	if err != nil {
 		t.Errorf("Get error: %s", err)
+		return
 	}
-	TestCommonBroker(broker, t)
+	CommonBrokerTest(broker, t)
 }

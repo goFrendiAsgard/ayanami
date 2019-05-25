@@ -38,13 +38,12 @@ Providing an environment with minimum dependencies in order to:
 ## Event Name
 
 ```
-<UUID|*>.<trig|srvc|flow>.<method>.[...info].<out|in>.<varName>
+<UUID|*>.<trig|srvc|flow>.<method>.<out|in>.<varName>
 ```
 
 * `<UUID|*>` is either UUID v4 or `*`
 * `<trig|srvc|flow>` is service type, either `trig` (trigger), `srvc` (service), or `flow`.
 * `<method>` is method name.
-* `[...info]` is extension of method name. So far only gateway use this segment. Gateways use `[...info]` to describe route.
 * `<out|in>` is either `out` or `in`. Typically services consume `in` event and omit `out` event. However, gateway and flow might act differently.
 * `<varName>` is variable name
 
