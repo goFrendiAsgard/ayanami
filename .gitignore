@@ -2,4 +2,5 @@
 ayanami
 examples/targets/flow/flow-example
 examples/targets/gateway/gateway-example
-examples/targets/gateway/textDecorator-example
+examples/targets/gateway/cmd-example
+examples/targets/gateway/html-example

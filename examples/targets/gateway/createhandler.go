@@ -122,7 +122,7 @@ func consumeCode(broker msgbroker.CommonBroker, ID string, method string, route 
 }
 
 func consumeContent(broker msgbroker.CommonBroker, ID string, method string, route string, chListen chan bool, chData chan string, chErr chan error) {
-	eventName := fmt.Sprintf("%s.trig.response.%s.%s.in.content", ID, method, route)
+	eventName := fmt.Sprintf("%s.trig.response.%s %s.in.content", ID, method, route)
 	log.Printf("[INFO] Prepare to consume `%s`", eventName)
 	broker.Consume(eventName,
 		// success

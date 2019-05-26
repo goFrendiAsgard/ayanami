@@ -12,9 +12,6 @@ var routes []string
 
 func init() {
 	routes = []string{
-		"/echo",
-		"/cowsay",
-		"/figlet",
 		"/",
 	}
 }

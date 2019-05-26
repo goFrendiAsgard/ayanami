@@ -13,7 +13,8 @@ func TestNats(t *testing.T) {
 		t.Errorf("Get error: %s", err)
 		return
 	}
-	CommonBrokerTest(broker, t)
+	CommonBrokerTest(broker, "ID.test", "ID.test", t)
+	CommonBrokerTest(broker, "*.testWildcard", "ID.testWildcard", t)
 }
 
 func TestNewCustomNats(t *testing.T) {

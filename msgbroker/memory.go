@@ -1,7 +1,9 @@
 package msgbroker
 
 import (
+	"fmt"
 	"github.com/state-alchemists/ayanami/servicedata"
+	"strings"
 )
 
 // Memory broker for mocking
@@ -16,7 +18,14 @@ func (broker *Memory) Consume(eventName string, successCallback ConsumeSuccessFu
 
 // Publish publish to memory broker
 func (broker *Memory) Publish(eventName string, pkg servicedata.Package) error {
-	go broker.handlers[eventName](pkg)
+	if handler, exists := broker.handlers[eventName]; exists {
+		go handler(pkg)
+	} else {
+		eventParts := strings.Split(eventName, ".")
+		wildCardEventName := fmt.Sprintf("*.%s", strings.Join(eventParts[1:], "."))
+		handler := broker.handlers[wildCardEventName]
+		go handler(pkg)
+	}
 	return nil
 }
 

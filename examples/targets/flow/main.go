@@ -14,50 +14,39 @@ func main() {
 	}
 	// define services
 	services := service.Services{
-		"pre": service.NewFlow(broker, service.FlowService{
-			FlowName: "pre",
-			Input: []service.IO{
-				service.IO{
-					EventName: "trig.request.get /pre.out.text",
-					VarName:   "form",
-				},
-			},
-			Output: []service.IO{
-				service.IO{
-					EventName: "trig.response.get /pre.in.code",
-					VarName:   "code",
-				},
-				service.IO{
-					EventName: "trig.request.get /pre.in.content",
-					VarName:   "preResult",
-				},
-			},
-			Flows: []service.FlowEvent{
+		"main": service.NewFlow(broker, "main",
+			// inputs
+			[]string{"figletInput"},
+			// outputs
+			[]string{"content", "code"},
+			[]service.FlowEvent{
 				service.FlowEvent{
-					VarName: "code",
-					Value:   200,
+					InputEvent:  "trig.request.get /.out.req.form.text.0",
+					VarName:     "figletInput",
+					OutputEvent: "srvc.cmd.figlet.in.input",
+				},
+				service.FlowEvent{
+					InputEvent:  "srvc.cmd.figlet.out.output",
+					VarName:     "figletOutput",
+					OutputEvent: "srvc.cmd.cowsay.in.input",
+				},
+				service.FlowEvent{
+					InputEvent:  "srvc.cmd.cowsay.out.output",
+					VarName:     "cowsayOutput",
+					OutputEvent: "srvc.html.pre.in.input",
+				},
+				service.FlowEvent{
+					InputEvent:  "srvc.html.pre.out.output",
+					VarName:     "content",
+					OutputEvent: "trig.response.get /.in.content",
+				},
+				service.FlowEvent{
+					VarName:     "code",
+					Value:       200,
+					OutputEvent: "trig.response.get /.in.code",
 				},
 			},
-		}),
-		"echo": service.CommonService{
-			Input: []service.IO{
-				service.IO{
-					EventName: "trig.request.get /echo.out.form",
-					VarName:   "form",
-				},
-			},
-			Output: []service.IO{
-				service.IO{
-					EventName: "trig.response.get /echo.in.code",
-					VarName:   "code",
-				},
-				service.IO{
-					EventName: "trig.response.get /echo.in.content",
-					VarName:   "content",
-				},
-			},
-			Function: WrappedEcho,
-		},
+		),
 	}
 	// consume and publish forever
 	ch := make(chan bool)

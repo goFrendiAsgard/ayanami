@@ -6,11 +6,11 @@ import (
 )
 
 // CommonBrokerTest is general helper for testing commonBroker
-func CommonBrokerTest(broker CommonBroker, t *testing.T) {
+func CommonBrokerTest(broker CommonBroker, consumeEventName, publishEventName string, t *testing.T) {
 	sentPkg := servicedata.Package{ID: "001", Data: "Hello world"}
 	// consume
 	stopped := make(chan bool, 1)
-	broker.Consume("test",
+	broker.Consume(consumeEventName,
 		// success
 		func(pkg servicedata.Package) {
 			if pkg.ID != "001" || pkg.Data != "Hello world" {
@@ -25,7 +25,7 @@ func CommonBrokerTest(broker CommonBroker, t *testing.T) {
 		},
 	)
 	// publish
-	err := broker.Publish("test", sentPkg)
+	err := broker.Publish(publishEventName, sentPkg)
 	if err != nil {
 		t.Errorf("Get error %s", err)
 	}
