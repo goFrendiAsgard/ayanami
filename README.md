@@ -37,14 +37,21 @@ Providing an environment with minimum dependencies in order to:
 
 ## Event Name
 
+Event Name should comply one of these formats
+
 ```
-<UUID|*>.<trig|srvc|flow>.<method>.<out|in>.<varName>
+<UUID|*>.<trig|srvc>.<serviceName>.<method>.<out|in>.<varName>
+<UUID|*>.<trig|srvc>.<serviceName>.<method>.err
+<UUID|*>.flow.<flowName>.<out|in>.<varName>
+<UUID|*>.flow.<flowName>.err
 ```
 
 * `<UUID|*>` is either UUID v4 or `*`
-* `<trig|srvc|flow>` is service type, either `trig` (trigger), `srvc` (service), or `flow`.
+* `<trig|srvc>` is service type, either `trig` (trigger), `srvc` (service).
+* `<serviceName>` is serviceName.
+* `<flowName>` is flowName.
 * `<method>` is method name.
-* `<out|in>` is either `out` or `in`. Typically services consume `in` event and omit `out` event. However, gateway and flow might act differently.
+* `<out|in>` is either `out` or `in`. Typically services consume `in` event and omit `out` event. However, gateway might act differently.
 * `<varName>` is variable name
 
 

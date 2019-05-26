@@ -24,34 +24,39 @@ type FlowService struct {
 }
 
 // NewFlow create new service for flow
-func NewFlow(broker msgbroker.CommonBroker, flowConfig FlowService) CommonService {
-	var service CommonService
+func NewFlow(broker msgbroker.CommonBroker, flowName string, inputs, outputs []string, flows []FlowEvent) CommonService {
 	// populate inputs
-	service.Input = flowConfig.Input
-	inputVarNames := flowConfig.Input.GetUniqueVarNames()
-	for _, varName := range inputVarNames {
-		eventName := fmt.Sprintf("flow.%s.in.%s", flowConfig.FlowName, varName)
-		service.Input = append(service.Input, IO{VarName: varName, EventName: eventName})
+	var serviceInputs []IO
+	for _, inputName := range inputs {
+		eventName := fmt.Sprintf("flow.%s.in.%s", flowName, inputName)
+		serviceInputs = append(serviceInputs, IO{VarName: inputName, EventName: eventName})
 	}
 	// populate outputs
-	service.Output = flowConfig.Output
-	outputVarNames := flowConfig.Output.GetUniqueVarNames()
-	for _, varName := range outputVarNames {
-		eventName := fmt.Sprintf("flow.%s.in.%s", flowConfig.FlowName, varName)
-		service.Output = append(service.Output, IO{VarName: varName, EventName: eventName})
+	var serviceOutputs []IO
+	for _, outputName := range outputs {
+		eventName := fmt.Sprintf("flow.%s.out.%s", flowName, outputName)
+		serviceOutputs = append(serviceOutputs, IO{VarName: outputName, EventName: eventName})
 	}
-	service.Function = createFlowWrapper(broker, flowConfig.Flows, outputVarNames)
-	return service
+	// get errorEventName
+	errorEventName := fmt.Sprintf("flow.%s.err", flowName)
+	// get flowWrappedFunction
+	wrappedFunction := createFlowWrapper(broker, flows, outputs)
+	return CommonService{
+		Input:          serviceInputs,
+		Output:         serviceOutputs,
+		ErrorEventName: errorEventName,
+		Function:       wrappedFunction,
+	}
 }
 
 func createFlowWrapper(broker msgbroker.CommonBroker, flows []FlowEvent, outputVarNames []string) WrappedFunction {
-	return func(inputs Dictionary) Dictionary {
+	return func(inputs Dictionary) (Dictionary, error) {
 		var outputs Dictionary
 		// create ID
 		ID, err := CreateID()
 		if err != nil {
 			log.Print(err)
-			return outputs
+			return outputs, err
 		}
 		// add values to every eventFlow without inputEvent
 		for index, flow := range flows {
@@ -81,7 +86,8 @@ func createFlowWrapper(broker msgbroker.CommonBroker, flows []FlowEvent, outputV
 						}
 					},
 					// error callback
-					func(err error) {
+					func(flowErr error) {
+						err = flowErr
 						log.Printf("[ERROR] Error: %s", err)
 					},
 				)
@@ -103,7 +109,7 @@ func createFlowWrapper(broker msgbroker.CommonBroker, flows []FlowEvent, outputV
 			}
 		}
 		<-completed
-		return outputs
+		return outputs, err
 	}
 }
 

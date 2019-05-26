@@ -8,35 +8,14 @@ import (
 )
 
 // WrappedFunction any function wrapped for ConsumeAndPublish
-type WrappedFunction = func(inputs Dictionary) Dictionary
+type WrappedFunction = func(inputs Dictionary) (Dictionary, error)
 
 // CommonService single configuration
 type CommonService struct {
-	Input    IOList
-	Output   IOList
-	Function WrappedFunction
-}
-
-// NewService create new singleConfig for service
-func NewService(serviceName string, methodName string, inputs []string, outputs []string, wrappedFunction WrappedFunction) CommonService {
-	// get inputConfig
-	var inputConfig []IO
-	for _, inputName := range inputs {
-		eventName := fmt.Sprintf("srvc.%s.%s.in.%s", serviceName, methodName, inputName)
-		inputConfig = append(inputConfig, IO{VarName: inputName, EventName: eventName})
-	}
-	// get outputConfig
-	var outputConfig []IO
-	for _, outputName := range outputs {
-		eventName := fmt.Sprintf("srvc.%s.%s.in.%s", serviceName, methodName, outputName)
-		outputConfig = append(outputConfig, IO{VarName: outputName, EventName: eventName})
-	}
-	// return config
-	return CommonService{
-		Input:    inputConfig,
-		Output:   outputConfig,
-		Function: wrappedFunction,
-	}
+	Input          IOList
+	Output         IOList
+	ErrorEventName string
+	Function       WrappedFunction
 }
 
 // Services configuration
@@ -47,12 +26,13 @@ func (services Services) ConsumeAndPublish(broker msgbroker.CommonBroker) {
 	for _, service := range services {
 		inputIOList := service.Input
 		outputIOList := service.Output
+		errorEventName := service.ErrorEventName
 		wrappedFunction := service.Function
-		consumeAndPublishSingle(broker, inputIOList, outputIOList, wrappedFunction)
+		consumeAndPublishSingle(broker, inputIOList, outputIOList, errorEventName, wrappedFunction)
 	}
 }
 
-func consumeAndPublishSingle(broker msgbroker.CommonBroker, inputIOList IOList, outputIOList IOList, wrappedFunction WrappedFunction) {
+func consumeAndPublishSingle(broker msgbroker.CommonBroker, inputIOList, outputIOList IOList, rawErrorEventName string, wrappedFunction WrappedFunction) {
 	// allInputs
 	allInputs := make(map[string]Dictionary)
 	rawInputEventNames := inputIOList.GetUniqueEventNames()
@@ -79,13 +59,19 @@ func consumeAndPublishSingle(broker msgbroker.CommonBroker, inputIOList IOList, 
 				// execute wrapper
 				if isInputComplete(inputVarNames, inputs) {
 					log.Printf("[INFO] Inputs for %s completed", ID)
-					outputs := wrappedFunction(inputs)
-					publish(broker, ID, outputIOList, outputs)
+					outputs, err := wrappedFunction(inputs)
+					if err != nil {
+						log.Printf("[ERROR] Error while consuming from %s: %s", inputEventName, err)
+						publishError(broker, rawErrorEventName, ID, err)
+						return
+					}
+					publish(broker, rawErrorEventName, ID, outputIOList, outputs)
 				}
 			},
 			// error callback
 			func(err error) {
 				log.Printf("[ERROR] Error while consuming from %s: %s", inputEventName, err)
+				publishError(broker, rawErrorEventName, "No-ID", err)
 			},
 		)
 	}
@@ -100,7 +86,7 @@ func isInputComplete(inputVarNames []string, inputs Dictionary) bool {
 	return true
 }
 
-func publish(msgBroker msgbroker.CommonBroker, ID string, outputIOList IOList, outputs Dictionary) {
+func publish(msgBroker msgbroker.CommonBroker, rawErrorEventName, ID string, outputIOList IOList, outputs Dictionary) error {
 	outputVarNames := outputIOList.GetUniqueVarNames()
 	for _, outputVarName := range outputVarNames {
 		data := outputs[outputVarName]
@@ -112,7 +98,15 @@ func publish(msgBroker msgbroker.CommonBroker, ID string, outputIOList IOList, o
 			err := msgBroker.Publish(eventName, pkg)
 			if err != nil {
 				log.Printf("[INFO] Error while publishing into `%s`: `%s`", eventName, err)
+				return publishError(msgBroker, rawErrorEventName, ID, err)
 			}
 		}
 	}
+	return nil
+}
+
+func publishError(msgBroker msgbroker.CommonBroker, rawErrorEventName, ID string, err error) error {
+	errorPkg := servicedata.Package{ID: ID, Data: err}
+	errorEventName := fmt.Sprintf("%s.%s", ID, rawErrorEventName)
+	return msgBroker.Publish(errorEventName, errorPkg)
 }
