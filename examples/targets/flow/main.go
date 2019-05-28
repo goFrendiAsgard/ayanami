@@ -16,13 +16,16 @@ func main() {
 	services := service.Services{
 		"main": service.NewFlow(broker, "main",
 			// inputs
-			[]string{"figletInput"},
+			[]string{"request"},
 			// outputs
 			[]string{"content", "code"},
 			[]service.FlowEvent{
 				service.FlowEvent{
-					InputEvent:  "trig.request.get /.out.req",
-					VarName:     "figletInput",
+					InputEvent: "trig.request.get /.out.req",
+					VarName:    "request",
+				},
+				service.FlowEvent{
+					VarName:     "request.form.text.0",
 					OutputEvent: "srvc.cmd.figlet.in.input",
 				},
 				service.FlowEvent{
