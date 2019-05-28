@@ -1,4 +1,5 @@
 .idea/
+profile.out
 ayanami
 examples/targets/flow/flow-example
 examples/targets/gateway/gateway-example

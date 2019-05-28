@@ -39,8 +39,8 @@ func (dictionary Dictionary) Get(dottedKeys string) interface{} {
 	return data
 }
 
-// Contain is key exists
-func (dictionary Dictionary) Contain(dottedKeys string) bool {
+// Has is key exists
+func (dictionary Dictionary) Has(dottedKeys string) bool {
 	keyParts := strings.Split(dottedKeys, ".")
 	var data interface{}
 	data = dictionary
@@ -114,13 +114,8 @@ func (dictionary *Dictionary) Set(dottedKeys string, newValue interface{}) error
 			}
 			pointer = pointer.(Dictionary)[key]
 		} else if reflectKind == reflect.Slice {
-			index, err := keyToIndex(key)
-			if err != nil {
-				return err
-			}
+			index, _ := keyToIndex(key)
 			pointer = pointer.([]interface{})[index]
-		} else if keyIndex == lastKeyIndex {
-			pointer.(Dictionary)[key] = newValue
 		} else {
 			return errors.New("cannot override non-dictionary and non-list")
 		}

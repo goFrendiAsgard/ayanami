@@ -68,54 +68,54 @@ func TestDictionaryGet(t *testing.T) {
 
 }
 
-func TestDictionaryContain(t *testing.T) {
+func TestDictionaryHas(t *testing.T) {
 	dictionary := createTestDictionary()
 	var expected, actual bool
 
 	expected = true
-	actual = dictionary.Contain("person.name")
+	actual = dictionary.Has("person.name")
 	if actual != expected {
 		t.Errorf("Expected `%t`, get `%t`", expected, actual)
 	}
 
 	expected = true
-	actual = dictionary.Contain("person.surename")
+	actual = dictionary.Has("person.surename")
 	if actual != expected {
 		t.Errorf("Expected `%t`, get `%t`", expected, actual)
 	}
 
 	expected = false
-	actual = dictionary.Contain("race")
+	actual = dictionary.Has("race")
 	if actual != expected {
 		t.Errorf("Expected `%t`, get `%t`", expected, actual)
 	}
 
 	expected = false
-	actual = dictionary.Contain("person.weapons")
+	actual = dictionary.Has("person.weapons")
 	if actual != expected {
 		t.Errorf("Expected `%t`, get `%t`", expected, actual)
 	}
 
 	expected = true
-	actual = dictionary.Contain("person.affiliations.0")
+	actual = dictionary.Has("person.affiliations.0")
 	if actual != expected {
 		t.Errorf("Expected `%t`, get `%t`", expected, actual)
 	}
 
 	expected = true
-	actual = dictionary.Contain("person.affiliations.1")
+	actual = dictionary.Has("person.affiliations.1")
 	if actual != expected {
 		t.Errorf("Expected `%t`, get `%t`", expected, actual)
 	}
 
 	expected = false
-	actual = dictionary.Contain("person.affiliations.2")
+	actual = dictionary.Has("person.affiliations.2")
 	if actual != expected {
 		t.Errorf("Expected `%t`, get `%t`", expected, actual)
 	}
 
 	expected = false
-	actual = dictionary.Contain("person.affiliations.name")
+	actual = dictionary.Has("person.affiliations.name")
 	if actual != expected {
 		t.Errorf("Expected `%t`, get `%t`", expected, actual)
 	}
@@ -177,6 +177,31 @@ func TestDictionarySet(t *testing.T) {
 		t.Errorf("Expected `%s`, get `%s`", expected, actual)
 	}
 
+	err = dictionary.Set("person.wolf.name", "lady")
+	if err != nil {
+		t.Errorf("Get error: %s", err)
+	}
+	expected = "lady"
+	actual = dictionary.Get("person.wolf.name")
+	if actual != expected {
+		t.Errorf("Expected `%s`, get `%s`", expected, actual)
+	}
+
+	var brothers []interface{}
+	err = dictionary.Set("person.brothers", brothers)
+	if err != nil {
+		t.Errorf("Get error: %s", err)
+	}
+	err = dictionary.Set("person.brothers.0.name", "Robb")
+	if err != nil {
+		t.Errorf("Get error: %s", err)
+	}
+	expected = "Robb"
+	actual = dictionary.Get("person.brothers.0.name")
+	if actual != expected {
+		t.Errorf("Expected `%s`, get `%s`", expected, actual)
+	}
+
 	err = dictionary.Set("person.affiliations.-1", "the north")
 	if err == nil {
 		t.Errorf("Error expected")
@@ -187,4 +212,14 @@ func TestDictionarySet(t *testing.T) {
 		t.Errorf("Expected `%s`, get `%s`", expected, actual)
 	}
 
+	err = dictionary.Set("location.1", "invalid")
+	if err == nil {
+		t.Errorf("Error expected")
+	}
+	// location should not be changed after invalid assignment
+	expected = "the north"
+	actual = dictionary.Get("location")
+	if actual != expected {
+		t.Errorf("Expected `%s`, get `%s`", expected, actual)
+	}
 }
