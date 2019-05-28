@@ -77,6 +77,8 @@ func responseError(ID string, w http.ResponseWriter, code int, err error) {
 }
 
 func publish(broker msgbroker.CommonBroker, ID string, method string, route string, r *http.Request) error {
+	eventName := fmt.Sprintf("%s.trig.request.%s %s.out.req", ID, method, route)
+	log.Printf("[INFO] prepare to publish `%s`", eventName)
 	data := make(map[string]interface{})
 	data["header"] = r.Header
 	data["contentLength"] = r.ContentLength
@@ -89,15 +91,15 @@ func publish(broker msgbroker.CommonBroker, ID string, method string, route stri
 	data["remoteAddr"] = r.RemoteAddr
 	// get json body
 	decoder := json.NewDecoder(r.Body)
-	var JSONBody map[string]interface{}
+	JSONBody := make(map[string]interface{})
 	err := decoder.Decode(&JSONBody)
 	if err != nil {
-		return err
+		log.Printf("[INFO] Fail to decode JSONBody while processing `%s`", eventName)
 	}
 	data["JSONBody"] = JSONBody
 	// prepare pkg
 	pkg := servicedata.Package{ID: ID, Data: data}
-	eventName := fmt.Sprintf("%s.trig.request.%s %s.out.req", ID, method, route)
+	log.Printf("[INFO] publish `%s`: %#v", eventName, pkg)
 	return broker.Publish(eventName, pkg)
 }
 

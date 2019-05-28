@@ -21,7 +21,7 @@ func main() {
 			[]string{"content", "code"},
 			[]service.FlowEvent{
 				service.FlowEvent{
-					InputEvent:  "trig.request.get /.out.req.form.text.0",
+					InputEvent:  "trig.request.get /.out.req",
 					VarName:     "figletInput",
 					OutputEvent: "srvc.cmd.figlet.in.input",
 				},

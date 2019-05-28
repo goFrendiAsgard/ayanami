@@ -12,7 +12,7 @@ type FlowEvent struct {
 	InputEvent  string
 	OutputEvent string
 	VarName     string      // read from inputEvent, put into var, publish into outputEvent
-	Value       interface{} // if InputEvent == "", the Value will be published instead
+	Value       interface{} // if InputEvent == "", we will use the value instead
 }
 
 // FlowService single flow config
