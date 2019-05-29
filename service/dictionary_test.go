@@ -5,12 +5,16 @@ import (
 )
 
 func createTestDictionary() Dictionary {
-	person := make(Dictionary)
+	person := make(map[string]interface{})
 	person["name"] = "Arya"
 	person["surename"] = "Stark"
 	person["affiliations"] = []interface{}{"faceless men", "winterfell"}
+	animal := make(Dictionary)
+	animal["name"] = "Ghost"
+	animal["type"] = "Wolf"
 	dictionary := make(Dictionary)
 	dictionary["person"] = person
+	dictionary["animal"] = animal
 	return dictionary
 }
 
@@ -26,6 +30,18 @@ func TestDictionaryGet(t *testing.T) {
 
 	expected = "Stark"
 	actual = dictionary.Get("person.surename")
+	if actual != expected {
+		t.Errorf("Expected `%s`, get `%s`", expected, actual)
+	}
+
+	expected = "Ghost"
+	actual = dictionary.Get("animal.name")
+	if actual != expected {
+		t.Errorf("Expected `%s`, get `%s`", expected, actual)
+	}
+
+	expected = "Wolf"
+	actual = dictionary.Get("animal.type")
 	if actual != expected {
 		t.Errorf("Expected `%s`, get `%s`", expected, actual)
 	}
@@ -80,6 +96,18 @@ func TestDictionaryHas(t *testing.T) {
 
 	expected = true
 	actual = dictionary.Has("person.surename")
+	if actual != expected {
+		t.Errorf("Expected `%t`, get `%t`", expected, actual)
+	}
+
+	expected = true
+	actual = dictionary.Has("animal.name")
+	if actual != expected {
+		t.Errorf("Expected `%t`, get `%t`", expected, actual)
+	}
+
+	expected = true
+	actual = dictionary.Has("animal.type")
 	if actual != expected {
 		t.Errorf("Expected `%t`, get `%t`", expected, actual)
 	}
