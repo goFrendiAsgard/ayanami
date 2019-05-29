@@ -30,7 +30,7 @@ func (services Services) ConsumeAndPublish(broker msgbroker.CommonBroker) {
 
 func consumeAndPublishSingle(broker msgbroker.CommonBroker, inputIOList, outputIOList IOList, rawErrorEventName string, wrappedFunction WrappedFunction) {
 	// allInputs
-	allInputs := make(map[string]Dictionary)
+	allInputs := make(map[string]*Dictionary)
 	rawInputEventNames := inputIOList.GetUniqueEventNames()
 	inputVarNames := inputIOList.GetUniqueVarNames()
 	for _, rawInputEventName := range rawInputEventNames {
@@ -44,18 +44,18 @@ func consumeAndPublishSingle(broker msgbroker.CommonBroker, inputIOList, outputI
 				ID := pkg.ID
 				data := pkg.Data
 				if _, exists := allInputs[ID]; !exists {
-					allInputs[ID] = Dictionary{}
+					allInputs[ID] = &Dictionary{}
 				}
 				// populate allInputs[ID] with varNames and servicedata
 				for _, varName := range varNames {
-					allInputs[ID][varName] = data
+					allInputs[ID].Set(varName, data)
 				}
 				inputs := allInputs[ID]
 				log.Printf("[INFO] Inputs for %s: %#v", ID, inputs)
 				// execute wrapper
-				if isInputComplete(inputVarNames, inputs) {
+				if inputs.HasAll(inputVarNames) {
 					log.Printf("[INFO] Inputs for %s completed", ID)
-					outputs, err := wrappedFunction(inputs)
+					outputs, err := wrappedFunction(*inputs)
 					if err != nil {
 						log.Printf("[ERROR] Error while consuming from %s: %s", inputEventName, err)
 						publishError(broker, rawErrorEventName, ID, err)
@@ -73,19 +73,10 @@ func consumeAndPublishSingle(broker msgbroker.CommonBroker, inputIOList, outputI
 	}
 }
 
-func isInputComplete(inputVarNames []string, inputs Dictionary) bool {
-	for _, inputVarName := range inputVarNames {
-		if _, exists := inputs[inputVarName]; !exists {
-			return false
-		}
-	}
-	return true
-}
-
 func publish(msgBroker msgbroker.CommonBroker, rawErrorEventName, ID string, outputIOList IOList, outputs Dictionary) error {
 	outputVarNames := outputIOList.GetUniqueVarNames()
 	for _, outputVarName := range outputVarNames {
-		data := outputs[outputVarName]
+		data := outputs.Get(outputVarName)
 		pkg := servicedata.Package{ID: ID, Data: data}
 		rawOutputEventNames := outputIOList.GetVarEventNames(outputVarName)
 		for _, rawOutputEventName := range rawOutputEventNames {

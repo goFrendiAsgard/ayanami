@@ -122,6 +122,23 @@ func TestDictionaryHas(t *testing.T) {
 
 }
 
+func TestDictionaryHasAll(t *testing.T) {
+	dictionary := createTestDictionary()
+	var expected, actual bool
+
+	expected = true
+	actual = dictionary.HasAll([]string{"person.name", "person.affiliations"})
+	if actual != expected {
+		t.Errorf("Expected `%t`, get `%t`", expected, actual)
+	}
+
+	expected = false
+	actual = dictionary.HasAll([]string{"person.name", "person.affiliations", "location"})
+	if actual != expected {
+		t.Errorf("Expected `%t`, get `%t`", expected, actual)
+	}
+}
+
 func TestDictionarySet(t *testing.T) {
 	dictionary := createTestDictionary()
 	var err error

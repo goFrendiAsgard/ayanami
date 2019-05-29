@@ -68,6 +68,16 @@ func (dictionary Dictionary) Has(dottedKeys string) bool {
 	return true
 }
 
+// HasAll check whether all key in keyNames are available in dictionary
+func (dictionary *Dictionary) HasAll(keyNames []string) bool {
+	for _, keyName := range keyNames {
+		if !dictionary.Has(keyName) {
+			return false
+		}
+	}
+	return true
+}
+
 // Set set dictionary
 func (dictionary *Dictionary) Set(dottedKeys string, newValue interface{}) error {
 	var pointer interface{}

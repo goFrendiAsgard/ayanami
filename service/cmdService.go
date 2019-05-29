@@ -34,7 +34,7 @@ func createCmdWrapper(cmd []string, inputVarNames, outputVarNames []string) Wrap
 		if err == nil {
 			outputVal := string(outByte)
 			for _, outputVarName := range outputVarNames {
-				outputs[outputVarName] = outputVal
+				outputs.Set(outputVarName, outputVal)
 			}
 		}
 		return outputs, err

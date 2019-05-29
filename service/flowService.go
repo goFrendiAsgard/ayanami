@@ -71,23 +71,22 @@ func createFlowWrapper(broker msgbroker.CommonBroker, flows []FlowEvent, outputV
 		completed := make(chan bool)
 		for _, flow := range flows {
 			inputEventName := fmt.Sprintf("%s.%s", ID, flow.InputEvent)
-			if flow.OutputEvent == "" {
-				continue
-			}
 			// varName already exists in vars
-			if val, exists := vars[flow.VarName]; exists {
-				publishFlowPkg(broker, flow.OutputEvent, ID, val, completed)
+			if vars.Has(flow.VarName) && flow.OutputEvent != "" {
+				publishFlowPkg(broker, flow.OutputEvent, ID, vars.Get(flow.VarName), completed)
 			}
-			// flow has both, inputEvent & outputEvent
+			// flow has inputEvent
 			if flow.InputEvent != "" {
 				log.Printf("[INFO] consuming from %s", inputEventName)
 				broker.Consume(inputEventName,
 					func(pkg servicedata.Package) {
 						// get the message and populate vars based on received message
 						log.Printf("[INFO] Get message from `%s`: %#v", inputEventName, pkg)
-						vars[flow.VarName] = pkg.Data
+						vars.Set(flow.VarName, pkg.Data)
 						// publish the servicedata
-						publishFlowPkg(broker, flow.OutputEvent, pkg.ID, pkg.Data, completed)
+						if flow.OutputEvent != "" {
+							publishFlowPkg(broker, flow.OutputEvent, pkg.ID, pkg.Data, completed)
+						}
 						processCompletedOutput(outputVarNames, vars, completed)
 					},
 					// error callback
@@ -104,14 +103,14 @@ func createFlowWrapper(broker msgbroker.CommonBroker, flows []FlowEvent, outputV
 		processCompletedOutput(outputVarNames, vars, completed)
 		<-completed
 		for _, outputName := range outputVarNames {
-			outputs[outputName] = vars[outputName]
+			outputs.Set(outputName, vars.Get(outputName))
 		}
 		return outputs, err
 	}
 }
 
 func processCompletedOutput(outputVarNames []string, vars Dictionary, completed chan bool) {
-	if isOutputComplete(outputVarNames, vars) {
+	if vars.HasAll(outputVarNames) {
 		completed <- true
 	}
 }
@@ -120,7 +119,7 @@ func getFlowDefaultVars(vars Dictionary, broker msgbroker.CommonBroker, ID strin
 	for _, flow := range flows {
 		// flow doesn't have inputEvent, use it's value to populate vars
 		if flow.InputEvent == "" {
-			vars[flow.VarName] = flow.Value
+			vars.Set(flow.VarName, flow.Value)
 			log.Printf("[INFO] Set `%s` into `%#v`", flow.VarName, flow.Value)
 			// flow also has outputEvent, publish the value
 			if flow.OutputEvent != "" {
@@ -138,7 +137,7 @@ func initFlowWrapper(inputs Dictionary) (Dictionary, Dictionary, string, error) 
 	ID, err := CreateID()
 	// preset vars
 	for inputName, inputVal := range inputs {
-		vars[inputName] = inputVal
+		vars.Set(inputName, inputVal)
 	}
 	return outputs, vars, ID, err
 }
@@ -152,13 +151,4 @@ func publishFlowPkg(broker msgbroker.CommonBroker, rawOutputEventName, ID string
 		log.Printf("[ERROR] Error: %s", err)
 		completed <- true
 	}
-}
-
-func isOutputComplete(outputVarNames []string, outputs Dictionary) bool {
-	for _, outputVarName := range outputVarNames {
-		if _, exists := outputs[outputVarName]; !exists {
-			return false
-		}
-	}
-	return true
 }
