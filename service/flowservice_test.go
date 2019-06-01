@@ -76,9 +76,9 @@ func TestNewFlowService(t *testing.T) {
 	broker := createFlowTestBroker(t)
 
 	// define flow
-	service := NewFlow(broker, "service",
+	service := NewFlow("flow", "test", broker,
 		// inputs
-		[]string{"a", "b", "c"},
+		[]string{"a", "b"},
 		// output
 		[]string{"d"},
 		// flows
@@ -108,11 +108,10 @@ func TestNewFlowService(t *testing.T) {
 
 	// test inputs
 	expectedInputs := IOList{
-		IO{EventName: "flow.service.in.a", VarName: "a"},
+		IO{EventName: "flow.test.in.a", VarName: "a"},
 		IO{EventName: "consume.a", VarName: "a"},
-		IO{EventName: "flow.service.in.b", VarName: "b"},
+		IO{EventName: "flow.test.in.b", VarName: "b"},
 		IO{EventName: "consume.b", VarName: "b"},
-		IO{EventName: "flow.service.in.c", VarName: "c"},
 	}
 	inputs := service.Input
 	if !reflect.DeepEqual(inputs, expectedInputs) {
@@ -121,7 +120,7 @@ func TestNewFlowService(t *testing.T) {
 
 	// test outputs
 	expectedOutputs := IOList{
-		IO{EventName: "flow.service.out.d", VarName: "d"},
+		IO{EventName: "flow.test.out.d", VarName: "d"},
 		IO{EventName: "publish.d", VarName: "d"},
 	}
 	Outputs := service.Output
@@ -130,7 +129,7 @@ func TestNewFlowService(t *testing.T) {
 	}
 
 	// test errorEventName
-	expectedErrorEventName := "flow.service.err"
+	expectedErrorEventName := "flow.test.err"
 	if service.ErrorEventName != expectedErrorEventName {
 		t.Errorf("expected %s, get %s", expectedErrorEventName, service.ErrorEventName)
 	}

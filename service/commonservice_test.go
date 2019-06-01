@@ -56,7 +56,7 @@ func TestConsumeAndPublish(t *testing.T) {
 			return outputs, nil
 		},
 	}
-	services.ConsumeAndPublish(broker)
+	services.ConsumeAndPublish(broker, "flow")
 
 	// publish a & b
 	broker.Publish("ID.srvc.common.in.a", servicedata.Package{

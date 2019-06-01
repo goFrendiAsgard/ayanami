@@ -22,13 +22,13 @@ type CommonService struct {
 type Services map[string]CommonService
 
 // ConsumeAndPublish consume from queue and Publish
-func (services Services) ConsumeAndPublish(broker msgbroker.CommonBroker) {
-	for _, service := range services {
-		consumeAndPublishSingle(broker, service.Input, service.Output, service.ErrorEventName, service.Function)
+func (services Services) ConsumeAndPublish(broker msgbroker.CommonBroker, serviceName string) {
+	for methodName, service := range services {
+		consumeAndPublishSingle(broker, serviceName, methodName, service.Input, service.Output, service.ErrorEventName, service.Function)
 	}
 }
 
-func consumeAndPublishSingle(broker msgbroker.CommonBroker, inputIOList, outputIOList IOList, rawErrorEventName string, wrappedFunction WrappedFunction) {
+func consumeAndPublishSingle(broker msgbroker.CommonBroker, serviceName, methodName string, inputIOList, outputIOList IOList, rawErrorEventName string, wrappedFunction WrappedFunction) {
 	// allInputs
 	allInputs := make(map[string]*Dictionary)
 	rawInputEventNames := inputIOList.GetUniqueEventNames()
@@ -36,7 +36,7 @@ func consumeAndPublishSingle(broker msgbroker.CommonBroker, inputIOList, outputI
 	for _, rawInputEventName := range rawInputEventNames {
 		inputEventName := fmt.Sprintf("*.%s", rawInputEventName)
 		varNames := inputIOList.GetEventVarNames(rawInputEventName)
-		log.Printf("[INFO] Consume from `%s`", inputEventName)
+		log.Printf("[INFO: %s.%s] Consume from `%s`", serviceName, methodName, inputEventName)
 		broker.Consume(inputEventName,
 			// success callback
 			func(pkg servicedata.Package) {
@@ -51,29 +51,31 @@ func consumeAndPublishSingle(broker msgbroker.CommonBroker, inputIOList, outputI
 					allInputs[ID].Set(varName, data)
 				}
 				inputs := allInputs[ID]
-				log.Printf("[INFO] Inputs for %s: %#v", ID, inputs)
+				log.Printf("[INFO: %s.%s] Inputs for %s: %#v", serviceName, methodName, ID, inputs)
 				// execute wrapper
 				if inputs.HasAll(inputVarNames) {
-					log.Printf("[INFO] Inputs for %s completed", ID)
+					log.Printf("[INFO: %s.%s] Inputs for %s completed", serviceName, methodName, ID)
 					outputs, err := wrappedFunction(*inputs)
+					defer delete(allInputs, ID)
 					if err != nil {
-						log.Printf("[ERROR] Error while consuming from %s: %s", inputEventName, err)
-						publishError(broker, rawErrorEventName, ID, err)
+						log.Printf("[ERROR: %s.%s] Error while consuming from %s: %s", serviceName, methodName, inputEventName, err)
+						publishError(broker, serviceName, methodName, rawErrorEventName, ID, err)
 						return
 					}
-					publish(broker, rawErrorEventName, ID, outputIOList, outputs)
+					log.Printf("[INFO: %s.%s] Outputs of %s are: %#v", serviceName, methodName, ID, outputs)
+					publish(broker, serviceName, methodName, rawErrorEventName, ID, outputIOList, outputs)
 				}
 			},
 			// error callback
 			func(err error) {
-				log.Printf("[ERROR] Error while consuming from %s: %s", inputEventName, err)
-				publishError(broker, rawErrorEventName, "No-ID", err)
+				log.Printf("[ERROR: %s.%s] Error while consuming from %s: %s", serviceName, methodName, inputEventName, err)
+				publishError(broker, serviceName, methodName, rawErrorEventName, "No-ID", err)
 			},
 		)
 	}
 }
 
-func publish(msgBroker msgbroker.CommonBroker, rawErrorEventName, ID string, outputIOList IOList, outputs Dictionary) error {
+func publish(msgBroker msgbroker.CommonBroker, serviceName, methodName, rawErrorEventName, ID string, outputIOList IOList, outputs Dictionary) error {
 	outputVarNames := outputIOList.GetUniqueVarNames()
 	for _, outputVarName := range outputVarNames {
 		data := outputs.Get(outputVarName)
@@ -81,19 +83,20 @@ func publish(msgBroker msgbroker.CommonBroker, rawErrorEventName, ID string, out
 		rawOutputEventNames := outputIOList.GetVarEventNames(outputVarName)
 		for _, rawOutputEventName := range rawOutputEventNames {
 			eventName := fmt.Sprintf("%s.%s", ID, rawOutputEventName)
-			log.Printf("[INFO] Publish into `%s`: `%#v`", eventName, pkg)
+			log.Printf("[INFO: %s.%s] Publish into `%s`: `%#v`", serviceName, methodName, eventName, pkg)
 			err := msgBroker.Publish(eventName, pkg)
 			if err != nil {
-				log.Printf("[INFO] Error while publishing into `%s`: `%s`", eventName, err)
-				return publishError(msgBroker, rawErrorEventName, ID, err)
+				log.Printf("[ERROR: %s.%s] Error while publishing into `%s`: `%s`", serviceName, methodName, eventName, err)
+				return publishError(msgBroker, serviceName, methodName, rawErrorEventName, ID, err)
 			}
 		}
 	}
 	return nil
 }
 
-func publishError(msgBroker msgbroker.CommonBroker, rawErrorEventName, ID string, err error) error {
+func publishError(msgBroker msgbroker.CommonBroker, serviceName, methodName, rawErrorEventName, ID string, err error) error {
 	errorPkg := servicedata.Package{ID: ID, Data: err}
 	errorEventName := fmt.Sprintf("%s.%s", ID, rawErrorEventName)
+	log.Printf("[INFO: %s.%s] Publish error to `%s`: `%s`", serviceName, methodName, errorEventName, err)
 	return msgBroker.Publish(errorEventName, errorPkg)
 }

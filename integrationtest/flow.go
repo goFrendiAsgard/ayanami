@@ -8,6 +8,7 @@ import (
 
 // MainFlow emulating flow's main function
 func MainFlow() {
+	serviceName := "flow"
 	// define broker
 	broker, err := msgbroker.NewNats()
 	if err != nil {
@@ -15,7 +16,7 @@ func MainFlow() {
 	}
 	// define services
 	services := service.Services{
-		"main": service.NewFlow(broker, "main",
+		"main": service.NewFlow(serviceName, "main", broker,
 			// inputs
 			[]string{"request"},
 			// outputs
@@ -49,11 +50,23 @@ func MainFlow() {
 					Value:       200,
 					OutputEvent: "trig.response.get /.in.code",
 				},
+				service.FlowEvent{
+					InputEvent: "srvc.cmd.figlet.err",
+					VarName:    "content",
+				},
+				service.FlowEvent{
+					InputEvent: "srvc.cmd.cowsay.err",
+					VarName:    "content",
+				},
+				service.FlowEvent{
+					InputEvent: "srvc.html.pre.err",
+					VarName:    "content",
+				},
 			},
 		),
 	}
 	// consume and publish forever
 	ch := make(chan bool)
-	services.ConsumeAndPublish(broker)
+	services.ConsumeAndPublish(broker, "flow")
 	<-ch
 }

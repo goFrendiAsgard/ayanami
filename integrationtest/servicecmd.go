@@ -16,16 +16,12 @@ func MainServiceCmd() {
 	}
 	// define services
 	services := service.Services{
-		"cowsay": service.NewCmd(
-			serviceName,
-			"cowsay",
+		"cowsay": service.NewCmd(serviceName, "cowsay",
 			[]string{"input"},
 			[]string{"output"},
-			[]string{"cowsay", "-n", "$input"},
+			[]string{"/bin/sh", "-c", "echo $input | cowsay -n"},
 		),
-		"figlet": service.NewCmd(
-			serviceName,
-			"figlet",
+		"figlet": service.NewCmd(serviceName, "figlet",
 			[]string{"input"},
 			[]string{"output"},
 			[]string{"figlet", "$input"},
@@ -33,6 +29,6 @@ func MainServiceCmd() {
 	}
 	// consume and publish forever
 	ch := make(chan bool)
-	services.ConsumeAndPublish(broker)
+	services.ConsumeAndPublish(broker, serviceName)
 	<-ch
 }

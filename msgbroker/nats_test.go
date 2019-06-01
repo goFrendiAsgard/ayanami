@@ -1,6 +1,7 @@
 package msgbroker
 
 import (
+	nats "github.com/nats-io/nats.go"
 	"github.com/state-alchemists/ayanami/servicedata"
 	"log"
 	"testing"
@@ -47,7 +48,12 @@ func TestNatsPublishInvalid(t *testing.T) {
 func TestNatsConsumeInvalid(t *testing.T) {
 	eventName := "invalidConsume"
 	broker, err := NewNats()
-	nc := broker.(*Nats).Connection
+	if err != nil {
+		t.Errorf("Get error: %s", err)
+		return
+	}
+	natsURL := GetNatsURL()
+	nc, err := nats.Connect(natsURL)
 	if err != nil {
 		t.Errorf("Get error: %s", err)
 		return
