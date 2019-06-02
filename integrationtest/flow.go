@@ -51,15 +51,15 @@ func MainFlow() {
 					OutputEvent: "trig.response.get.in.code",
 				},
 				service.FlowEvent{
-					InputEvent: "srvc.cmd.figlet.err",
+					InputEvent: "srvc.cmd.figlet.err.message",
 					VarName:    "content",
 				},
 				service.FlowEvent{
-					InputEvent: "srvc.cmd.cowsay.err",
+					InputEvent: "srvc.cmd.cowsay.err.message",
 					VarName:    "content",
 				},
 				service.FlowEvent{
-					InputEvent: "srvc.html.pre.err",
+					InputEvent: "srvc.html.pre.err.message",
 					VarName:    "content",
 				},
 			},

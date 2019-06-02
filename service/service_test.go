@@ -41,7 +41,7 @@ func TestNewService(t *testing.T) {
 	}
 
 	// test errorEventName
-	expectedErrorEventName := "srvc.service.method.err"
+	expectedErrorEventName := "srvc.service.method.err.message"
 	if service.ErrorEventName != expectedErrorEventName {
 		t.Errorf("expected %s, get %s", expectedErrorEventName, service.ErrorEventName)
 	}

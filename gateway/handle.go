@@ -8,44 +8,9 @@ import (
 	"github.com/state-alchemists/ayanami/servicedata"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 )
-
-// GetPort get port from environment
-func GetPort() int64 {
-	portStr, ok := os.LookupEnv("GATEWAY_PORT")
-	if ok {
-		port, err := strconv.ParseInt(portStr, 10, 64)
-		if err != nil {
-			return port
-		}
-	}
-	return 8080
-}
-
-// GetMultipartFormLimit get port from environment
-func GetMultipartFormLimit() int64 {
-	multipartFormLimitStr, ok := os.LookupEnv("GATEWAY_MULTIPART_FORM_LIMIT")
-	if ok {
-		multipartFormLimit, err := strconv.ParseInt(multipartFormLimitStr, 10, 64)
-		if err != nil {
-			return multipartFormLimit
-		}
-	}
-	return 20480
-}
-
-// RouteToSegments translate route into segments
-func RouteToSegments(route string) string {
-	route = strings.Replace(route, "/", ".", -1)
-	route = strings.Replace(route, " ", ".", -1)
-	if route == "." {
-		route = ""
-	}
-	return route
-}
 
 // Serve handle HTTP request
 func Serve(broker msgbroker.CommonBroker, port int64, multipartFormLimit int64, routes []string) {

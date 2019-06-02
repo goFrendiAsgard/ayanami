@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func handle(broker msgbroker.CommonBroker, httpPort int, path string) {
+func serve(broker msgbroker.CommonBroker, httpPort int, path string) {
 	routes := []string{
 		path,
 	}
@@ -20,7 +20,7 @@ func handle(broker msgbroker.CommonBroker, httpPort int, path string) {
 	Serve(broker, port, multipartFormLimit, routes)
 }
 
-func handleTest(broker msgbroker.CommonBroker, port int, path string, t *testing.T) {
+func serveTest(broker msgbroker.CommonBroker, port int, path string, t *testing.T) {
 	broker.Consume(fmt.Sprintf("*.trig.request.get%s.out.req", RouteToSegments(path)),
 		func(pkg servicedata.Package) {
 			ID := pkg.ID
@@ -37,7 +37,7 @@ func handleTest(broker msgbroker.CommonBroker, port int, path string, t *testing
 			t.Errorf("Get error %s", err)
 		},
 	)
-	go handle(broker, port, path)
+	go serve(broker, port, path)
 	time.Sleep(1 * time.Second)
 	// emulate request
 	response, err := http.Get(fmt.Sprintf("http://localhost:%d%s", port, path))
@@ -62,7 +62,7 @@ func TestHandleWithMemory(t *testing.T) {
 		log.Fatal(err)
 	}
 	port := 8508
-	handleTest(broker, port, "/memory", t)
+	serveTest(broker, port, "/memory", t)
 }
 
 func TestHandleWithNats(t *testing.T) {
@@ -71,5 +71,5 @@ func TestHandleWithNats(t *testing.T) {
 		log.Fatal(err)
 	}
 	port := 8507
-	handleTest(broker, port, "/nats", t)
+	serveTest(broker, port, "/nats", t)
 }

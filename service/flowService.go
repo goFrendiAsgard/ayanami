@@ -90,7 +90,7 @@ func NewFlow(serviceName, flowName string, broker msgbroker.CommonBroker, inputs
 		}
 	}
 	// get errorEventName
-	errorEventName := fmt.Sprintf("flow.%s.err", flowName)
+	errorEventName := fmt.Sprintf("flow.%s.err.message", flowName)
 	// get flowWrappedFunction
 	wrappedFunction := createFlowWrapper(serviceName, flowName, broker, flows, inputs, outputs)
 	return CommonService{
@@ -102,7 +102,8 @@ func NewFlow(serviceName, flowName string, broker msgbroker.CommonBroker, inputs
 }
 
 func createFlowWrapper(serviceName, flowName string, broker msgbroker.CommonBroker, flows FlowEvents, inputVarNames, outputVarNames []string) WrappedFunction {
-	return func(vars Dictionary) (Dictionary, error) {
+	return func(inputs Dictionary) (Dictionary, error) {
+		vars := NewPresetDictionaryRW(inputs)
 		outputs := make(Dictionary)
 		ID, err := CreateID()
 		if err != nil {
@@ -124,7 +125,7 @@ func createFlowWrapper(serviceName, flowName string, broker msgbroker.CommonBrok
 						if !vars.Has(varName) {
 							log.Printf("[INFO: %s.%s] Set `%s` into: `%#v`", serviceName, flowName, varName, pkg.Data)
 							vars.Set(varName, pkg.Data)
-							publishFlowVar(serviceName, flowName, broker, ID, flows, outputVarNames, varName, vars)
+							publishFlowVar(serviceName, flowName, broker, ID, flows, outputVarNames, varName, vars.GetDictionary())
 						} else {
 							log.Printf("[INFO: %s.%s] `%s` already defined, no need to set", serviceName, flowName, varName)
 						}
@@ -139,7 +140,7 @@ func createFlowWrapper(serviceName, flowName string, broker msgbroker.CommonBrok
 			allConsumerDeclared.Done()
 		}
 		// set default values
-		for varName, value := range getFlowDefaultVars(flows, vars) {
+		for varName, value := range getFlowDefaultVars(flows, vars.GetDictionary()) {
 			if !vars.Has(varName) {
 				log.Printf("[INFO: %s.%s] Internally set `%s` into: `%#v`", serviceName, flowName, varName, value)
 				vars.Set(varName, value)
@@ -147,8 +148,8 @@ func createFlowWrapper(serviceName, flowName string, broker msgbroker.CommonBrok
 				log.Printf("[INFO: %s.%s] `%s` already defined, no need to internal set", serviceName, flowName, varName)
 			}
 		}
-		for varName := range vars {
-			publishFlowVar(serviceName, flowName, broker, ID, flows, outputVarNames, varName, vars)
+		for varName := range vars.GetDictionary() {
+			publishFlowVar(serviceName, flowName, broker, ID, flows, outputVarNames, varName, vars.GetDictionary())
 		}
 		notifyIfOutputCompleted(vars, outputVarNames, outputCompleted)
 		<-outputCompleted
@@ -235,7 +236,7 @@ func isSubVarOf(varName, subVarName string) bool {
 	return strings.Index(subVarName, varName+".") == 0
 }
 
-func notifyIfOutputCompleted(vars Dictionary, outputVarNames []string, outputCompleted chan bool) {
+func notifyIfOutputCompleted(vars *DictionaryRW, outputVarNames []string, outputCompleted chan bool) {
 	if vars.HasAll(outputVarNames) {
 		outputCompleted <- true
 	}

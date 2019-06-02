@@ -42,7 +42,7 @@ func (dictionary Dictionary) Get(dottedKeys string) interface{} {
 	return data
 }
 
-// Has is key exists
+// Has check whether key exists in dictionary
 func (dictionary Dictionary) Has(dottedKeys string) bool {
 	keyParts := strings.Split(dottedKeys, ".")
 	var data interface{}

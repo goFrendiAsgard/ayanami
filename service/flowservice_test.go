@@ -9,103 +9,32 @@ import (
 	"testing"
 )
 
-func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
-	// prepare broker
-	broker, err := msgbroker.NewMemory()
-	if err != nil {
-		t.Errorf("Getting error: %s", err)
+func TestFlowEvents(t *testing.T) {
+	var expected, actual []string
+	flowEvents := createFlowEventsTest()
+	// getInputEvents
+	expected = []string{"consume.a", "consume.b", "srvc.service.method.out.delta"}
+	actual = flowEvents.GetInputEvents()
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("expected `%#v`, get %#v`", expected, actual)
 	}
-
-	ID := ""
-	aComplete := false
-	bComplete := false
-	cComplete := false
-	var a, b, c int
-	errorCallback := func(err error) {
-		aComplete = true
-		bComplete = true
-		cComplete = true
-		t.Errorf("Get error %s", err)
+	// getVarNamesByInputEvent
+	expected = []string{"a"}
+	actual = flowEvents.GetVarNamesByInputEvent("consume.a")
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("expected `%#v`, get %#v`", expected, actual)
 	}
-	calculateAndPublish := func() {
-		if aComplete && bComplete && cComplete {
-			d := a + b + c
-			pkg := servicedata.Package{ID: ID, Data: d}
-			log.Printf("pkg: %#v\n", pkg)
-			eventName := fmt.Sprintf("%s.srvc.service.method.out.delta", ID)
-			broker.Publish(eventName, pkg)
-		}
+	// GetOutputEventByVarNames
+	expected = []string{"srvc.service.method.in.alpha"}
+	actual = flowEvents.GetOutputEventByVarNames("a")
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("expected `%#v`, get %#v`", expected, actual)
 	}
-
-	broker.Consume("*.srvc.service.method.in.alpha",
-		func(pkg servicedata.Package) {
-			ID = pkg.ID
-			a = pkg.Data.(int)
-			aComplete = true
-			calculateAndPublish()
-		},
-		errorCallback,
-	)
-	broker.Consume("*.srvc.service.method.in.beta",
-		func(pkg servicedata.Package) {
-			ID = pkg.ID
-			b = pkg.Data.(int)
-			bComplete = true
-			calculateAndPublish()
-		},
-		errorCallback,
-	)
-	broker.Consume("*.srvc.service.method.in.gamma",
-		func(pkg servicedata.Package) {
-			ID = pkg.ID
-			c = pkg.Data.(int)
-			cComplete = true
-			calculateAndPublish()
-		},
-		errorCallback,
-	)
-	broker.Consume("*.publish.d",
-		func(pkg servicedata.Package) {
-		},
-		errorCallback,
-	)
-	return broker
 }
 
 func TestNewFlowService(t *testing.T) {
 	broker := createFlowTestBroker(t)
-
-	// define flow
-	service := NewFlow("flow", "test", broker,
-		// inputs
-		[]string{"a", "b"},
-		// output
-		[]string{"d"},
-		// flows
-		[]FlowEvent{
-			FlowEvent{
-				InputEvent:  "consume.a",
-				VarName:     "a",
-				OutputEvent: "srvc.service.method.in.alpha",
-			},
-			FlowEvent{
-				InputEvent:  "consume.b",
-				VarName:     "b",
-				OutputEvent: "srvc.service.method.in.beta",
-			},
-			FlowEvent{
-				VarName:     "c",
-				Value:       100,
-				OutputEvent: "srvc.service.method.in.gamma",
-			},
-			FlowEvent{
-				InputEvent:  "srvc.service.method.out.delta",
-				VarName:     "d",
-				OutputEvent: "publish.d",
-			},
-		},
-	)
-
+	service := createFlowServiceTest(broker)
 	// test inputs
 	expectedInputs := IOList{
 		IO{EventName: "flow.test.in.a", VarName: "a"},
@@ -117,7 +46,6 @@ func TestNewFlowService(t *testing.T) {
 	if !reflect.DeepEqual(inputs, expectedInputs) {
 		t.Errorf("\nexpected: %#v\nget     : %#v", expectedInputs, inputs)
 	}
-
 	// test outputs
 	expectedOutputs := IOList{
 		IO{EventName: "flow.test.out.d", VarName: "d"},
@@ -127,13 +55,11 @@ func TestNewFlowService(t *testing.T) {
 	if !reflect.DeepEqual(Outputs, expectedOutputs) {
 		t.Errorf("\nexpected: %#v\nget     : %#v", expectedOutputs, Outputs)
 	}
-
 	// test errorEventName
-	expectedErrorEventName := "flow.test.err"
+	expectedErrorEventName := "flow.test.err.message"
 	if service.ErrorEventName != expectedErrorEventName {
 		t.Errorf("expected %s, get %s", expectedErrorEventName, service.ErrorEventName)
 	}
-
 	// test wrappedFunction
 	expectedFunctionOutput := make(Dictionary)
 	expectedFunctionOutput["d"] = 123
@@ -147,5 +73,100 @@ func TestNewFlowService(t *testing.T) {
 	if !reflect.DeepEqual(functionOutput, expectedFunctionOutput) {
 		t.Errorf("expected %#v, get %#v", expectedFunctionOutput, functionOutput)
 	}
+}
 
+func createFlowEventsTest() FlowEvents {
+	return FlowEvents{
+		FlowEvent{
+			InputEvent:  "consume.a",
+			VarName:     "a",
+			OutputEvent: "srvc.service.method.in.alpha",
+		},
+		FlowEvent{
+			InputEvent:  "consume.b",
+			VarName:     "b",
+			OutputEvent: "srvc.service.method.in.beta",
+		},
+		FlowEvent{
+			VarName:     "c",
+			Value:       100,
+			OutputEvent: "srvc.service.method.in.gamma",
+		},
+		FlowEvent{
+			InputEvent:  "srvc.service.method.out.delta",
+			VarName:     "d",
+			OutputEvent: "publish.d",
+		},
+	}
+}
+
+func createFlowServiceTest(broker msgbroker.CommonBroker) CommonService {
+	// define flow
+	service := NewFlow("flow", "test", broker,
+		// inputs
+		[]string{"a", "b"},
+		// output
+		[]string{"d"},
+		// flows
+		createFlowEventsTest(),
+	)
+	return service
+}
+
+func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
+	// prepare broker
+	broker, err := msgbroker.NewMemory()
+	if err != nil {
+		t.Errorf("Getting error: %s", err)
+	}
+	storage := NewDictionaryRW()
+	errorCallback := func(err error) {
+		storage.Set("a", 0)
+		storage.Set("b", 0)
+		storage.Set("c", 0)
+		t.Errorf("Get error %s", err)
+	}
+	calculateAndPublish := func() {
+		if storage.HasAll([]string{"a", "b", "c"}) {
+			ID := storage.Get("ID").(string)
+			a := storage.Get("a").(int)
+			b := storage.Get("b").(int)
+			c := storage.Get("c").(int)
+			d := a + b + c
+			pkg := servicedata.Package{ID: ID, Data: d}
+			log.Printf("pkg: %#v\n", pkg)
+			eventName := fmt.Sprintf("%s.srvc.service.method.out.delta", ID)
+			broker.Publish(eventName, pkg)
+		}
+	}
+	broker.Consume("*.srvc.service.method.in.alpha",
+		func(pkg servicedata.Package) {
+			storage.Set("ID", pkg.ID)
+			storage.Set("a", pkg.Data.(int))
+			calculateAndPublish()
+		},
+		errorCallback,
+	)
+	broker.Consume("*.srvc.service.method.in.beta",
+		func(pkg servicedata.Package) {
+			storage.Set("ID", pkg.ID)
+			storage.Set("b", pkg.Data.(int))
+			calculateAndPublish()
+		},
+		errorCallback,
+	)
+	broker.Consume("*.srvc.service.method.in.gamma",
+		func(pkg servicedata.Package) {
+			storage.Set("ID", pkg.ID)
+			storage.Set("c", pkg.Data.(int))
+			calculateAndPublish()
+		},
+		errorCallback,
+	)
+	broker.Consume("*.publish.d",
+		func(pkg servicedata.Package) {
+		},
+		errorCallback,
+	)
+	return broker
 }

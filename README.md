@@ -40,19 +40,16 @@ Providing an environment with minimum dependencies in order to:
 Event Name should comply one of these formats
 
 ```
-<UUID|*>.<trig|srvc>.<serviceName>.<method>.<out|in>.<varName>
-<UUID|*>.<trig|srvc>.<serviceName>.<method>.err
-<UUID|*>.flow.<flowName>.<out|in>.<varName>
-<UUID|*>.flow.<flowName>.err
+<ID>.<trig|srvc|flow>.<serviceName>.<segments...>.<out|in>.<varName>
+<ID>.<trig|srvc|flow>.<serviceName>.<segments...>.err.message
 ```
 
-* `<UUID|*>` is either UUID v4 or `*`
-* `<trig|srvc>` is service type, either `trig` (trigger), `srvc` (service).
-* `<serviceName>` is serviceName.
-* `<flowName>` is flowName.
-* `<method>` is method name.
-* `<out|in>` is either `out` or `in`. Typically services consume `in` event and omit `out` event. However, gateway might act differently.
-* `<varName>` is variable name
+* `<ID>` is 32 characters of `UUID v4 with no hyphens`.
+* `<trig|srvc|flow>` is service type, either `trig` (trigger), `srvc` (service), or `flow`.
+* `<serviceName>` is either serviceName or flowname. Should only contains alphanumeric.
+* `<segments...>` is description of the event. Should only contains alphanumeric or `.`, but should not started, ended, or has two consecutive `.`.
+* `<out|in>` is either `out` or `in`. Typically services consume `in` event and omit `out` event.
+* `<varName>` is variable name.
 
 
 # Terminologies

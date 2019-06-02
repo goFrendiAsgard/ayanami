@@ -30,7 +30,7 @@ func (services Services) ConsumeAndPublish(broker msgbroker.CommonBroker, servic
 
 func consumeAndPublishSingle(broker msgbroker.CommonBroker, serviceName, methodName string, inputIOList, outputIOList IOList, rawErrorEventName string, wrappedFunction WrappedFunction) {
 	// allInputs
-	allInputs := make(map[string]*Dictionary)
+	allInputs := NewDictionaryRW()
 	rawInputEventNames := inputIOList.GetUniqueEventNames()
 	inputVarNames := inputIOList.GetUniqueVarNames()
 	for _, rawInputEventName := range rawInputEventNames {
@@ -43,20 +43,20 @@ func consumeAndPublishSingle(broker msgbroker.CommonBroker, serviceName, methodN
 				// prepare allInputs
 				ID := pkg.ID
 				data := pkg.Data
-				if _, exists := allInputs[ID]; !exists {
-					allInputs[ID] = &Dictionary{}
+				if !allInputs.Has(ID) {
+					allInputs.Set(ID, NewDictionaryRW())
 				}
 				// populate allInputs[ID] with varNames and servicedata
 				for _, varName := range varNames {
-					allInputs[ID].Set(varName, data)
+					allInputs.Get(ID).(*DictionaryRW).Set(varName, data)
 				}
-				inputs := allInputs[ID]
-				log.Printf("[INFO: %s.%s] Inputs for %s: %#v", serviceName, methodName, ID, inputs)
+				// inputs := allInputs.Get(ID).(*DictionaryRW)
+				log.Printf("[INFO: %s.%s] Inputs for %s: %#v", serviceName, methodName, ID, allInputs.Get(ID).(*DictionaryRW).GetDictionary())
 				// execute wrapper
-				if inputs.HasAll(inputVarNames) {
+				if allInputs.Get(ID).(*DictionaryRW).HasAll(inputVarNames) {
 					log.Printf("[INFO: %s.%s] Inputs for %s completed", serviceName, methodName, ID)
-					outputs, err := wrappedFunction(*inputs)
-					defer delete(allInputs, ID)
+					outputs, err := wrappedFunction(allInputs.Get(ID).(*DictionaryRW).GetDictionary())
+					defer allInputs.Delete(ID)
 					if err != nil {
 						log.Printf("[ERROR: %s.%s] Error while consuming from %s: %s", serviceName, methodName, inputEventName, err)
 						publishError(broker, serviceName, methodName, rawErrorEventName, ID, err)
@@ -95,7 +95,7 @@ func publish(msgBroker msgbroker.CommonBroker, serviceName, methodName, rawError
 }
 
 func publishError(msgBroker msgbroker.CommonBroker, serviceName, methodName, rawErrorEventName, ID string, err error) error {
-	errorPkg := servicedata.Package{ID: ID, Data: err}
+	errorPkg := servicedata.Package{ID: ID, Data: fmt.Sprintf("%s", err)}
 	errorEventName := fmt.Sprintf("%s.%s", ID, rawErrorEventName)
 	log.Printf("[INFO: %s.%s] Publish error to `%s`: `%s`", serviceName, methodName, errorEventName, err)
 	return msgBroker.Publish(errorEventName, errorPkg)

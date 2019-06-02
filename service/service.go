@@ -19,7 +19,7 @@ func NewService(serviceName string, methodName string, inputs, outputs []string,
 		serviceOutputs = append(serviceOutputs, IO{VarName: outputName, EventName: eventName})
 	}
 	// get errorEventName
-	errorEventName := fmt.Sprintf("srvc.%s.%s.err", serviceName, methodName)
+	errorEventName := fmt.Sprintf("srvc.%s.%s.err.message", serviceName, methodName)
 	// return config
 	return CommonService{
 		Input:          serviceInputs,
