@@ -11,6 +11,5 @@ func TestMemory(t *testing.T) {
 		t.Errorf("Get error: %s", err)
 		return
 	}
-	CommonBrokerTest(broker, "ID.test", "ID.test", t)
-	CommonBrokerTest(broker, "*.testWildcard", "ID.testWildcard", t)
+	CommonBrokerTest(broker, t)
 }

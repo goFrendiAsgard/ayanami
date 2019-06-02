@@ -28,7 +28,7 @@ func (broker Memory) Publish(eventName string, pkg servicedata.Package) error {
 		wildCardEventName := fmt.Sprintf("*.%s", strings.Join(eventParts[1:], "."))
 		handler, exists := broker.handlers[wildCardEventName]
 		if exists {
-			log.Printf("[MEMORY CONSUME]\nEvent  : %s\nContent: %#v", eventName, pkg)
+			log.Printf("[MEMORY CONSUME]\nEvent  : %s\nContent: %#v", wildCardEventName, pkg)
 			go handler(pkg)
 		}
 	}

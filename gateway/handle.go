@@ -37,6 +37,16 @@ func GetMultipartFormLimit() int64 {
 	return 20480
 }
 
+// RouteToSegments translate route into segments
+func RouteToSegments(route string) string {
+	route = strings.Replace(route, "/", ".", -1)
+	route = strings.Replace(route, " ", ".", -1)
+	if route == "." {
+		route = ""
+	}
+	return route
+}
+
 // Serve handle HTTP request
 func Serve(broker msgbroker.CommonBroker, port int64, multipartFormLimit int64, routes []string) {
 	for _, route := range routes {
@@ -74,8 +84,8 @@ func createRouteHandler(broker msgbroker.CommonBroker, multipartFormLimit int64,
 }
 
 func consume(broker msgbroker.CommonBroker, ID, method, route string, codeChannel chan int, contentChannel chan string) {
-	codeEventName := fmt.Sprintf("%s.trig.response.%s %s.in.code", ID, method, route)
-	contentEventName := fmt.Sprintf("%s.trig.response.%s %s.in.content", ID, method, route)
+	codeEventName := fmt.Sprintf("%s.trig.response.%s%s.in.code", ID, method, RouteToSegments(route))
+	contentEventName := fmt.Sprintf("%s.trig.response.%s%s.in.content", ID, method, RouteToSegments(route))
 	// consume code
 	log.Printf("[INFO: Gateway] Consume `%s`", codeEventName)
 	broker.Consume(codeEventName,
@@ -124,7 +134,7 @@ func response(ID string, w http.ResponseWriter, code int, content string) {
 }
 
 func publish(broker msgbroker.CommonBroker, ID string, method string, route string, multipartFormLimit int64, r *http.Request) error {
-	eventName := fmt.Sprintf("%s.trig.request.%s %s.out.req", ID, method, route)
+	eventName := fmt.Sprintf("%s.trig.request.%s%s.out.req", ID, method, RouteToSegments(route))
 	// parse form & multipart form
 	r.ParseForm()
 	r.ParseMultipartForm(multipartFormLimit)

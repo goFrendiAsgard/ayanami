@@ -23,7 +23,7 @@ func MainFlow() {
 			[]string{"content", "code"},
 			[]service.FlowEvent{
 				service.FlowEvent{
-					InputEvent: "trig.request.get /.out.req",
+					InputEvent: "trig.request.get.out.req",
 					VarName:    "request",
 				},
 				service.FlowEvent{
@@ -43,12 +43,12 @@ func MainFlow() {
 				service.FlowEvent{
 					InputEvent:  "srvc.html.pre.out.output",
 					VarName:     "content",
-					OutputEvent: "trig.response.get /.in.content",
+					OutputEvent: "trig.response.get.in.content",
 				},
 				service.FlowEvent{
 					VarName:     "code",
 					Value:       200,
-					OutputEvent: "trig.response.get /.in.code",
+					OutputEvent: "trig.response.get.in.code",
 				},
 				service.FlowEvent{
 					InputEvent: "srvc.cmd.figlet.err",

@@ -21,16 +21,16 @@ func handle(broker msgbroker.CommonBroker, httpPort int, path string) {
 }
 
 func handleTest(broker msgbroker.CommonBroker, port int, path string, t *testing.T) {
-	broker.Consume(fmt.Sprintf("*.trig.request.get %s.out.req", path),
+	broker.Consume(fmt.Sprintf("*.trig.request.get%s.out.req", RouteToSegments(path)),
 		func(pkg servicedata.Package) {
 			ID := pkg.ID
 			// publish code
 			codePkg := servicedata.Package{ID: ID, Data: 200}
-			codeEvent := fmt.Sprintf("%s.trig.response.get %s.in.code", ID, path)
+			codeEvent := fmt.Sprintf("%s.trig.response.get%s.in.code", ID, RouteToSegments(path))
 			broker.Publish(codeEvent, codePkg)
 			// publish content
 			contentPkg := servicedata.Package{ID: ID, Data: "hi"}
-			contentEvent := fmt.Sprintf("%s.trig.response.get %s.in.content", ID, path)
+			contentEvent := fmt.Sprintf("%s.trig.response.get%s.in.content", ID, RouteToSegments(path))
 			broker.Publish(contentEvent, contentPkg)
 		},
 		func(err error) {
