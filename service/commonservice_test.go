@@ -10,7 +10,8 @@ import (
 
 func TestConsumeAndPublish(t *testing.T) {
 	// create broker
-	broker, errorMessageCh, err := createCommonServiceBrokerTest("normal")
+	errorMessageCh := make(chan string, 1)
+	broker, err := createCommonServiceBrokerTest("normal", errorMessageCh)
 	if err != nil {
 		t.Errorf("Getting error: %s", err)
 	}
@@ -51,7 +52,8 @@ func TestConsumeAndPublish(t *testing.T) {
 
 func TestConsumeAndPublishFunctionError(t *testing.T) {
 	// create broker
-	broker, errorMessageCh, err := createCommonServiceBrokerTest("funcErr")
+	errorMessageCh := make(chan string, 1)
+	broker, err := createCommonServiceBrokerTest("funcErr", errorMessageCh)
 	if err != nil {
 		t.Errorf("Getting error: %s", err)
 	}
@@ -87,32 +89,33 @@ func TestConsumeAndPublishFunctionError(t *testing.T) {
 	}
 }
 
-func createCommonServiceBrokerTest(ID string) (msgbroker.CommonBroker, chan string, error) {
-	errorMessage := make(chan string)
+func createCommonServiceBrokerTest(ID string, errorMessageCh chan string) (msgbroker.CommonBroker, error) {
 	// define brokers
 	broker, err := msgbroker.NewMemory()
 	if err != nil {
-		return broker, errorMessage, err
+		return broker, err
 	}
+	// consume event
 	broker.Consume(fmt.Sprintf("%s.srvc.common.out.c", ID),
 		func(pkg servicedata.Package) {
 			c := pkg.Data.(int)
 			if c != 7 {
-				errorMessage <- fmt.Sprintf("expected 7, get %d", c)
+				errorMessageCh <- fmt.Sprintf("expected 7, get %d", c)
 			}
-			errorMessage <- ""
+			errorMessageCh <- ""
 		},
 		func(err error) {
-			errorMessage <- fmt.Sprintf("%s", err)
+			errorMessageCh <- fmt.Sprintf("%s", err)
 		},
 	)
+	// consume error event
 	broker.Consume(fmt.Sprintf("%s.srvc.common.err", ID),
 		func(pkg servicedata.Package) {
-			errorMessage <- fmt.Sprintf("%s", pkg.Data)
+			errorMessageCh <- fmt.Sprintf("%s", pkg.Data)
 		},
 		func(err error) {
-			errorMessage <- fmt.Sprintf("%s", err)
+			errorMessageCh <- fmt.Sprintf("%s", err)
 		},
 	)
-	return broker, errorMessage, err
+	return broker, err
 }

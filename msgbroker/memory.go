@@ -10,15 +10,15 @@ import (
 
 // Memory broker for mocking
 type Memory struct {
-	handlers map[string]ConsumeSuccessFunc
 	lock     *sync.RWMutex
+	handlers map[string]ConsumeSuccessFunc
 }
 
 // Consume consume from memory broker
 func (broker Memory) Consume(eventName string, successCallback ConsumeSuccessFunc, errorCallback ConsumeErrorFunc) {
 	broker.lock.Lock()
-	defer broker.lock.Unlock()
 	broker.handlers[eventName] = successCallback
+	broker.lock.Unlock()
 }
 
 // Publish publish to memory broker
@@ -46,6 +46,6 @@ func NewMemory() (CommonBroker, error) {
 	var broker CommonBroker
 	handlers := make(map[string]ConsumeSuccessFunc)
 	lock := sync.RWMutex{}
-	broker = Memory{handlers, &lock}
+	broker = Memory{lock: &lock, handlers: handlers}
 	return broker, nil
 }

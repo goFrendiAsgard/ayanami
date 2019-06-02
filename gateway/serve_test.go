@@ -11,26 +11,35 @@ import (
 	"time"
 )
 
-func serve(broker msgbroker.CommonBroker, httpPort int, path string) {
-	routes := []string{
-		path,
+func TestServeWithMemory(t *testing.T) {
+	broker, err := msgbroker.NewMemory()
+	if err != nil {
+		log.Fatal(err)
 	}
-	port := int64(httpPort)
-	multipartFormLimit := GetMultipartFormLimit()
-	Serve(broker, port, multipartFormLimit, routes)
+	port := 8508
+	serveTest(broker, port, "/memory", t)
+}
+
+func TestServeWithNats(t *testing.T) {
+	broker, err := msgbroker.NewNats()
+	if err != nil {
+		log.Fatal(err)
+	}
+	port := 8507
+	serveTest(broker, port, "/nats", t)
 }
 
 func serveTest(broker msgbroker.CommonBroker, port int, path string, t *testing.T) {
-	broker.Consume(fmt.Sprintf("*.trig.request.get%s.out.req", RouteToSegments(path)),
+	broker.Consume(fmt.Sprintf("*.trig.request.get.%s.out.req", RouteToSegments(path)),
 		func(pkg servicedata.Package) {
 			ID := pkg.ID
 			// publish code
 			codePkg := servicedata.Package{ID: ID, Data: 200}
-			codeEvent := fmt.Sprintf("%s.trig.response.get%s.in.code", ID, RouteToSegments(path))
+			codeEvent := fmt.Sprintf("%s.trig.response.get.%s.in.code", ID, RouteToSegments(path))
 			broker.Publish(codeEvent, codePkg)
 			// publish content
 			contentPkg := servicedata.Package{ID: ID, Data: "hi"}
-			contentEvent := fmt.Sprintf("%s.trig.response.get%s.in.content", ID, RouteToSegments(path))
+			contentEvent := fmt.Sprintf("%s.trig.response.get.%s.in.content", ID, RouteToSegments(path))
 			broker.Publish(contentEvent, contentPkg)
 		},
 		func(err error) {
@@ -56,20 +65,11 @@ func serveTest(broker msgbroker.CommonBroker, port int, path string, t *testing.
 	}
 }
 
-func TestHandleWithMemory(t *testing.T) {
-	broker, err := msgbroker.NewMemory()
-	if err != nil {
-		log.Fatal(err)
+func serve(broker msgbroker.CommonBroker, httpPort int, path string) {
+	routes := []string{
+		path,
 	}
-	port := 8508
-	serveTest(broker, port, "/memory", t)
-}
-
-func TestHandleWithNats(t *testing.T) {
-	broker, err := msgbroker.NewNats()
-	if err != nil {
-		log.Fatal(err)
-	}
-	port := 8507
-	serveTest(broker, port, "/nats", t)
+	port := int64(httpPort)
+	multipartFormLimit := GetMultipartFormLimit()
+	Serve(broker, port, multipartFormLimit, routes)
 }

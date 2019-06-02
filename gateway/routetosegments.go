@@ -1,15 +1,21 @@
 package gateway
 
 import (
-	"strings"
+	"regexp"
 )
 
 // RouteToSegments translate route into segments
 func RouteToSegments(route string) string {
-	route = strings.Replace(route, "/", ".", -1)
-	route = strings.Replace(route, " ", ".", -1)
-	if route == "." {
-		route = ""
-	}
+	// replace all forbidden characters into "."
+	re := regexp.MustCompile(`[/ ]+`)
+	route = re.ReplaceAllLiteralString(route, ".")
+	// normalize all consecutive "."
+	re = regexp.MustCompile(`\.+`)
+	route = re.ReplaceAllLiteralString(route, ".")
+	// remove "." at the begining and end of string
+	re = regexp.MustCompile(`^\.`)
+	route = re.ReplaceAllLiteralString(route, "")
+	re = regexp.MustCompile(`\.$`)
+	route = re.ReplaceAllLiteralString(route, "")
 	return route
 }

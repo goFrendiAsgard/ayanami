@@ -48,13 +48,11 @@ func consumeAndPublishSingle(broker msgbroker.CommonBroker, serviceName, methodN
 				if _, exists := allInputs[ID]; !exists {
 					allInputs[ID] = make(Dictionary)
 				}
-				lock.Unlock()
 				// populate allInputs[ID] with varNames and servicedata
 				for _, varName := range varNames {
-					lock.Lock()
 					allInputs[ID][varName] = data
-					lock.Unlock()
 				}
+				lock.Unlock()
 				lock.RLock()
 				inputs := allInputs[ID]
 				log.Printf("[INFO: %s.%s] Inputs for %s: %#v", serviceName, methodName, ID, inputs)
