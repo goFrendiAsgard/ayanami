@@ -6,6 +6,7 @@ import (
 	"github.com/state-alchemists/ayanami/servicedata"
 	"log"
 	"reflect"
+	"sync"
 	"testing"
 )
 
@@ -119,19 +120,27 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 	if err != nil {
 		t.Errorf("Getting error: %s", err)
 	}
-	storage := NewDictionaryRW()
+	var lock sync.RWMutex
+	storage := make(Dictionary)
 	errorCallback := func(err error) {
+		lock.Lock()
 		storage.Set("a", 0)
 		storage.Set("b", 0)
 		storage.Set("c", 0)
+		lock.Unlock()
 		t.Errorf("Get error %s", err)
 	}
 	calculateAndPublish := func() {
-		if storage.HasAll([]string{"a", "b", "c"}) {
+		lock.RLock()
+		inputCompleted := storage.HasAll([]string{"a", "b", "c"})
+		lock.RUnlock()
+		if inputCompleted {
+			lock.RLock()
 			ID := storage.Get("ID").(string)
 			a := storage.Get("a").(int)
 			b := storage.Get("b").(int)
 			c := storage.Get("c").(int)
+			lock.RUnlock()
 			d := a + b + c
 			pkg := servicedata.Package{ID: ID, Data: d}
 			log.Printf("pkg: %#v\n", pkg)
@@ -141,24 +150,30 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 	}
 	broker.Consume("*.srvc.service.method.in.alpha",
 		func(pkg servicedata.Package) {
+			lock.Lock()
 			storage.Set("ID", pkg.ID)
 			storage.Set("a", pkg.Data.(int))
+			lock.Unlock()
 			calculateAndPublish()
 		},
 		errorCallback,
 	)
 	broker.Consume("*.srvc.service.method.in.beta",
 		func(pkg servicedata.Package) {
+			lock.Lock()
 			storage.Set("ID", pkg.ID)
 			storage.Set("b", pkg.Data.(int))
+			lock.Unlock()
 			calculateAndPublish()
 		},
 		errorCallback,
 	)
 	broker.Consume("*.srvc.service.method.in.gamma",
 		func(pkg servicedata.Package) {
+			lock.Lock()
 			storage.Set("ID", pkg.ID)
 			storage.Set("c", pkg.Data.(int))
+			lock.Unlock()
 			calculateAndPublish()
 		},
 		errorCallback,

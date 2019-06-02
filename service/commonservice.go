@@ -5,6 +5,7 @@ import (
 	"github.com/state-alchemists/ayanami/msgbroker"
 	"github.com/state-alchemists/ayanami/servicedata"
 	"log"
+	"sync"
 )
 
 // WrappedFunction any function wrapped for ConsumeAndPublish
@@ -29,8 +30,8 @@ func (services Services) ConsumeAndPublish(broker msgbroker.CommonBroker, servic
 }
 
 func consumeAndPublishSingle(broker msgbroker.CommonBroker, serviceName, methodName string, inputIOList, outputIOList IOList, rawErrorEventName string, wrappedFunction WrappedFunction) {
-	// allInputs
-	allInputs := NewDictionaryRW()
+	var lock sync.RWMutex
+	allInputs := make(map[string]Dictionary)
 	rawInputEventNames := inputIOList.GetUniqueEventNames()
 	inputVarNames := inputIOList.GetUniqueVarNames()
 	for _, rawInputEventName := range rawInputEventNames {
@@ -43,20 +44,29 @@ func consumeAndPublishSingle(broker msgbroker.CommonBroker, serviceName, methodN
 				// prepare allInputs
 				ID := pkg.ID
 				data := pkg.Data
-				if !allInputs.Has(ID) {
-					allInputs.Set(ID, NewDictionaryRW())
+				lock.Lock()
+				if _, exists := allInputs[ID]; !exists {
+					allInputs[ID] = make(Dictionary)
 				}
+				lock.Unlock()
 				// populate allInputs[ID] with varNames and servicedata
 				for _, varName := range varNames {
-					allInputs.Get(ID).(*DictionaryRW).Set(varName, data)
+					lock.Lock()
+					allInputs[ID][varName] = data
+					lock.Unlock()
 				}
-				// inputs := allInputs.Get(ID).(*DictionaryRW)
-				log.Printf("[INFO: %s.%s] Inputs for %s: %#v", serviceName, methodName, ID, allInputs.Get(ID).(*DictionaryRW).GetDictionary())
+				lock.RLock()
+				inputs := allInputs[ID]
+				log.Printf("[INFO: %s.%s] Inputs for %s: %#v", serviceName, methodName, ID, inputs)
+				inputCompleted := inputs.HasAll(inputVarNames)
+				lock.RUnlock()
 				// execute wrapper
-				if allInputs.Get(ID).(*DictionaryRW).HasAll(inputVarNames) {
+				if inputCompleted {
 					log.Printf("[INFO: %s.%s] Inputs for %s completed", serviceName, methodName, ID)
-					outputs, err := wrappedFunction(allInputs.Get(ID).(*DictionaryRW).GetDictionary())
-					defer allInputs.Delete(ID)
+					lock.RLock()
+					outputs, err := wrappedFunction(inputs)
+					lock.RUnlock()
+					// defer allInputs.Delete(ID)
 					if err != nil {
 						log.Printf("[ERROR: %s.%s] Error while consuming from %s: %s", serviceName, methodName, inputEventName, err)
 						publishError(broker, serviceName, methodName, rawErrorEventName, ID, err)
