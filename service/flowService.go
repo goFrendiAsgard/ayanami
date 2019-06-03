@@ -13,8 +13,9 @@ import (
 type FlowEvent struct {
 	InputEvent  string
 	OutputEvent string
-	VarName     string      // read from inputEvent, put into var, publish into outputEvent
-	Value       interface{} // if InputEvent == "", we will use the value instead
+	VarName     string // read from inputEvent, put into var if value is not exists, publish into outputEvent
+	UseValue    bool
+	Value       interface{}
 }
 
 // FlowService single flow config
@@ -37,6 +38,17 @@ func (flows FlowEvents) GetInputEvents() []string {
 		}
 	}
 	return inputEvents
+}
+
+// GetVarFlowByInputEvent get unique vars by inputEvent
+func (flows FlowEvents) GetVarFlowByInputEvent(inputEvent string) map[string]FlowEvent {
+	varFlows := make(map[string]FlowEvent)
+	for _, flow := range flows {
+		if flow.InputEvent == inputEvent {
+			varFlows[flow.VarName] = flow
+		}
+	}
+	return varFlows
 }
 
 // GetVarNamesByInputEvent get unique vars by inputEvent
@@ -120,22 +132,26 @@ func createFlowWrapper(serviceName, flowName string, broker msgbroker.CommonBrok
 			broker.Consume(inputEvent,
 				func(pkg servicedata.Package) { // consume success
 					log.Printf("[INFO: %s.%s] Getting message from %s: %#v", serviceName, flowName, inputEvent, pkg.Data)
-					for _, varName := range flows.GetVarNamesByInputEvent(rawInputEvent) {
+					for varName, varFlow := range flows.GetVarFlowByInputEvent(rawInputEvent) {
 						allConsumerDeclared.Wait()
 						lock.RLock()
 						varExists := vars.Has(varName)
 						lock.RUnlock()
-						if !varExists {
-							log.Printf("[INFO: %s.%s] Set `%s` into: `%#v`", serviceName, flowName, varName, pkg.Data)
-							lock.Lock()
-							vars.Set(varName, pkg.Data)
-							lock.Unlock()
-							lock.RLock()
-							publishFlowVar(serviceName, flowName, broker, ID, flows, outputVarNames, varName, vars)
-							lock.RUnlock()
-						} else {
+						if varExists {
 							log.Printf("[INFO: %s.%s] `%s` already defined, no need to set", serviceName, flowName, varName)
+							continue
 						}
+						log.Printf("[INFO: %s.%s] Set `%s` into: `%#v`", serviceName, flowName, varName, pkg.Data)
+						lock.Lock()
+						if varFlow.UseValue {
+							vars.Set(varName, varFlow.Value)
+						} else {
+							vars.Set(varName, pkg.Data)
+						}
+						lock.Unlock()
+						lock.RLock()
+						publishFlowVar(serviceName, flowName, broker, ID, flows, outputVarNames, varName, vars)
+						lock.RUnlock()
 					}
 					lock.RLock()
 					notifyIfOutputCompleted(vars, outputVarNames, outputCompleted)
@@ -149,20 +165,25 @@ func createFlowWrapper(serviceName, flowName string, broker msgbroker.CommonBrok
 			allConsumerDeclared.Done()
 		}
 		// set default values
-		lock.Lock()
-		for varName, value := range getFlowDefaultVars(flows, vars) {
+		lock.RLock()
+		defaultVars := getFlowDefaultVars(flows, vars)
+		lock.RUnlock()
+		for varName, value := range defaultVars {
+			lock.Lock()
 			if !vars.Has(varName) {
 				log.Printf("[INFO: %s.%s] Internally set `%s` into: `%#v`", serviceName, flowName, varName, value)
 				vars.Set(varName, value)
 			} else {
 				log.Printf("[INFO: %s.%s] `%s` already defined, no need to internal set", serviceName, flowName, varName)
 			}
+			lock.Unlock()
 		}
-		lock.Unlock()
-		lock.RLock()
 		for varName := range vars {
+			lock.RLock()
 			publishFlowVar(serviceName, flowName, broker, ID, flows, outputVarNames, varName, vars)
+			lock.RUnlock()
 		}
+		lock.RLock()
 		notifyIfOutputCompleted(vars, outputVarNames, outputCompleted)
 		lock.RUnlock()
 		<-outputCompleted

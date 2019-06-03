@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"fmt"
+	"github.com/state-alchemists/ayanami/config"
 	"github.com/state-alchemists/ayanami/msgbroker"
 	"github.com/state-alchemists/ayanami/servicedata"
 	"io/ioutil"
@@ -21,7 +22,7 @@ func TestServeWithMemory(t *testing.T) {
 }
 
 func TestServeWithNats(t *testing.T) {
-	broker, err := msgbroker.NewNats()
+	broker, err := msgbroker.NewNats(config.GetNatsURL())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,6 +71,6 @@ func serve(broker msgbroker.CommonBroker, httpPort int, path string) {
 		path,
 	}
 	port := int64(httpPort)
-	multipartFormLimit := GetMultipartFormLimit()
+	multipartFormLimit := config.GetGatewayMultipartFormLimit()
 	Serve(broker, port, multipartFormLimit, routes)
 }

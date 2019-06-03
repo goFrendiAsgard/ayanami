@@ -86,6 +86,9 @@ func consumeAndPublishSingle(broker msgbroker.CommonBroker, serviceName, methodN
 func publish(msgBroker msgbroker.CommonBroker, serviceName, methodName, rawErrorEventName, ID string, outputIOList IOList, outputs Dictionary) error {
 	outputVarNames := outputIOList.GetUniqueVarNames()
 	for _, outputVarName := range outputVarNames {
+		if !outputs.Has(outputVarName) {
+			continue
+		}
 		data := outputs.Get(outputVarName)
 		pkg := servicedata.Package{ID: ID, Data: data}
 		rawOutputEventNames := outputIOList.GetVarEventNames(outputVarName)

@@ -2,14 +2,16 @@ package msgbroker
 
 import (
 	nats "github.com/nats-io/nats.go"
+	"github.com/state-alchemists/ayanami/config"
 	"github.com/state-alchemists/ayanami/servicedata"
 	"log"
 	"testing"
+	"time"
 )
 
 func TestNats(t *testing.T) {
 	var broker CommonBroker
-	broker, err := NewNats()
+	broker, err := NewNats(config.GetNatsURL())
 	if err != nil {
 		t.Errorf("Get error: %s", err)
 		return
@@ -17,15 +19,17 @@ func TestNats(t *testing.T) {
 	CommonBrokerTest(broker, t)
 }
 
-func TestNewCustomNats(t *testing.T) {
-	_, err := NewCustomNats("invalid url")
+func TestNatsInvalidURL(t *testing.T) {
+	log.Println("Test invalid Nats URL")
+	_, err := NewNats("invalid url")
 	if err == nil {
 		t.Error("Error expected")
 	}
 }
 
 func TestNatsPublishInvalid(t *testing.T) {
-	broker, err := NewNats()
+	log.Println("Test invalid Nats publish event")
+	broker, err := NewNats(config.GetNatsURL())
 	if err != nil {
 		t.Errorf("Get error: %s", err)
 		return
@@ -45,13 +49,13 @@ func TestNatsPublishInvalid(t *testing.T) {
 }
 
 func TestNatsConsumeInvalid(t *testing.T) {
-	eventName := "invalidConsume"
-	broker, err := NewNats()
+	log.Println("Test invalid Nats consume event")
+	broker, err := NewNats(config.GetNatsURL())
 	if err != nil {
 		t.Errorf("Get error: %s", err)
 		return
 	}
-	natsURL := GetNatsURL()
+	natsURL := config.GetNatsURL()
 	nc, err := nats.Connect(natsURL)
 	if err != nil {
 		t.Errorf("Get error: %s", err)
@@ -59,7 +63,7 @@ func TestNatsConsumeInvalid(t *testing.T) {
 	}
 	// consume
 	stopped := make(chan bool, 1)
-	broker.Consume(eventName,
+	broker.Consume("invalidConsume",
 		// consume success (should never happen)
 		func(pkg servicedata.Package) {
 			t.Errorf("Error expected")
@@ -73,9 +77,15 @@ func TestNatsConsumeInvalid(t *testing.T) {
 			stopped <- true
 		},
 	)
+	// if consume doesn't respond for too long, end it
+	nc.Subscribe("invalidConsume", func(m *nats.Msg) {
+		log.Printf("Get invalid consume package: %s", string(m.Data))
+		time.Sleep(5 * time.Second)
+		t.Errorf("Subscriber doesn't response for too long")
+		stopped <- true
+	})
 	// publish
-	err = nc.Publish(eventName, []byte("Hello world"))
-	log.Print("publish")
+	err = nc.Publish("invalidConsume", []byte("Hello world"))
 	if err != nil {
 		t.Errorf("Get error: %s", err)
 	}

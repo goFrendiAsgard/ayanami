@@ -1,12 +1,12 @@
-package gateway
+package config
 
 import (
 	"os"
 	"strconv"
 )
 
-// GetMultipartFormLimit get port from environment
-func GetMultipartFormLimit() int64 {
+// GetGatewayMultipartFormLimit get port from environment
+func GetGatewayMultipartFormLimit() int64 {
 	multipartFormLimitStr, ok := os.LookupEnv("GATEWAY_MULTIPART_FORM_LIMIT")
 	if ok {
 		multipartFormLimit, err := strconv.ParseInt(multipartFormLimitStr, 10, 64)

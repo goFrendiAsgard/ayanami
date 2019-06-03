@@ -29,14 +29,14 @@ func (broker Memory) Publish(eventName string, pkg servicedata.Package) error {
 	if handler, exists := broker.handlers[eventName]; exists {
 		log.Printf("[MEMORY CONSUME]\n  Event  : %s\n  Content: %#v", eventName, pkg)
 		go handler(pkg)
-	} else {
-		eventParts := strings.Split(eventName, ".")
-		wildCardEventName := fmt.Sprintf("*.%s", strings.Join(eventParts[1:], "."))
-		handler, exists := broker.handlers[wildCardEventName]
-		if exists {
-			log.Printf("[MEMORY CONSUME]\n  Event  : %s\n  Content: %#v", wildCardEventName, pkg)
-			go handler(pkg)
-		}
+		return nil
+	}
+	eventParts := strings.Split(eventName, ".")
+	wildCardEventName := fmt.Sprintf("*.%s", strings.Join(eventParts[1:], "."))
+	handler, exists := broker.handlers[wildCardEventName]
+	if exists {
+		log.Printf("[MEMORY CONSUME]\n  Event  : %s\n  Content: %#v", wildCardEventName, pkg)
+		go handler(pkg)
 	}
 	return nil
 }

@@ -1,6 +1,7 @@
 package integrationtest
 
 import (
+	"github.com/state-alchemists/ayanami/config"
 	"github.com/state-alchemists/ayanami/msgbroker"
 	"github.com/state-alchemists/ayanami/service"
 	"log"
@@ -10,7 +11,7 @@ import (
 func MainServiceCmd() {
 	serviceName := "cmd"
 	// define broker
-	broker, err := msgbroker.NewNats()
+	broker, err := msgbroker.NewNats(config.GetNatsURL())
 	if err != nil {
 		log.Fatal(err)
 	}

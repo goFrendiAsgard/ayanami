@@ -49,8 +49,8 @@ func createRouteHandler(broker msgbroker.CommonBroker, multipartFormLimit int64,
 }
 
 func consume(broker msgbroker.CommonBroker, ID, method, route string, codeChannel chan int, contentChannel chan string) {
-	codeEventName := fmt.Sprintf("%s.trig.response.%s.%s.in.code", ID, method, RouteToSegments(route))
-	contentEventName := fmt.Sprintf("%s.trig.response.%s.%s.in.content", ID, method, RouteToSegments(route))
+	codeEventName := getResponseCodeEventName(ID, method, route)
+	contentEventName := getResponseContentEventName(ID, method, route)
 	// consume code
 	log.Printf("[INFO: Gateway] Consume `%s`", codeEventName)
 	broker.Consume(codeEventName,
@@ -99,7 +99,7 @@ func response(ID string, w http.ResponseWriter, code int, content string) {
 }
 
 func publish(broker msgbroker.CommonBroker, ID string, method string, route string, multipartFormLimit int64, r *http.Request) error {
-	eventName := fmt.Sprintf("%s.trig.request.%s.%s.out.req", ID, method, RouteToSegments(route))
+	eventName := getRequestEventName(ID, method, route)
 	// parse form & multipart form
 	r.ParseForm()
 	r.ParseMultipartForm(multipartFormLimit)
@@ -125,4 +125,24 @@ func publish(broker msgbroker.CommonBroker, ID string, method string, route stri
 	pkg := servicedata.Package{ID: ID, Data: data}
 	log.Printf("[INFO: Gateway] publish `%s`: %#v", eventName, pkg)
 	return broker.Publish(eventName, pkg)
+}
+
+func getResponseCodeEventName(ID, method, route string) string {
+	return getEventName(ID, "response", method, route, "in", "code")
+}
+
+func getResponseContentEventName(ID, method, route string) string {
+	return getEventName(ID, "response", method, route, "in", "content")
+}
+
+func getRequestEventName(ID, method, route string) string {
+	return getEventName(ID, "request", method, route, "out", "req")
+}
+
+func getEventName(ID, trigger, method, route, direction, varName string) string {
+	segment := RouteToSegments(route)
+	if segment == "" {
+		return fmt.Sprintf("%s.trig.%s.%s.%s.%s", ID, trigger, method, direction, varName)
+	}
+	return fmt.Sprintf("%s.trig.%s.%s.%s.%s.%s", ID, trigger, method, segment, direction, varName)
 }
