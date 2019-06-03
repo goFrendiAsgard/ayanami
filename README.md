@@ -224,7 +224,7 @@ You can then create a flow to orchestrate the services:
 
 ## Create Flow
 
-```
+```go
 package integrationtest
 
 import (
