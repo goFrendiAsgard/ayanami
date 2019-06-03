@@ -216,11 +216,11 @@ func MainServiceCmd() {
 
 Flow is your business logic. Let's say you have develop several services like in our previous examples. Your architecture should looks like this:
 
-[!architecture](images/architecture.png)
+![architecture](images/architecture.png)
 
 You can then create a flow to orchestrate the services:
 
-[!flow](images/flow.png)
+![flow](images/flow.png)
 
 ## Create Flow
 
