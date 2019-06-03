@@ -16,22 +16,23 @@ func TestConsumeAndPublish(t *testing.T) {
 		t.Errorf("Getting error: %s", err)
 	}
 	// create service
-	services := make(Services)
-	services["test"] = CommonService{
-		Input: IOList{
-			IO{EventName: "srvc.common.in.a", VarName: "a"},
-			IO{EventName: "srvc.common.in.b", VarName: "b"},
-		},
-		Output: IOList{
-			IO{EventName: "srvc.common.out.c", VarName: "c"},
-		},
-		ErrorEventName: "srvc.common.err",
-		Function: func(inputs Dictionary) (Dictionary, error) {
-			outputs := make(Dictionary)
-			a := inputs["a"].(int)
-			b := inputs["b"].(int)
-			outputs["c"] = a + b
-			return outputs, nil
+	services := Services{
+		CommonService{
+			Input: IOList{
+				IO{EventName: "srvc.common.in.a", VarName: "a"},
+				IO{EventName: "srvc.common.in.b", VarName: "b"},
+			},
+			Output: IOList{
+				IO{EventName: "srvc.common.out.c", VarName: "c"},
+			},
+			ErrorEventName: "srvc.common.err",
+			Function: func(inputs Dictionary) (Dictionary, error) {
+				outputs := make(Dictionary)
+				a := inputs["a"].(int)
+				b := inputs["b"].(int)
+				outputs["c"] = a + b
+				return outputs, nil
+			},
 		},
 	}
 	services.ConsumeAndPublish(broker, "flow")
@@ -58,19 +59,20 @@ func TestConsumeAndPublishFunctionError(t *testing.T) {
 		t.Errorf("Getting error: %s", err)
 	}
 	// create service
-	services := make(Services)
-	services["test"] = CommonService{
-		Input: IOList{
-			IO{EventName: "srvc.common.in.a", VarName: "a"},
-			IO{EventName: "srvc.common.in.b", VarName: "b"},
-		},
-		Output: IOList{
-			IO{EventName: "srvc.common.out.c", VarName: "c"},
-		},
-		ErrorEventName: "srvc.common.err",
-		Function: func(inputs Dictionary) (Dictionary, error) {
-			outputs := make(Dictionary)
-			return outputs, errors.New("ErrorThrown")
+	services := Services{
+		CommonService{
+			Input: IOList{
+				IO{EventName: "srvc.common.in.a", VarName: "a"},
+				IO{EventName: "srvc.common.in.b", VarName: "b"},
+			},
+			Output: IOList{
+				IO{EventName: "srvc.common.out.c", VarName: "c"},
+			},
+			ErrorEventName: "srvc.common.err",
+			Function: func(inputs Dictionary) (Dictionary, error) {
+				outputs := make(Dictionary)
+				return outputs, errors.New("ErrorThrown")
+			},
 		},
 	}
 	services.ConsumeAndPublish(broker, "flow")

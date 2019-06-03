@@ -9,7 +9,7 @@ import (
 
 // MainGateway emulating gateway's main
 func MainGateway() {
-	routes := []string{
+	routes := []string{ // define your routes
 		"/",
 	}
 	broker, err := msgbroker.NewNats(config.GetNatsURL())

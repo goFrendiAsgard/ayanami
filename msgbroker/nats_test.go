@@ -84,6 +84,7 @@ func TestNatsConsumeInvalid(t *testing.T) {
 		t.Errorf("Subscriber doesn't response for too long")
 		stopped <- true
 	})
+	time.Sleep(time.Second) // make sure consumer is ready before publish
 	// publish
 	err = nc.Publish("invalidConsume", []byte("Hello world"))
 	if err != nil {

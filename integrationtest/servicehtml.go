@@ -17,7 +17,7 @@ func MainServiceHTML() {
 	}
 	// define services
 	services := service.Services{
-		"pre": service.NewService(serviceName, "pre",
+		service.NewService(serviceName, "pre",
 			[]string{"input"},
 			[]string{"output"},
 			WrappedPre,

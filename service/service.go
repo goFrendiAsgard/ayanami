@@ -22,6 +22,8 @@ func NewService(serviceName string, methodName string, inputs, outputs []string,
 	errorEventName := fmt.Sprintf("srvc.%s.%s.err.message", serviceName, methodName)
 	// return config
 	return CommonService{
+		ServiceName:    serviceName,
+		MethodName:     methodName,
 		Input:          serviceInputs,
 		Output:         serviceOutputs,
 		ErrorEventName: errorEventName,

@@ -17,7 +17,7 @@ func MainFlow() {
 	}
 	// define services
 	services := service.Services{
-		"main": service.NewFlow(serviceName, "main", broker,
+		service.NewFlow(serviceName, "main", broker,
 			// inputs
 			[]string{"request"},
 			// outputs

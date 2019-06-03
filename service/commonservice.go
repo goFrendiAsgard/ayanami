@@ -13,6 +13,8 @@ type WrappedFunction = func(inputs Dictionary) (Dictionary, error)
 
 // CommonService single configuration
 type CommonService struct {
+	ServiceName    string
+	MethodName     string
 	Input          IOList
 	Output         IOList
 	ErrorEventName string
@@ -20,12 +22,12 @@ type CommonService struct {
 }
 
 // Services configuration
-type Services map[string]CommonService
+type Services []CommonService
 
 // ConsumeAndPublish consume from queue and Publish
 func (services Services) ConsumeAndPublish(broker msgbroker.CommonBroker, serviceName string) {
-	for methodName, service := range services {
-		consumeAndPublishSingle(broker, serviceName, methodName, service.Input, service.Output, service.ErrorEventName, service.Function)
+	for _, service := range services {
+		consumeAndPublishSingle(broker, service.ServiceName, service.MethodName, service.Input, service.Output, service.ErrorEventName, service.Function)
 	}
 }
 
