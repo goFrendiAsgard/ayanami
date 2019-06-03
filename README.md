@@ -4,6 +4,8 @@ A FaaS-like framework for your own infrastructure.
 
 The name is inspired from `Evangelion-Unit-00's pilot`: `Ayanami Rei`. The name `Rei` itself has the same pronunciation as in Heraclitus's philosophy, `Panta Rhei` (lit: everything flows). We believe that the developer should focus more on data flows and transformations rather than managing infrastructures.
 
+![Ayanami Rei](images/ayanami-rei.png)
+
 # Why
 
 * FaaS is good since it let you focus on the code instead of infrastructure
