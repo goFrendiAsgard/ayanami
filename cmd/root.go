@@ -6,31 +6,21 @@ import (
 	"os"
 )
 
-const longDescription = `Ayanami is a code deployment generator.
-With Ayanami, you only need to define 3 things:
-	* Functions
-	* Templates
-	* Function Compositions
-Ayanami will do everything else for you`
+const longDescription = `
+    _                                     _ 
+   / \  _   _  ____ _ __   ____ _ ______ (_)
+  / _ \| | | |/ _  | '_ \ / _  | '_   _ \| |
+ / ___ \ |_| | (_| | | | | (_| | | | | | | |
+/_/   \_\__, |\__,_|_| |_|\__,_|_| |_| |_|_|
+        |___/       
 
-func init() {
-	rootCmd.PersistentFlags().StringP("template", "t", "templates", "template directory")
-	rootCmd.PersistentFlags().StringP("service", "s", "services", "service directory")
-	rootCmd.PersistentFlags().StringP("composition", "c", "compositions", "composition directory")
-}
+Ayanami is a FaaS-like framework for your own infrastructure.
+To make a project, please use --help for seeing available commands`
 
 var rootCmd = &cobra.Command{
 	Use:   "ayanami",
-	Short: "Ayanami is a code deployment generator.",
+	Short: "FaaS-like framework for your own infrastructure.",
 	Long:  longDescription,
-	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
-		fmt.Println(os.Getwd())
-		fmt.Println(cmd.Flags().GetString("template"))
-		fmt.Println(cmd.Flags().GetString("service"))
-		fmt.Println(cmd.Flags().GetString("composition"))
-		fmt.Println(args)
-	},
 }
 
 // Execute ...

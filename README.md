@@ -31,7 +31,14 @@ Providing an environment with minimum dependencies in order to:
 
 * Developer create functions. The functions can be written in any language, even binary
 * Developer define flows (how the functions are connected to each others)
+* Developer create templates if necessary
 * Ayanami compose flows and functions into several microservices that can talk to each other using nats messaging.
+
+# Getting started
+
+```
+ayanami init -p awesomeproject -r "github.com/gofrendi/awesomeproject"
+```
 
 # Terminologies
 
