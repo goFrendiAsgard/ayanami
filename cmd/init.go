@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/state-alchemists/ayanami/generator"
+	"github.com/state-alchemists/ayanami/projectgenerator"
 	"log"
 	"os"
 )
@@ -27,6 +27,12 @@ var initCmd = &cobra.Command{
 		log.Printf("[INFO] Project's parent directory : %s", dirName)
 		log.Printf("[INFO] Project name               : %s", projectName)
 		log.Printf("[INFO] Project repository         : %s", repoName)
-		generator.GenerateProject(dirName, projectName, repoName)
+		generator, err := projectgenerator.NewProjectGenerator(dirName, projectName, repoName)
+		if err != nil {
+			log.Printf("[ERROR] %s", err)
+			return
+		}
+		generator.Generate()
+		log.Printf("[INFO] Done")
 	},
 }
