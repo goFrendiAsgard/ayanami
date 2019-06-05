@@ -27,6 +27,6 @@ var initCmd = &cobra.Command{
 		log.Printf("[INFO] Project's parent directory : %s", dirName)
 		log.Printf("[INFO] Project name               : %s", projectName)
 		log.Printf("[INFO] Project repository         : %s", repoName)
-		generator.Generate(dirName, projectName, repoName)
+		generator.GenerateProject(dirName, projectName, repoName)
 	},
 }

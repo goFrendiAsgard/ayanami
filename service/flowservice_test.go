@@ -14,20 +14,20 @@ func TestFlowEvents(t *testing.T) {
 	var expected, actual []string
 	flowEvents := createFlowEventsTest()
 	// getInputEvents
-	expected = []string{"consume.a", "consume.b", "srvc.service.method.out.delta"}
+	expected = []string{"consume.container", "consume.b", "srvc.service.method.out.delta"}
 	actual = flowEvents.GetInputEvents()
 	if !reflect.DeepEqual(expected, actual) {
 		t.Errorf("expected `%#v`, get %#v`", expected, actual)
 	}
 	// getVarNamesByInputEvent
-	expected = []string{"a"}
-	actual = flowEvents.GetVarNamesByInputEvent("consume.a")
+	expected = []string{"b"}
+	actual = flowEvents.GetVarNamesByInputEvent("consume.b")
 	if !reflect.DeepEqual(expected, actual) {
 		t.Errorf("expected `%#v`, get %#v`", expected, actual)
 	}
 	// GetOutputEventByVarNames
 	expected = []string{"srvc.service.method.in.alpha"}
-	actual = flowEvents.GetOutputEventByVarNames("a")
+	actual = flowEvents.GetOutputEventByVarNames("container.a")
 	if !reflect.DeepEqual(expected, actual) {
 		t.Errorf("expected `%#v`, get %#v`", expected, actual)
 	}
@@ -38,8 +38,8 @@ func TestNewFlowService(t *testing.T) {
 	service := createFlowServiceTest(broker)
 	// test inputs
 	expectedInputs := IOList{
-		IO{EventName: "flow.test.in.a", VarName: "a"},
-		IO{EventName: "consume.a", VarName: "a"},
+		IO{EventName: "flow.test.in.container", VarName: "container"},
+		IO{EventName: "consume.container", VarName: "container"},
 		IO{EventName: "flow.test.in.b", VarName: "b"},
 		IO{EventName: "consume.b", VarName: "b"},
 	}
@@ -51,6 +51,10 @@ func TestNewFlowService(t *testing.T) {
 	expectedOutputs := IOList{
 		IO{EventName: "flow.test.out.d", VarName: "d"},
 		IO{EventName: "publish.d", VarName: "d"},
+		IO{EventName: "flow.test.out.ok", VarName: "ok"},
+		IO{EventName: "publish.ok", VarName: "ok"},
+		IO{EventName: "flow.test.out.isGreaterThan100", VarName: "isGreaterThan100"},
+		IO{EventName: "publish.isGreaterThan100", VarName: "isGreaterThan100"},
 	}
 	Outputs := service.Output
 	if !reflect.DeepEqual(Outputs, expectedOutputs) {
@@ -62,10 +66,9 @@ func TestNewFlowService(t *testing.T) {
 		t.Errorf("expected %s, get %s", expectedErrorEventName, service.ErrorEventName)
 	}
 	// test wrappedFunction
-	expectedFunctionOutput := make(Dictionary)
-	expectedFunctionOutput["d"] = 123
+	expectedFunctionOutput := Dictionary{"d": 123, "ok": true, "isGreaterThan100": true}
 	functionInput := make(Dictionary)
-	functionInput["a"] = 20
+	functionInput["container"] = Dictionary{"a": 20}
 	functionInput["b"] = 3
 	functionOutput, err := service.Function(functionInput)
 	if err != nil {
@@ -79,8 +82,11 @@ func TestNewFlowService(t *testing.T) {
 func createFlowEventsTest() FlowEvents {
 	return FlowEvents{
 		FlowEvent{
-			InputEvent:  "consume.a",
-			VarName:     "a",
+			InputEvent: "consume.container",
+			VarName:    "container",
+		},
+		FlowEvent{
+			VarName:     "container.a",
 			OutputEvent: "srvc.service.method.in.alpha",
 		},
 		FlowEvent{
@@ -98,6 +104,26 @@ func createFlowEventsTest() FlowEvents {
 			VarName:     "d",
 			OutputEvent: "publish.d",
 		},
+		FlowEvent{
+			InputEvent:  "srvc.service.method.out.delta",
+			VarName:     "ok",
+			OutputEvent: "publish.ok",
+			UseValue:    true,
+			Value:       true,
+		},
+		FlowEvent{
+			InputEvent:  "srvc.service.method.out.delta",
+			VarName:     "isGreaterThan100",
+			OutputEvent: "publish.isGreaterThan100",
+			UseFunction: true,
+			Function: func(val interface{}) interface{} {
+				d := val.(int)
+				if d > 100 {
+					return true
+				}
+				return false
+			},
+		},
 	}
 }
 
@@ -105,9 +131,9 @@ func createFlowServiceTest(broker msgbroker.CommonBroker) CommonService {
 	// define flow
 	service := NewFlow("flow", "test", broker,
 		// inputs
-		[]string{"a", "b"},
+		[]string{"container", "b"},
 		// output
-		[]string{"d"},
+		[]string{"d", "ok", "isGreaterThan100"},
 		// flows
 		createFlowEventsTest(),
 	)

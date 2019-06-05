@@ -44,6 +44,9 @@ func createRouteHandler(broker msgbroker.CommonBroker, multipartFormLimit int64,
 		// wait for response
 		code := <-codeChannel
 		content := <-contentChannel
+		if code == 500 { // if there is a `500`, error, override the error message with this one
+			content = "Internal Server Error"
+		}
 		response(ID, w, code, content)
 	}
 }
@@ -62,6 +65,8 @@ func consume(broker msgbroker.CommonBroker, ID, method, route string, codeChanne
 				codeChannel <- val
 			} else {
 				log.Printf("[ERROR: Gateway] %s", err)
+				codeChannel <- 500
+				contentChannel <- "Internal Server Error"
 			}
 		},
 		// error

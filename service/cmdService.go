@@ -22,6 +22,7 @@ func createCmdWrapper(serviceName, methodName string, cmd []string, inputVarName
 				pattern1 := fmt.Sprintf("$%s", varName)
 				pattern2 := fmt.Sprintf("${%s}", varName)
 				varValue := fmt.Sprintf("%s", inputs.Get(varName))
+				// if varValue doesn't started and ended with double quote, add double quote to it. Otherwise, let it be
 				if cmd[cmdIndex] != pattern1 && cmd[cmdIndex] != pattern2 {
 					valParts := strings.Split(varValue, "")
 					if valParts[0] != "\"" || valParts[len(valParts)-1] != "\"" {

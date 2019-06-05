@@ -34,7 +34,7 @@ func TestAll(t *testing.T) {
 	go MainServiceCmd()
 	go MainServiceHTML()
 	// wait for two seconds
-	time.Sleep(1 * time.Second)
+	time.Sleep(100 * time.Millisecond)
 	// emulate request
 	response, err := http.Get(fmt.Sprintf("http://localhost:8080/?text=%s", url.QueryEscape("Hello there, I <3 U")))
 	if err != nil {
