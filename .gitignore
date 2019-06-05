@@ -1,5 +1,5 @@
 .idea/
-.projectGeneratorTest/
+*/.test/
 profile.out
 ayanami
 examples/targets/flow/flow-example

@@ -70,7 +70,7 @@ func (procedure testProcedure) Build(config Configs) error {
 func TestNormal(t *testing.T) {
 	actualState := map[string]bool{}
 	// set generator
-	generator := Generator{}
+	generator := NewGenerator()
 	generator.AddConfigs(
 		Configs{
 			testConfig{Name: "A", Valid: true, State: actualState},
@@ -112,7 +112,7 @@ func TestNormal(t *testing.T) {
 func TestInvalidConfig(t *testing.T) {
 	actualState := map[string]bool{}
 	// set generator
-	generator := Generator{}
+	generator := NewGenerator()
 	generator.AddConfigs(
 		Configs{
 			testConfig{Name: "A", Valid: true, State: actualState},
@@ -145,7 +145,7 @@ func TestInvalidConfig(t *testing.T) {
 func TestInvalidProcedure(t *testing.T) {
 	actualState := map[string]bool{}
 	// set generator
-	generator := Generator{}
+	generator := NewGenerator()
 	generator.AddConfigs(
 		Configs{
 			testConfig{Name: "A", Valid: true, State: actualState},
@@ -178,7 +178,7 @@ func TestInvalidProcedure(t *testing.T) {
 func TestErrorConfig(t *testing.T) {
 	actualState := map[string]bool{}
 	// set generator
-	generator := Generator{}
+	generator := NewGenerator()
 	generator.AddConfigs(
 		Configs{
 			testConfig{Name: "A", Valid: true, State: actualState},
@@ -216,7 +216,7 @@ func TestErrorConfig(t *testing.T) {
 func TestErrorProcedure(t *testing.T) {
 	actualState := map[string]bool{}
 	// set generator
-	generator := Generator{}
+	generator := NewGenerator()
 	generator.AddConfigs(
 		Configs{
 			testConfig{Name: "A", Valid: true, State: actualState},

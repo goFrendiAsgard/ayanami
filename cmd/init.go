@@ -29,10 +29,14 @@ var initCmd = &cobra.Command{
 		log.Printf("[INFO] Project repository         : %s", repoName)
 		generator, err := projectgenerator.NewProjectGenerator(dirName, projectName, repoName)
 		if err != nil {
+			log.Printf("[ERROR] Cannot init generator : %s", err)
+			return
+		}
+		err = generator.Generate()
+		if err != nil {
 			log.Printf("[ERROR] %s", err)
 			return
 		}
-		generator.Generate()
 		log.Printf("[INFO] Done")
 	},
 }

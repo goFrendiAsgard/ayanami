@@ -84,3 +84,8 @@ func (generator *Generator) Scaffold() error {
 	}
 	return nil
 }
+
+// NewGenerator create new generator
+func NewGenerator() Generator {
+	return Generator{}
+}

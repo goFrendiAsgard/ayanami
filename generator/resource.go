@@ -8,7 +8,6 @@ import (
 
 // Resource Resource containing common methods to generate files
 type Resource struct {
-	cwd            string
 	sourceCodePath string
 	deployablePath string
 }
@@ -53,6 +52,14 @@ func (r Resource) WriteString(dst string, content string) error {
 	return nil
 }
 
+// NewCustomResource create new resource
+func NewCustomResource(sourceCodePath, deployablePath string) (Resource, error) {
+	resource := Resource{}
+	resource.sourceCodePath = sourceCodePath
+	resource.deployablePath = deployablePath
+	return resource, nil
+}
+
 // NewResource create new resource
 func NewResource() (Resource, error) {
 	resource := Resource{}
@@ -61,10 +68,9 @@ func NewResource() (Resource, error) {
 		return resource, err
 	}
 	pwd := filepath.Dir(cwd)
-	resource.cwd = cwd
-	resource.sourceCodePath = filepath.Join(pwd, "sourcecode")
-	resource.deployablePath = filepath.Join(pwd, "deployable")
-	return resource, err
+	sourceCodePath := filepath.Join(pwd, "sourcecode")
+	deployablePath := filepath.Join(pwd, "deployable")
+	return NewCustomResource(sourceCodePath, deployablePath)
 }
 
 func mkdirAll(dst string) {
