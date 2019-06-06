@@ -1,7 +1,12 @@
-package prototype
+package gen
+
+import (
+	"github.com/state-alchemists/ayanami/generator"
+)
 
 // GoServiceConfig configuration to generate GoService
 type GoServiceConfig struct {
+	generator.Resource
 }
 
 // Validate validating config

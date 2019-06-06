@@ -1,7 +1,12 @@
-package prototype
+package gen
+
+import (
+	"github.com/state-alchemists/ayanami/generator"
+)
 
 // FlowConfig configuration to generate Flow
 type FlowConfig struct {
+	generator.Resource
 }
 
 // Validate validating config

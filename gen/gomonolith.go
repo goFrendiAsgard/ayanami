@@ -1,4 +1,4 @@
-package prototype
+package gen
 
 import (
 	"github.com/state-alchemists/ayanami/generator"
@@ -6,6 +6,7 @@ import (
 
 // GoMonolithProcedure procedureuration to generate GoMonolith
 type GoMonolithProcedure struct {
+	generator.Resource
 }
 
 // Validate validating procedure

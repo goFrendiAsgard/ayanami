@@ -1,8 +1,13 @@
-package prototype
+package gen
+
+import (
+	"github.com/state-alchemists/ayanami/generator"
+)
 
 // GatewayConfig configuration to generate Gateway
 type GatewayConfig struct {
 	Routes []string
+	generator.Resource
 }
 
 // Validate validating config
@@ -17,5 +22,5 @@ func (config GatewayConfig) Scaffold() error {
 
 // Build building config
 func (config GatewayConfig) Build() error {
-	return nil
+	return config.Resource.WriteDeployable("gateway.go", "gateway.go", config)
 }

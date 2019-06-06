@@ -1,7 +1,12 @@
-package prototype
+package gen
+
+import (
+	"github.com/state-alchemists/ayanami/generator"
+)
 
 // CmdConfig configuration to generate Cmd
 type CmdConfig struct {
+	generator.Resource
 }
 
 // Validate validating config
