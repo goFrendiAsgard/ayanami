@@ -4,16 +4,28 @@ package main
 import(
 	"fmt"
 	"github.com/state-alchemists/ayanami/generator"
+    "path/filepath"
+    "os"
 )
 
-// Generator our main generator
-var Generator = generator.NewGenerator()
-
-func init() {
-	// do something here
-}
+ // Declare `Gen` and `Res`
+ _, currentDirPath, _, ok := runtime.Caller(0)
+projectPath := filepath.Dir(currentDirPath)
+Gen := generator.NewGenerator()
+Res := generator.NewResourceByProjectPath(projectPath)
 
 func main() {
-	fmt.Println("nanana")
+    param := "build"
+	if len(os.Args) > 1 {
+		param = os.Args[1]
+	}
+    switch param {
+    case "build":
+        Gen.Build()
+    case "scaffold":
+        Gen.Scaffold()
+    default:
+        fmt.Println("Unrecognized command. Currently only support `build` and `scaffold`")
+    }
 }
 {{end}}

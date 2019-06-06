@@ -6,6 +6,7 @@ import (
 
 // GoMonolithProcedure procedureuration to generate GoMonolith
 type GoMonolithProcedure struct {
+	PackageName string
 	*generator.Resource
 }
 

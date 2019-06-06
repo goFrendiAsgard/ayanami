@@ -1,0 +1,34 @@
+{{define "cmd.go"}}
+package main
+
+import (
+	"github.com/state-alchemists/ayanami/config"
+	"github.com/state-alchemists/ayanami/msgbroker"
+	"github.com/state-alchemists/ayanami/service"
+	"log"
+)
+
+func main() {
+	serviceName := "{{.ServiceName}}"
+	// define broker
+	broker, err := msgbroker.NewNats(config.GetNatsURL())
+	if err != nil {
+		log.Fatal(err)
+	}
+	// define services
+	services := service.Services{
+		{{ range $methodName, $method := . }}service.NewCmd(serviceName, "{{$methodName}}",
+            // inputs
+			[]string{{{$method.Inputs}}},
+            // outputs
+			[]string{{{$method.Outputs}}},
+            // command
+			[]string{"/bin/sh", {{$method.Command}}},
+		),{{ end }}
+	}
+	// consume and publish forever
+	ch := make(chan bool)
+	services.ConsumeAndPublish(broker, serviceName)
+	<-ch
+}
+{{end}}

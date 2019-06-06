@@ -6,6 +6,7 @@ import (
 
 // FlowConfig configuration to generate Flow
 type FlowConfig struct {
+	PackageName string
 	*generator.Resource
 }
 

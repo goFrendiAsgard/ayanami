@@ -21,8 +21,8 @@ func init() {
 	}
 	// define default values
 	execDir := filepath.Dir(execFile)
-	templatePath := filepath.Join(execDir, "templates")
-	genPath := filepath.Join(execDir, "gen")
+	templatePath = filepath.Join(execDir, "templates")
+	genPath = filepath.Join(execDir, "gen")
 	// define flags
 	initCmd.Flags().StringVarP(&genPath, "gen", "g", genPath, "Gen directory")
 	initCmd.Flags().StringVarP(&templatePath, "template", "t", templatePath, "project generator's template directory")
