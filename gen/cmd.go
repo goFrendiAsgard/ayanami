@@ -4,57 +4,49 @@ import (
 	"fmt"
 	"github.com/state-alchemists/ayanami/generator"
 	"log"
-	"regexp"
 )
 
-// SingleCmd a definition of function
-type SingleCmd struct {
+// Cmd a definition of function
+type Cmd struct {
 	Inputs  []string
 	Outputs []string
 	Command string
 }
 
-// SingleCmdRep SingleCmd, ready to be parsed as template
-type SingleCmdRep struct {
-	Inputs  string
-	Outputs string
-	Command string
-}
-
 // CmdConfig configuration to generate Cmd
 type CmdConfig struct {
-	PackageName string
 	ServiceName string
-	Commands    map[string]SingleCmd
-	*generator.Resource
+	PackageName string
+	Commands    map[string]Cmd
+	*generator.IOHelper
+	generator.StringHelper
 }
 
 // Validate validating config
 func (config CmdConfig) Validate() bool {
 	if config.PackageName == "" {
-		log.Printf("[Invalid COmmand Service: %s] Package Name should not be empty", config.ServiceName)
+		log.Println("[ERROR] Package Name should not be empty")
 		return false
 	}
-	alphanumeric := regexp.MustCompile(`^[a-zA-Z0-9]+$`)
-	if !alphanumeric.Match([]byte(config.ServiceName)) {
-		log.Printf("[Invalid Command Service: %s] Service name should be alphanumeric, but `%s` found", config.ServiceName, config.ServiceName)
+	if config.IsAlphaNumeric(config.ServiceName) {
+		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", config.ServiceName)
 		return false
 	}
 	for methodName, command := range config.Commands {
-		if alphanumeric.Match([]byte(methodName)) {
-			log.Printf("[Invalid Command Service: %s] method should be alphanumeric, but `%s` found", config.ServiceName, methodName)
+		if config.IsAlphaNumeric(methodName) {
+			log.Printf("[ERROR] method should be alphanumeric, but `%s` found", methodName)
 			return false
 		}
 		if len(command.Inputs) == 0 {
-			log.Printf("[Invalid Command Service: %s] command `%s` has no input", config.ServiceName, methodName)
+			log.Printf("[ERROR] command `%s` has no input", methodName)
 			return false
 		}
 		if len(command.Outputs) == 0 {
-			log.Printf("[Invalid Command Service: %s] command `%s` has no output", config.ServiceName, methodName)
+			log.Printf("[ERROR] command `%s` has no output", methodName)
 			return false
 		}
 		if command.Command == "" {
-			log.Printf("[Invalid Command Service: %s] command `%s` is empty", config.ServiceName, methodName)
+			log.Printf("[ERROR] command `%s` is empty", methodName)
 			return false
 		}
 	}
@@ -69,14 +61,13 @@ func (config CmdConfig) Scaffold() error {
 // Build building config
 func (config CmdConfig) Build() error {
 	// build template-ready commands
-	tmplCommands := make(map[string]SingleCmdRep)
-	for methodName, singleCmd := range config.Commands {
-		singleCmdRep := SingleCmdRep{
-			Inputs:  QuoteArray(singleCmd.Inputs, ", "),
-			Outputs: QuoteArray(singleCmd.Outputs, ", "),
-			Command: Quote(singleCmd.Command),
+	tmplCommands := make(map[string]map[string]string)
+	for methodName, cmd := range config.Commands {
+		tmplCommands[methodName] = map[string]string{
+			"Inputs":  config.QuoteArrayAndJoin(cmd.Inputs, ", "),
+			"Outputs": config.QuoteArrayAndJoin(cmd.Outputs, ", "),
+			"Command": config.Quote(cmd.Command),
 		}
-		tmplCommands[methodName] = singleCmdRep
 	}
 	// write main.go
 	mainPath := fmt.Sprintf("%s/main.go", config.ServiceName)

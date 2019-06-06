@@ -9,50 +9,50 @@ import (
 	"text/template"
 )
 
-// Resource Resource containing common methods to generate files
-type Resource struct {
+// IOHelper IOHelper containing common methods to generate files
+type IOHelper struct {
 	sourcePath string
 	depPath    string
 	template   *template.Template
 }
 
-// NewResource create new resource
-func NewResource(sourcePath, depPath, templatePath string) (*Resource, error) {
+// NewIOHelper create new IOHelper
+func NewIOHelper(sourcePath, depPath, templatePath string) (IOHelper, error) {
 	projectTemplatePattern := filepath.Join(templatePath, "*")
 	projectTemplate := template.Must(template.ParseGlob(projectTemplatePattern))
-	resource := Resource{
+	io := IOHelper{
 		sourcePath: sourcePath,
 		depPath:    depPath,
 		template:   projectTemplate,
 	}
-	return &resource, nil
+	return io, nil
 }
 
-// NewResourceByProjectPath create new resource using
-func NewResourceByProjectPath(projectPath string) (*Resource, error) {
+// NewIOHelperByProjectPath create new io by using projectPath
+func NewIOHelperByProjectPath(projectPath string) (IOHelper, error) {
 	sourceCodePath := filepath.Join(projectPath, "sourcecode")
 	deployablePath := filepath.Join(projectPath, "deployable")
 	templatePath := filepath.Join(projectPath, "generator", "templates")
-	return NewResource(sourceCodePath, deployablePath, templatePath)
+	return NewIOHelper(sourceCodePath, deployablePath, templatePath)
 }
 
 // GetSourcePath get sourcePath
-func (r *Resource) GetSourcePath() string {
-	return r.sourcePath
+func (io *IOHelper) GetSourcePath() string {
+	return io.sourcePath
 }
 
 // GetDepPath get depPath
-func (r *Resource) GetDepPath() string {
-	return r.depPath
+func (io *IOHelper) GetDepPath() string {
+	return io.depPath
 }
 
 // GetTemplate get template
-func (r *Resource) GetTemplate() *template.Template {
-	return r.template
+func (io *IOHelper) GetTemplate() *template.Template {
+	return io.template
 }
 
 // IsExists check whether filePath exists or not
-func (r *Resource) IsExists(filePath string) bool {
+func (io *IOHelper) IsExists(filePath string) bool {
 	if _, err := os.Stat(filePath); err == nil {
 		return true
 	}
@@ -60,19 +60,19 @@ func (r *Resource) IsExists(filePath string) bool {
 }
 
 // IsSourceExists check whether filePath exists or not
-func (r *Resource) IsSourceExists(filePath string) bool {
-	filePath = filepath.Join(r.sourcePath, filePath)
-	return r.IsExists(filePath)
+func (io *IOHelper) IsSourceExists(filePath string) bool {
+	filePath = filepath.Join(io.sourcePath, filePath)
+	return io.IsExists(filePath)
 }
 
 // IsDepExists check whether filePath exists or not
-func (r *Resource) IsDepExists(filePath string) bool {
-	filePath = filepath.Join(r.depPath, filePath)
-	return r.IsExists(filePath)
+func (io *IOHelper) IsDepExists(filePath string) bool {
+	filePath = filepath.Join(io.depPath, filePath)
+	return io.IsExists(filePath)
 }
 
 // Copy src to dst
-func (r *Resource) Copy(src, dst string) error {
+func (io *IOHelper) Copy(src, dst string) error {
 	// make sure parent directory exists
 	dstParent := filepath.Dir(dst)
 	err := os.MkdirAll(dstParent, os.ModePerm)
@@ -84,40 +84,40 @@ func (r *Resource) Copy(src, dst string) error {
 }
 
 // CopySourceToDep copy sourcecode/src to deployable/dst
-func (r *Resource) CopySourceToDep(src, dst string) error {
+func (io *IOHelper) CopySourceToDep(src, dst string) error {
 	// read from src
-	src = filepath.Join(r.sourcePath, src)
+	src = filepath.Join(io.sourcePath, src)
 	// create dst's parent directory if not exists
-	dst = filepath.Join(r.depPath, dst)
-	return r.Copy(src, dst)
+	dst = filepath.Join(io.depPath, dst)
+	return io.Copy(src, dst)
 }
 
 // WriteDep write to sourcecode/dstPath
-func (r *Resource) WriteDep(filePath, templateName string, data interface{}) error {
-	filePath = filepath.Join(r.depPath, filePath)
-	return r.Write(filePath, templateName, data)
+func (io *IOHelper) WriteDep(filePath, templateName string, data interface{}) error {
+	filePath = filepath.Join(io.depPath, filePath)
+	return io.Write(filePath, templateName, data)
 }
 
 // WriteSource write to sourcecode/dstPath
-func (r *Resource) WriteSource(filePath, templateName string, data interface{}) error {
-	filePath = filepath.Join(r.sourcePath, filePath)
-	return r.Write(filePath, templateName, data)
+func (io *IOHelper) WriteSource(filePath, templateName string, data interface{}) error {
+	filePath = filepath.Join(io.sourcePath, filePath)
+	return io.Write(filePath, templateName, data)
 }
 
 // Write write using template
-func (r *Resource) Write(filePath, templateName string, data interface{}) error {
+func (io *IOHelper) Write(filePath, templateName string, data interface{}) error {
 	buff := new(bytes.Buffer)
-	err := r.template.ExecuteTemplate(buff, templateName, data)
+	err := io.template.ExecuteTemplate(buff, templateName, data)
 	if err != nil {
 		return err
 	}
 	content := buff.String()
 	content = strings.Trim(content, "\n")
-	return r.WriteFile(filePath, content)
+	return io.WriteFile(filePath, content)
 }
 
 // WriteFile write content to filePath
-func (r *Resource) WriteFile(filePath string, content string) error {
+func (io *IOHelper) WriteFile(filePath string, content string) error {
 	// make sure parent directory exists
 	fileParentPath := filepath.Dir(filePath)
 	err := os.MkdirAll(fileParentPath, os.ModePerm)

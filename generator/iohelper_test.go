@@ -8,62 +8,62 @@ import (
 	"testing"
 )
 
-func TestResource(t *testing.T) {
+func TestIO(t *testing.T) {
 	_, currentDirPath, _, ok := runtime.Caller(0)
 	if !ok {
 		t.Error("fail to locate directory")
 	}
 	ayanamiDirPath := filepath.Dir(filepath.Dir(currentDirPath))
 	dummyProjectPath := filepath.Join(ayanamiDirPath, "generator", "dummyProject")
-	// resource
-	resource, err := NewResourceByProjectPath(dummyProjectPath)
+	// io
+	io, err := NewIOHelperByProjectPath(dummyProjectPath)
 	if err != nil {
 		t.Errorf("Get error: %s", err)
 	}
 
 	// check template
-	if resource.GetTemplate() == nil {
+	if io.GetTemplate() == nil {
 		t.Errorf("template should not be nil")
 	}
 	// check sourcePath
 	expectedSourceCodePath := filepath.Join(dummyProjectPath, "sourcecode")
-	actualSourceCodePath := resource.GetSourcePath()
+	actualSourceCodePath := io.GetSourcePath()
 	if expectedSourceCodePath != actualSourceCodePath {
 		t.Errorf("expected `%s`, get `%s`", expectedSourceCodePath, actualSourceCodePath)
 	}
 	// check depPath
 	expectedDeployablePath := filepath.Join(dummyProjectPath, "deployable")
-	actualDeployablePath := resource.GetDepPath()
+	actualDeployablePath := io.GetDepPath()
 	if expectedDeployablePath != actualDeployablePath {
 		t.Errorf("expected `%s`, get `%s`", expectedDeployablePath, actualDeployablePath)
 	}
 
 	// check existance
 	expectedExistance := true
-	actualExistance := resource.IsSourceExists("exists.py")
+	actualExistance := io.IsSourceExists("exists.py")
 	if expectedExistance != actualExistance {
 		t.Errorf("expected `%t`, get `%t`", expectedExistance, actualExistance)
 	}
 	expectedExistance = true
-	actualExistance = resource.IsDepExists("exists.py")
+	actualExistance = io.IsDepExists("exists.py")
 	if expectedExistance != actualExistance {
 		t.Errorf("expected `%t`, get `%t`", expectedExistance, actualExistance)
 	}
 
 	// check non-existance
 	expectedExistance = false
-	actualExistance = resource.IsSourceExists("not-exists.py")
+	actualExistance = io.IsSourceExists("not-exists.py")
 	if expectedExistance != actualExistance {
 		t.Errorf("expected `%t`, get `%t`", expectedExistance, actualExistance)
 	}
 	expectedExistance = false
-	actualExistance = resource.IsDepExists("not-exists.py")
+	actualExistance = io.IsDepExists("not-exists.py")
 	if expectedExistance != actualExistance {
 		t.Errorf("expected `%t`, get `%t`", expectedExistance, actualExistance)
 	}
 
 	// writeSource (scaffold)
-	err = resource.WriteSource("hello.py", "hello.py", "world")
+	err = io.WriteSource("hello.py", "hello.py", "world")
 	if err != nil {
 		t.Errorf("Get error: %s", err)
 	}
@@ -81,7 +81,7 @@ func TestResource(t *testing.T) {
 	}
 
 	// copySourceToDeployable (build)
-	err = resource.CopySourceToDep("hello.py", "hello.py")
+	err = io.CopySourceToDep("hello.py", "hello.py")
 	if err != nil {
 		t.Errorf("Get error: %s", err)
 	}
@@ -99,7 +99,7 @@ func TestResource(t *testing.T) {
 	}
 
 	// writeDep (build)
-	resource.WriteDep("fruit.py", "fruit.py", []string{"orange", "grape", "strawberry"})
+	io.WriteDep("fruit.py", "fruit.py", []string{"orange", "grape", "strawberry"})
 	// check content of deployable/fruit.py
 	expectedDeployedFruitPyPath := filepath.Join(dummyProjectPath, "deployable", "fruit.py")
 	defer os.RemoveAll(expectedDeployedFruitPyPath)

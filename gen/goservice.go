@@ -17,7 +17,7 @@ type Function struct {
 // GoServiceConfig configuration to generate GoService
 type GoServiceConfig struct {
 	PackageName string
-	*generator.Resource
+	*generator.IOHelper
 }
 
 // Validate validating config

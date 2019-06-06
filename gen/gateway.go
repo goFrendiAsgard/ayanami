@@ -7,9 +7,20 @@ import (
 
 // GatewayConfig configuration to generate Gateway
 type GatewayConfig struct {
+	ServiceName string
 	PackageName string
 	Routes      []string
-	*generator.Resource
+	*generator.IOHelper
+}
+
+// NewGateway create new gateway
+func NewGateway(ioHelper *generator.IOHelper, serviceName string, packageName string, routes []string) GatewayConfig {
+	return GatewayConfig{
+		ServiceName: serviceName,
+		PackageName: packageName,
+		Routes:      routes,
+		IOHelper:    ioHelper,
+	}
 }
 
 // Validate validating config

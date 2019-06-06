@@ -12,7 +12,7 @@ import(
  _, currentDirPath, _, ok := runtime.Caller(0)
 projectPath := filepath.Dir(currentDirPath)
 Gen := generator.NewGenerator()
-Res := generator.NewResourceByProjectPath(projectPath)
+IOHelper := generator.NewIOHelperByProjectPath(projectPath)
 
 func main() {
     param := "build"

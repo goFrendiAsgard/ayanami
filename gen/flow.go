@@ -4,10 +4,27 @@ import (
 	"github.com/state-alchemists/ayanami/generator"
 )
 
+// FlowEvent event definition
+type FlowEvent struct {
+	VarName              string
+	InputEvent           string
+	OutputEvent          string
+	VarValue             string
+	UseVarValue          bool
+	FunctionName         string
+	FunctionImportPath   string
+	FunctionDependencies []string
+	UseFunction          bool
+}
+
 // FlowConfig configuration to generate Flow
 type FlowConfig struct {
 	PackageName string
-	*generator.Resource
+	FlowName    string
+	Inputs      []string
+	Outputs     []string
+	Events      []FlowEvent
+	*generator.IOHelper
 }
 
 // Validate validating config

@@ -7,7 +7,7 @@ import (
 // GoMonolithProcedure procedureuration to generate GoMonolith
 type GoMonolithProcedure struct {
 	PackageName string
-	*generator.Resource
+	*generator.IOHelper
 }
 
 // Validate validating procedure
