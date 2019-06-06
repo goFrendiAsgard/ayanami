@@ -6,7 +6,7 @@ import (
 
 // CmdConfig configuration to generate Cmd
 type CmdConfig struct {
-	generator.Resource
+	*generator.Resource
 }
 
 // Validate validating config

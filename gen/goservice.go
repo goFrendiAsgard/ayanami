@@ -6,7 +6,7 @@ import (
 
 // GoServiceConfig configuration to generate GoService
 type GoServiceConfig struct {
-	generator.Resource
+	*generator.Resource
 }
 
 // Validate validating config

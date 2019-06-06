@@ -7,7 +7,7 @@ import (
 // GatewayConfig configuration to generate Gateway
 type GatewayConfig struct {
 	Routes []string
-	generator.Resource
+	*generator.Resource
 }
 
 // Validate validating config
@@ -22,5 +22,5 @@ func (config GatewayConfig) Scaffold() error {
 
 // Build building config
 func (config GatewayConfig) Build() error {
-	return config.Resource.WriteDeployable("gateway.go", "gateway.go", config)
+	return config.Resource.WriteDep("gateway.go", "gateway.go", config)
 }

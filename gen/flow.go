@@ -6,7 +6,7 @@ import (
 
 // FlowConfig configuration to generate Flow
 type FlowConfig struct {
-	generator.Resource
+	*generator.Resource
 }
 
 // Validate validating config
