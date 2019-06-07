@@ -25,6 +25,12 @@ func TestString(t *testing.T) {
 	if expectedQuoteArrayAndJoinResult != actualQuoteArrayAndJoinResult {
 		t.Errorf("expected `%s`, get `%s`", expectedQuoteArrayAndJoinResult, actualQuoteArrayAndJoinResult)
 	}
+	// QuoteMap
+	expectedQuoteMapResult := map[string]string{"00": `"rei"`, "01": `"shinji"`, "02": `"asuka"`, "03": `"\""`}
+	actualQuoteMapResult := s.QuoteMap(map[string]string{"00": "rei", "01": "shinji", "02": "asuka", "03": `"`})
+	if !reflect.DeepEqual(expectedQuoteMapResult, actualQuoteMapResult) {
+		t.Errorf("expected %#v, get %#v", expectedQuoteMapResult, actualQuoteMapResult)
+	}
 	// IsMatch
 	expectedMatch := true
 	actualMatch := s.IsMatch("abc", "^a.+$")

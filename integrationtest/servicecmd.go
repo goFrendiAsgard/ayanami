@@ -18,13 +18,9 @@ func MainServiceCmd() {
 	// define services
 	services := service.Services{
 		service.NewCmd(serviceName, "cowsay",
-			[]string{"input"},
-			[]string{"output"},
 			[]string{"/bin/sh", "-c", "echo $input | cowsay -n"},
 		),
 		service.NewCmd(serviceName, "figlet",
-			[]string{"input"},
-			[]string{"output"},
 			[]string{"figlet", "$input"},
 		),
 	}

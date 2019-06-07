@@ -6,46 +6,52 @@ import (
 	"log"
 )
 
-// Cmd a definition of function
-type Cmd struct {
-	Inputs  []string
-	Outputs []string
-	Command string
-}
-
 // CmdConfig configuration to generate Cmd
 type CmdConfig struct {
 	ServiceName string
 	PackageName string
-	Commands    map[string]Cmd
+	Commands    map[string]string
 	*generator.IOHelper
 	generator.StringHelper
 }
 
-// Validate validating config
-func (config CmdConfig) Validate() bool {
-	if config.PackageName == "" {
-		log.Println("[ERROR] Package Name should not be empty")
-		return false
+// NewCmd create new cmd
+func NewCmd(ioHelper *generator.IOHelper, serviceName string, packageName string, commands map[string]string) CmdConfig {
+	return CmdConfig{
+		ServiceName: serviceName,
+		PackageName: packageName,
+		Commands:    commands,
+		IOHelper:    ioHelper,
 	}
+}
+
+// NewEmptyCmd create new empty cmd
+func NewEmptyCmd(ioHelper *generator.IOHelper, serviceName string, packageName string) CmdConfig {
+	return NewCmd(ioHelper, serviceName, packageName, make(map[string]string))
+}
+
+// Set replace/add cmd's command
+func (config *CmdConfig) Set(method, command string) {
+	config.Commands[method] = command
+}
+
+// Validate validating config
+func (config *CmdConfig) Validate() bool {
+	log.Printf("[INFO] Validating %s", config.ServiceName)
 	if config.IsAlphaNumeric(config.ServiceName) {
 		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", config.ServiceName)
 		return false
 	}
+	if config.PackageName == "" {
+		log.Println("[ERROR] Package Name should not be empty")
+		return false
+	}
 	for methodName, command := range config.Commands {
-		if config.IsAlphaNumeric(methodName) {
+		if !config.IsAlphaNumeric(methodName) {
 			log.Printf("[ERROR] method should be alphanumeric, but `%s` found", methodName)
 			return false
 		}
-		if len(command.Inputs) == 0 {
-			log.Printf("[ERROR] command `%s` has no input", methodName)
-			return false
-		}
-		if len(command.Outputs) == 0 {
-			log.Printf("[ERROR] command `%s` has no output", methodName)
-			return false
-		}
-		if command.Command == "" {
+		if command == "" {
 			log.Printf("[ERROR] command `%s` is empty", methodName)
 			return false
 		}
@@ -54,24 +60,15 @@ func (config CmdConfig) Validate() bool {
 }
 
 // Scaffold scaffolding config
-func (config CmdConfig) Scaffold() error {
+func (config *CmdConfig) Scaffold() error {
 	return nil
 }
 
 // Build building config
-func (config CmdConfig) Build() error {
-	// build template-ready commands
-	tmplCommands := make(map[string]map[string]string)
-	for methodName, cmd := range config.Commands {
-		tmplCommands[methodName] = map[string]string{
-			"Inputs":  config.QuoteArrayAndJoin(cmd.Inputs, ", "),
-			"Outputs": config.QuoteArrayAndJoin(cmd.Outputs, ", "),
-			"Command": config.Quote(cmd.Command),
-		}
-	}
+func (config *CmdConfig) Build() error {
 	// write main.go
 	mainPath := fmt.Sprintf("%s/main.go", config.ServiceName)
-	err := config.WriteDep(mainPath, "cmd.go", tmplCommands)
+	err := config.WriteDep(mainPath, "cmd.main.go", config.QuoteMap(config.Commands))
 	if err != nil {
 		return err
 	}

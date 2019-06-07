@@ -7,12 +7,7 @@ import (
 
 func TestNewCmdService(t *testing.T) {
 	service := NewCmd("service", "method",
-		// inputs
-		[]string{"name", "time"},
-		// output
-		[]string{"greeting"},
-		// command
-		[]string{"echo", "hello", "$name", "how are you", "$time"},
+		[]string{"echo", "hello", "$name", "how are you", "${time}"},
 	)
 
 	// test inputs
@@ -27,7 +22,7 @@ func TestNewCmdService(t *testing.T) {
 
 	// test outputs
 	expectedOutputs := IOList{
-		IO{EventName: "srvc.service.method.out.greeting", VarName: "greeting"},
+		IO{EventName: "srvc.service.method.out.output", VarName: "output"},
 	}
 	Outputs := service.Output
 	if !reflect.DeepEqual(Outputs, expectedOutputs) {
@@ -42,7 +37,7 @@ func TestNewCmdService(t *testing.T) {
 
 	// test wrappedFunction
 	expectedFunctionOutput := make(Dictionary)
-	expectedFunctionOutput["greeting"] = "hello world how are you today\n"
+	expectedFunctionOutput["output"] = "hello world how are you today\n"
 	functionInput := make(Dictionary)
 	functionInput["name"] = "world"
 	functionInput["time"] = "today"

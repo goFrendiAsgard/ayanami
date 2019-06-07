@@ -1,4 +1,4 @@
-{{define "gateway.go"}}
+{{ define "gateway.main.go" }}
 package main
 
 import (
@@ -22,4 +22,4 @@ func main() {
 	multipartFormLimit := config.GetGatewayMultipartFormLimit()
 	gateway.Serve(broker, port, multipartFormLimit, routes)
 }
-{{end}}
+{{ end }}

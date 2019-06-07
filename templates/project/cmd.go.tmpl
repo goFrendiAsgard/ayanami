@@ -1,4 +1,4 @@
-{{define "cmd.go"}}
+{{ define "cmd.main.go" }}
 package main
 
 import (
@@ -17,13 +17,8 @@ func main() {
 	}
 	// define services
 	services := service.Services{
-		{{ range $methodName, $method := . }}service.NewCmd(serviceName, "{{$methodName}}",
-            // inputs
-			[]string{{{$method.Inputs}}},
-            // outputs
-			[]string{{{$method.Outputs}}},
-            // command
-			[]string{"/bin/sh", {{$method.Command}}},
+		{{ range $methodName, $command := . }}service.NewCmd(serviceName, "{{$methodName}}",
+			[]string{"/bin/sh", {{$command}}},
 		),{{ end }}
 	}
 	// consume and publish forever
@@ -31,4 +26,4 @@ func main() {
 	services.ConsumeAndPublish(broker, serviceName)
 	<-ch
 }
-{{end}}
+{{ end }}

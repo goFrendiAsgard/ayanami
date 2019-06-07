@@ -4,13 +4,42 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"regexp"
 	"strings"
 )
 
 // NewCmd create new cmd
-func NewCmd(serviceName string, methodName string, inputs []string, outputs []string, command []string) CommonService {
+func NewCmd(serviceName string, methodName string, command []string) CommonService {
+	inputs := getInputFromCommand(command)
+	outputs := []string{"output"}
 	wrappedFunction := createCmdWrapper(serviceName, methodName, command, inputs, outputs)
 	return NewService(serviceName, methodName, inputs, outputs, wrappedFunction)
+}
+
+func getInputFromCommand(command []string) []string {
+	inputs := []string{}
+	re1, err := regexp.Compile(`\$([a-zA-Z0-9]+)`)
+	if err != nil {
+		return inputs
+	}
+	re2, err := regexp.Compile(`\$\{([a-zA-Z0-9]+)\}`)
+	if err != nil {
+		return inputs
+	}
+	for _, part := range command {
+		matches1 := re1.FindAllStringSubmatch(part, -1)
+		matches2 := re2.FindAllStringSubmatch(part, -1)
+		inputs = addMatchesToArray(inputs, matches1)
+		inputs = addMatchesToArray(inputs, matches2)
+	}
+	return inputs
+}
+
+func addMatchesToArray(arr []string, matches [][]string) []string {
+	for _, match := range matches {
+		arr = AppendUniqueString(match[1], arr)
+	}
+	return arr
 }
 
 func createCmdWrapper(serviceName, methodName string, cmd []string, inputVarNames, outputVarNames []string) WrappedFunction {
@@ -19,16 +48,12 @@ func createCmdWrapper(serviceName, methodName string, cmd []string, inputVarName
 		// preprocess cmd
 		for cmdIndex := range cmd {
 			for _, varName := range inputVarNames {
+				varValue := fmt.Sprintf("%s", inputs.Get(varName))
 				pattern1 := fmt.Sprintf("$%s", varName)
 				pattern2 := fmt.Sprintf("${%s}", varName)
-				varValue := fmt.Sprintf("%s", inputs.Get(varName))
 				// if varValue doesn't started and ended with double quote, add double quote to it. Otherwise, let it be
 				if cmd[cmdIndex] != pattern1 && cmd[cmdIndex] != pattern2 {
-					valParts := strings.Split(varValue, "")
-					if valParts[0] != "\"" || valParts[len(valParts)-1] != "\"" {
-						varValue = strings.Replace(varValue, "\"", "\\\"", -1)
-						varValue = fmt.Sprintf("\"%s\"", varValue)
-					}
+					varValue = getEscapedValueQuote(varValue)
 				}
 				cmd[cmdIndex] = strings.Replace(cmd[cmdIndex], pattern1, varValue, -1)
 				cmd[cmdIndex] = strings.Replace(cmd[cmdIndex], pattern2, varValue, -1)
@@ -48,4 +73,13 @@ func createCmdWrapper(serviceName, methodName string, cmd []string, inputVarName
 		}
 		return outputs, err
 	}
+}
+
+func getEscapedValueQuote(str string) string {
+	runic := []rune(str)
+	if string(runic[0]) != `"` || string(runic[len(str)-1]) != `"` {
+		escapedStr := strings.Replace(str, `"`, `\"`, -1)
+		return fmt.Sprintf(`"%s"`, escapedStr)
+	}
+	return str
 }

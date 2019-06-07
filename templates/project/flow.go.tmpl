@@ -1,3 +1,4 @@
+{{ define "flow.main.go" }}
 package main
 
 import (
@@ -94,3 +95,4 @@ func main() {
 	services.ConsumeAndPublish(broker, "flow")
 	<-ch
 }
+{{ end }}

@@ -24,7 +24,7 @@ func NewGateway(ioHelper *generator.IOHelper, serviceName string, packageName st
 }
 
 // Validate validating config
-func (config GatewayConfig) Validate() bool {
+func (config *GatewayConfig) Validate() bool {
 	if config.PackageName == "" {
 		log.Printf("[Invalid Gateway] Package Name should not be empty")
 		return false
@@ -33,13 +33,13 @@ func (config GatewayConfig) Validate() bool {
 }
 
 // Scaffold scaffolding config
-func (config GatewayConfig) Scaffold() error {
+func (config *GatewayConfig) Scaffold() error {
 	return nil
 }
 
 // Build building config
-func (config GatewayConfig) Build() error {
-	err := config.WriteDep("gateway/main.go", "gateway.go", config)
+func (config *GatewayConfig) Build() error {
+	err := config.WriteDep("gateway/main.go", "gateway.main.go", config)
 	if err != nil {
 		return err
 	}

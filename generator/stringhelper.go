@@ -16,6 +16,14 @@ func (s StringHelper) Quote(str string) string {
 	return fmt.Sprintf("\"%s\"", str)
 }
 
+// QuoteMap quote array's elements
+func (s StringHelper) QuoteMap(data map[string]string) map[string]string {
+	for index, str := range data {
+		data[index] = s.Quote(str)
+	}
+	return data
+}
+
 // QuoteArray quote array's elements
 func (s StringHelper) QuoteArray(arr []string) []string {
 	for index, str := range arr {
