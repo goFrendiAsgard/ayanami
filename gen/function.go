@@ -16,6 +16,8 @@ type ExposedFunction struct {
 	FunctionAssignment  string
 	Inputs              []string
 	Outputs             []string
+	JoinedInputs        string
+	JoinedOutputs       string
 }
 
 // Function a definition of function
@@ -31,11 +33,6 @@ type Function struct {
 // GetFileName get name of function file
 func (f *Function) GetFileName() string {
 	return fmt.Sprintf("%s.go", strings.ToLower(f.FunctionName))
-}
-
-// GetImportedName get name of function file
-func (f *Function) GetImportedName() string {
-	return fmt.Sprintf("%s.Wrapped%s", f.FunctionPackage, f.FunctionName)
 }
 
 // ToExposed change function to it exposed counterpart
@@ -63,6 +60,8 @@ func (f *Function) ToExposed() ExposedFunction {
 		FunctionAssignment:  functionAssignment,
 		Inputs:              f.Inputs,
 		Outputs:             f.Outputs,
+		JoinedInputs:        f.QuoteArrayAndJoin(f.Inputs, ", "),
+		JoinedOutputs:       f.QuoteArrayAndJoin(f.Outputs, ", "),
 	}
 }
 

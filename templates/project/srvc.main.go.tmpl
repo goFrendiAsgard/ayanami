@@ -5,25 +5,24 @@ import (
 	"github.com/state-alchemists/ayanami/config"
 	"github.com/state-alchemists/ayanami/msgbroker"
 	"github.com/state-alchemists/ayanami/service"
-	"log"
+	"log"{{ _, $package := range .Packages }}
+    "{{.PackageName}}/{{$package}}"{{ end }}
 )
 
-// MainServiceCmd emulating cmd's main function
-func MainServiceCmd() {
-	serviceName := "cmd"
+func main() {
+	serviceName := "{{.ServiceName}}"
 	// define broker
 	broker, err := msgbroker.NewNats(config.GetNatsURL())
 	if err != nil {
 		log.Fatal(err)
 	}
 	// define services
-	services := service.Services{
-		service.NewCmd(serviceName, "cowsay",
-			[]string{"/bin/sh", "-c", "echo $input | cowsay -n"},
-		),
-		service.NewCmd(serviceName, "figlet",
-			[]string{"figlet", "$input"},
-		),
+	services := service.Services{{{ $methodName, $function := range .Functions }}
+        service.NewService(serviceName, "{{$methodName}}",
+			[]string{{{$function.JoinedInputs}}},
+			[]string{{{$function.JoinedOutputs}}},
+			{{$function.FunctionPackage}}.Wrapped{{$function.FunctionName}},
+		),{{end}}
 	}
 	// consume and publish forever
 	ch := make(chan bool)
