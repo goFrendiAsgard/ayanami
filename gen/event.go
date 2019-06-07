@@ -3,6 +3,7 @@ package gen
 import (
 	"fmt"
 	"github.com/state-alchemists/ayanami/generator"
+	"log"
 	"strings"
 )
 
@@ -15,9 +16,27 @@ type Event struct {
 	UseValue             bool
 	FunctionName         string
 	FunctionPackage      string
-	FunctionDependencies []string
+	FunctionDependencies []string // should belong to the same package
 	UseFunction          bool
 	generator.StringHelper
+}
+
+// GetFunctionFileName get name of function file
+func (e *Event) GetFunctionFileName() string {
+	return fmt.Sprintf("%s.go", strings.ToLower(e.FunctionName))
+}
+
+// Validate validating an event
+func (e *Event) Validate() bool {
+	if e.VarName == "" {
+		log.Println("[ERROR] Var name should not be empty")
+		return false
+	}
+	if e.UseFunction && !e.IsMatch(e.FunctionName, "^[A-Z][a-zA-Z0-9]*$") && e.FunctionPackage == "" {
+		log.Println("[ERROR] Function name should not be alphanumeric and function package should not be empty")
+		return false
+	}
+	return true
 }
 
 // ToMap change event to map
@@ -32,9 +51,7 @@ func (e *Event) ToMap() map[string]string {
 	}
 	if e.UseFunction {
 		result["UseFunction"] = "true"
-		packageParts := strings.Split(e.FunctionPackage, "/")
-		namespace := packageParts[len(packageParts)-1]
-		result["Function"] = fmt.Sprintf("%s.%s", namespace, e.FunctionName)
+		result["Function"] = fmt.Sprintf("%s.%s", e.FunctionPackage, e.FunctionName)
 	}
 	e.addValIndentationToMap(result)
 	return result

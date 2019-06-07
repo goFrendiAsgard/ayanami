@@ -1,0 +1,21 @@
+{{ define "srvc.function.go" }}
+package {{.FunctionPackage}}
+
+import (
+	"github.com/state-alchemists/ayanami/service"
+)
+
+func {{.FunctionDeclaration}} {
+    return {{.FunctionReturn}}
+}
+
+func Wrapped{{.FunctionName}}(inputs service.Dictionary) (service.Dictionary, error) {
+    outputs := make(service.Dictionary){{ _, $input := range .Inputs }}
+    {{$input}} := inputs.Get("{{$inputs}}")
+    {{end}}
+    {{.FunctionAssignment}}{{ _, $output := range .Outputs }}
+    outputs.Set("{{$output}}", {{$output}})
+    {{ end }}
+    return outputs, nil
+}
+{{end}}

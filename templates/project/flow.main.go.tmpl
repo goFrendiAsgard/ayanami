@@ -6,7 +6,7 @@ import (
 	"github.com/state-alchemists/ayanami/msgbroker"
 	"github.com/state-alchemists/ayanami/service"
 	"log"{{ _, $package := range .Packages }}
-    "{{$package}}"{{ end }}
+    "{{.PackageName}}/{{$package}}"{{ end }}
 )
 
 func main() {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/state-alchemists/ayanami/generator"
 	"log"
+	"path/filepath"
 )
 
 // CmdConfig configuration to generate Cmd
@@ -28,7 +29,7 @@ func (config *CmdConfig) Validate() bool {
 		return false
 	}
 	if config.PackageName == "" {
-		log.Println("[ERROR] Package Name should not be empty")
+		log.Println("[ERROR] Package name should not be empty")
 		return false
 	}
 	for methodName, command := range config.Commands {
@@ -51,14 +52,18 @@ func (config *CmdConfig) Scaffold() error {
 
 // Build building config
 func (config *CmdConfig) Build() error {
+	log.Printf("[INFO] Building %s", config.ServiceName)
+	dirPath := fmt.Sprintf("srvc-%s", config.ServiceName)
 	// write main.go
-	mainPath := fmt.Sprintf("%s/main.go", config.ServiceName)
+	log.Println("[INFO] Create main.go")
+	mainPath := filepath.Join(dirPath, "main.go")
 	err := config.WriteDep(mainPath, "cmd.main.go", config.QuoteMap(config.Commands))
 	if err != nil {
 		return err
 	}
 	// write go.mod
-	goModPath := fmt.Sprintf("%s/go.mod", config.ServiceName)
+	log.Println("[INFO] Create go.mod")
+	goModPath := filepath.Join(dirPath, "go.mod")
 	err = config.WriteDep(goModPath, "go.mod", config.PackageName)
 	return err
 }
