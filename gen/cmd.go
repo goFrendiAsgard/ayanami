@@ -15,21 +15,6 @@ type CmdConfig struct {
 	generator.StringHelper
 }
 
-// NewCmd create new cmd
-func NewCmd(ioHelper *generator.IOHelper, serviceName string, packageName string, commands map[string]string) CmdConfig {
-	return CmdConfig{
-		ServiceName: serviceName,
-		PackageName: packageName,
-		Commands:    commands,
-		IOHelper:    ioHelper,
-	}
-}
-
-// NewEmptyCmd create new empty cmd
-func NewEmptyCmd(ioHelper *generator.IOHelper, serviceName string, packageName string) CmdConfig {
-	return NewCmd(ioHelper, serviceName, packageName, make(map[string]string))
-}
-
 // Set replace/add cmd's command
 func (config *CmdConfig) Set(method, command string) {
 	config.Commands[method] = command
@@ -76,4 +61,19 @@ func (config *CmdConfig) Build() error {
 	goModPath := fmt.Sprintf("%s/go.mod", config.ServiceName)
 	err = config.WriteDep(goModPath, "go.mod", config.PackageName)
 	return err
+}
+
+// NewCmd create new cmd
+func NewCmd(ioHelper *generator.IOHelper, serviceName string, packageName string, commands map[string]string) CmdConfig {
+	return CmdConfig{
+		ServiceName: serviceName,
+		PackageName: packageName,
+		Commands:    commands,
+		IOHelper:    ioHelper,
+	}
+}
+
+// NewEmptyCmd create new empty cmd
+func NewEmptyCmd(ioHelper *generator.IOHelper, serviceName string, packageName string) CmdConfig {
+	return NewCmd(ioHelper, serviceName, packageName, make(map[string]string))
 }

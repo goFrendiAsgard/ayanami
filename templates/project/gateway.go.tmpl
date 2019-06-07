@@ -9,10 +9,8 @@ import (
 )
 
 func main() {
-	routes := []string{ // define your routes here
-		{{range .Routes}}
-		"{{.}}",
-		{{end}}
+	routes := []string{ // define your routes here{{range .Routes}}
+        "{{.}}",{{end}}
 	}
 	broker, err := msgbroker.NewNats(config.GetNatsURL())
 	if err != nil {

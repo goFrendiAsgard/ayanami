@@ -106,14 +106,23 @@ func (io *IOHelper) WriteSource(filePath, templateName string, data interface{})
 
 // Write write using template
 func (io *IOHelper) Write(filePath, templateName string, data interface{}) error {
-	buff := new(bytes.Buffer)
-	err := io.template.ExecuteTemplate(buff, templateName, data)
+	content, err := io.GetParsedTemplate(templateName, data)
 	if err != nil {
 		return err
 	}
+	return io.WriteFile(filePath, content)
+}
+
+// GetParsedTemplate get parsed template
+func (io *IOHelper) GetParsedTemplate(templateName string, data interface{}) (string, error) {
+	buff := new(bytes.Buffer)
+	err := io.template.ExecuteTemplate(buff, templateName, data)
+	if err != nil {
+		return "", err
+	}
 	content := buff.String()
 	content = strings.Trim(content, "\n")
-	return io.WriteFile(filePath, content)
+	return content, nil
 }
 
 // WriteFile write content to filePath

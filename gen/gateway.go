@@ -13,16 +13,6 @@ type GatewayConfig struct {
 	*generator.IOHelper
 }
 
-// NewGateway create new gateway
-func NewGateway(ioHelper *generator.IOHelper, serviceName string, packageName string, routes []string) GatewayConfig {
-	return GatewayConfig{
-		ServiceName: serviceName,
-		PackageName: packageName,
-		Routes:      routes,
-		IOHelper:    ioHelper,
-	}
-}
-
 // Validate validating config
 func (config *GatewayConfig) Validate() bool {
 	if config.PackageName == "" {
@@ -45,4 +35,14 @@ func (config *GatewayConfig) Build() error {
 	}
 	err = config.WriteDep("gateway/go.mod", "go.mod", config.PackageName)
 	return err
+}
+
+// NewGateway create new gateway
+func NewGateway(ioHelper *generator.IOHelper, serviceName string, packageName string, routes []string) GatewayConfig {
+	return GatewayConfig{
+		ServiceName: serviceName,
+		PackageName: packageName,
+		Routes:      routes,
+		IOHelper:    ioHelper,
+	}
 }
