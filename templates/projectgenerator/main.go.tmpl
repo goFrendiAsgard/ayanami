@@ -6,13 +6,17 @@ import(
 	"github.com/state-alchemists/ayanami/generator"
     "path/filepath"
     "os"
+    "runtime"
 )
 
- // Declare `Gen` and `Res`
- _, currentDirPath, _, ok := runtime.Caller(0)
-projectPath := filepath.Dir(currentDirPath)
-Gen := generator.NewGenerator()
-IOHelper := generator.NewIOHelperByProjectPath(projectPath)
+var _, currentDirPath, _, ok = runtime.Caller(0)
+var projectPath = filepath.Dir(filepath.Dir(currentDirPath))
+
+// Gen is our generator
+var Gen = generator.NewGenerator()
+
+// IOHelper is our helper
+var IOHelper, err = generator.NewIOHelperByProjectPath(projectPath)
 
 func main() {
     param := "build"

@@ -5,8 +5,8 @@ import (
 	"github.com/state-alchemists/ayanami/config"
 	"github.com/state-alchemists/ayanami/msgbroker"
 	"github.com/state-alchemists/ayanami/service"
-	"log"{{ _, $package := range .Packages }}
-    "{{.PackageName}}/{{$package}}"{{ end }}
+	"log"{{ range .Packages }}
+    "{{.PackageName}}/{{.}}"{{ end }}
 )
 
 func main() {
@@ -20,11 +20,11 @@ func main() {
 	services := service.Services{
 		service.NewFlow(serviceName, "{{.FlowName}}", broker,
 			// inputs
-			[]string{{{.Inputs}}},
+			[]string{ {{.Inputs}} },
 			// outputs
-			[]string{{{.Outputs}}},
-			[]service.FlowEvent{{{ _, $event := range .Events }}
-				service.FlowEvent{{{ $key, $val := range $event }}
+			[]string{ {{.Outputs}} },
+			[]service.FlowEvent{ {{ range .Events }}
+				service.FlowEvent{ {{ range $key, $val := . }}
 					$key: $val,{{ end }}
 				},{{end}}
 			},

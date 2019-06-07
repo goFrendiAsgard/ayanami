@@ -5,8 +5,8 @@ import (
 	"github.com/state-alchemists/ayanami/config"
 	"github.com/state-alchemists/ayanami/msgbroker"
 	"github.com/state-alchemists/ayanami/service"
-	"log"{{ _, $package := range .Packages }}
-    "{{.PackageName}}/{{$package}}"{{ end }}
+	"log"{{ range .Packages }}
+    "{{.PackageName}}/{{.}}"{{ end }}
 )
 
 func main() {
@@ -17,10 +17,10 @@ func main() {
 		log.Fatal(err)
 	}
 	// define services
-	services := service.Services{{{ $methodName, $function := range .Functions }}
+	services := service.Services{ {{ range $methodName, $function := .Functions }}
         service.NewService(serviceName, "{{$methodName}}",
-			[]string{{{$function.JoinedInputs}}},
-			[]string{{{$function.JoinedOutputs}}},
+			[]string{ {{$function.JoinedInputs}} },
+			[]string{ {{$function.JoinedOutputs}} },
 			{{$function.FunctionPackage}}.Wrapped{{$function.FunctionName}},
 		),{{end}}
 	}
