@@ -25,20 +25,20 @@ func main() {
 	}
     switch param {
     case "build":
-        log.Println("[INFO] Building...")
+        log.Println("START BUILDING...")
         err := Gen.Build()
         if err == nil {
-            log.Println("[INFO] Done...")
+            log.Println("TASK DONE...\n")
         } else {
-            log.Printf("[ERROR] %s", err)
+            log.Printf("[ERROR] %s\n", err)
         }
     case "scaffold":
-        log.Println("[INFO] Scaffolding...")
+        log.Println("START SCAFFOLDING...")
         err := Gen.Scaffold()
         if err == nil {
-            log.Println("[INFO] Done...")
+            log.Println("TASK DONE...\n")
         } else {
-            log.Printf("[ERROR] %s", err)
+            log.Printf("[ERROR] %s\n", err)
         }
     default:
         log.Println("[ERROR] Unrecognized command. Currently only support `build` and `scaffold`")

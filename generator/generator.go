@@ -57,13 +57,13 @@ func (generator *Generator) Build() error {
 		return errors.New("Invalid config/procedure")
 	}
 	// build configs
-	log.Println("BUILD CONFIGS")
+	log.Println("BUILDING CONFIGS")
 	err := generator.configs.Build()
 	if err != nil {
 		return err
 	}
 	// build procedures
-	log.Println("BUILD PROCEDURES")
+	log.Println("BUILDING PROCEDURES")
 	err = generator.procedures.Build(generator.configs)
 	if err != nil {
 		return err
@@ -78,13 +78,13 @@ func (generator *Generator) Scaffold() error {
 		return errors.New("Invalid config/procedure")
 	}
 	// scaffold configs
-	log.Println("SCAFFOLD CONFIGS")
+	log.Println("SCAFFOLDING CONFIGS")
 	err := generator.configs.Scaffold()
 	if err != nil {
 		return err
 	}
 	// scaffold procedures
-	log.Println("SCAFFOLD CONFIGS")
+	log.Println("SCAFFOLDING PROCEDURES")
 	err = generator.procedures.Scaffold(generator.configs)
 	if err != nil {
 		return err
