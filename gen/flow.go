@@ -36,7 +36,8 @@ func (config *FlowConfig) AddEvent(event Event) {
 
 // Validate validating config
 func (config FlowConfig) Validate() bool {
-	log.Printf("[INFO] Validating %s", config.FlowName)
+	serviceName := config.getServiceName()
+	log.Printf("[INFO] Validating %s", serviceName)
 	for _, input := range config.Inputs {
 		if !config.IsMatch(input, "^[A-Za-z][a-zA-Z0-9]*$") {
 			log.Printf("[ERROR] Invalid input `%s`", input)
@@ -68,7 +69,8 @@ func (config FlowConfig) Validate() bool {
 
 // Scaffold scaffolding config
 func (config FlowConfig) Scaffold() error {
-	log.Printf("[INFO] Scaffolding %s", config.FlowName)
+	serviceName := config.getServiceName()
+	log.Printf("[INFO] Scaffolding %s", serviceName)
 	for _, event := range config.Events {
 		if !event.UseFunction {
 			continue
@@ -109,7 +111,8 @@ func (config FlowConfig) Scaffold() error {
 
 // Build building config
 func (config FlowConfig) Build() error {
-	log.Printf("[INFO] Building %s", config.FlowName)
+	serviceName := config.getServiceName()
+	log.Printf("[INFO] Building %s", serviceName)
 	depPath := fmt.Sprintf("flow-%s", config.FlowName)
 	// write functions and dependencies
 	for _, event := range config.Events {
@@ -154,7 +157,7 @@ func (config FlowConfig) Build() error {
 
 func (config *FlowConfig) toExposed() ExposedFlowConfig {
 	return ExposedFlowConfig{
-		ServiceName: fmt.Sprintf("flow%s", config.FlowName),
+		ServiceName: config.getServiceName(),
 		RepoName:    config.RepoName,
 		FlowName:    config.FlowName,
 		Packages:    config.getPackagesForExposed(),
@@ -162,6 +165,10 @@ func (config *FlowConfig) toExposed() ExposedFlowConfig {
 		Outputs:     config.QuoteArrayAndJoin(config.Outputs, ", "),
 		Inputs:      config.QuoteArrayAndJoin(config.Inputs, ", "),
 	}
+}
+
+func (config *FlowConfig) getServiceName() string {
+	return fmt.Sprintf("flow%s", config.FlowName)
 }
 
 func (config *FlowConfig) getEventsForExposed() []map[string]string {
