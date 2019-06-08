@@ -151,5 +151,5 @@ func NewGoService(ioHelper *generator.IOHelper, serviceName, repoName string, fu
 
 // NewEmptyGoService create new empty service
 func NewEmptyGoService(ioHelper *generator.IOHelper, serviceName, repoName string) GoServiceConfig {
-	return NewGoService(ioHelper, repoName, serviceName, make(map[string]Function))
+	return NewGoService(ioHelper, serviceName, repoName, make(map[string]Function))
 }
