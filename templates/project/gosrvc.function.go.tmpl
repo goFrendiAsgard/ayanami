@@ -5,10 +5,12 @@ import (
 	"github.com/state-alchemists/ayanami/service"
 )
 
+// {{.FunctionName}} declaration
 func {{.FunctionDeclaration}} {
     return {{.FunctionReturn}}
 }
 
+// Wrapped{{.FunctionName}} wrapper for {{.FunctionName}}
 func Wrapped{{.FunctionName}}(inputs service.Dictionary) (service.Dictionary, error) {
     Result := make(service.Dictionary){{ range .Inputs }}
     {{.}} := inputs.Get("{{.}}"){{end}}
