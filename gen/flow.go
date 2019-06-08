@@ -14,8 +14,8 @@ type ExposedFlowConfig struct {
 	FlowName    string
 	Packages    []string
 	Events      []map[string]string
-	Outputs     []string
-	Inputs      []string
+	Outputs     string
+	Inputs      string
 }
 
 // FlowConfig definition
@@ -68,13 +68,14 @@ func (config FlowConfig) Validate() bool {
 
 // Scaffold scaffolding config
 func (config FlowConfig) Scaffold() error {
+	log.Printf("[INFO] Scaffolding %s", config.FlowName)
 	for _, event := range config.Events {
 		if !event.UseFunction {
 			continue
 		}
 		data := map[string]string{
-			"RepoName":     event.FunctionPackage,
-			"FunctionName": event.FunctionName,
+			"FunctionPackage": event.FunctionPackage,
+			"FunctionName":    event.FunctionName,
 		}
 		packageSourcePath := event.FunctionPackage
 		functionFileName := event.GetFunctionFileName()
@@ -158,8 +159,8 @@ func (config *FlowConfig) toExposed() ExposedFlowConfig {
 		FlowName:    config.FlowName,
 		Packages:    config.getPackagesForExposed(),
 		Events:      config.getEventsForExposed(),
-		Outputs:     config.QuoteArray(config.Outputs),
-		Inputs:      config.QuoteArray(config.Inputs),
+		Outputs:     config.QuoteArrayAndJoin(config.Outputs, ", "),
+		Inputs:      config.QuoteArrayAndJoin(config.Inputs, ", "),
 	}
 }
 

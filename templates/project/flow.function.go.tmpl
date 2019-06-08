@@ -1,10 +1,11 @@
 {{ define "flow.function.go" }}
-package {{.PackageName}}
+package {{.FunctionPackage}}
 
+// {{.FunctionName}} declaration
 func {{.FunctionName}}(oldValue interface{}) interface{} {
     var newValue interface{}
     // TODO: replace this
     newValue = oldValue
-    return oldValue
+    return newValue
 }
 {{end}}

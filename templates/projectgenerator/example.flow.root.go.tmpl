@@ -27,10 +27,12 @@ func init() {
         "code",
         200,
     ))
-    flow.AddEvent(gen.NewOutputEventVal(
+    flow.AddEvent(gen.NewOutputEventFunc(
         "trig.response.get.in.message",
-        "message",
-        "Hello world",
+        "request",
+        "html",
+        "CreateDefaultResponse",
+        []string{},
     ))
 
     // register flow

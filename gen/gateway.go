@@ -37,6 +37,7 @@ func (config GatewayConfig) Validate() bool {
 
 // Scaffold scaffolding config
 func (config GatewayConfig) Scaffold() error {
+	log.Printf("[SKIP] Scaffolding %s", config.ServiceName)
 	return nil
 }
 

@@ -24,6 +24,22 @@ type GoServiceConfig struct {
 	generator.StringHelper
 }
 
+func (config *GoServiceConfig) toExposed() ExposedGoServiceConfig {
+	exposedFunctions := make(map[string]ExposedFunction)
+	packages := []string{}
+	for methodName, function := range config.Functions {
+		exposedFunction := function.ToExposed()
+		exposedFunctions[methodName] = exposedFunction
+		packages = append(packages, exposedFunction.FunctionPackage)
+	}
+	return ExposedGoServiceConfig{
+		Packages:    packages,
+		RepoName:    config.RepoName,
+		ServiceName: config.ServiceName,
+		Functions:   exposedFunctions,
+	}
+}
+
 // Set replace/add service's function
 func (config *GoServiceConfig) Set(method string, function Function) {
 	config.Functions[method] = function
@@ -127,22 +143,6 @@ func (config GoServiceConfig) Build() error {
 	goModPath := filepath.Join(depPath, "go.mod")
 	err = config.WriteDep(goModPath, "go.mod", config)
 	return err
-}
-
-func (config *GoServiceConfig) toExposed() ExposedGoServiceConfig {
-	exposedFunctions := make(map[string]ExposedFunction)
-	packages := []string{}
-	for methodName, function := range config.Functions {
-		exposedFunction := function.ToExposed()
-		exposedFunctions[methodName] = exposedFunction
-		packages = append(packages, exposedFunction.FunctionPackage)
-	}
-	return ExposedGoServiceConfig{
-		Packages:    packages,
-		RepoName:    config.RepoName,
-		ServiceName: config.ServiceName,
-		Functions:   exposedFunctions,
-	}
 }
 
 // NewGoService create new goservice

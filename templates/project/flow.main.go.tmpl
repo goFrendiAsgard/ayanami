@@ -26,7 +26,7 @@ func main() {
 			[]string{ {{.Outputs}} },
 			[]service.FlowEvent{ {{ range .Events }}
 				service.FlowEvent{ {{ range $key, $val := . }}
-					$key: $val,{{ end }}
+					{{$key}}: {{$val}},{{ end }}
 				},{{end}}
 			},
 		),

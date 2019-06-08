@@ -60,6 +60,7 @@ func (config CmdConfig) Validate() bool {
 
 // Scaffold scaffolding config
 func (config CmdConfig) Scaffold() error {
+	log.Printf("[SKIP] Scaffolding %s", config.ServiceName)
 	return nil
 }
 
