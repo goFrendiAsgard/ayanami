@@ -9,7 +9,7 @@ import (
 type Generator struct {
 	configs    Configs
 	procedures Procedures
-	IOHelper
+	IOHelper   IOHelper
 }
 
 // AddConfig add single config to generator

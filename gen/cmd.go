@@ -18,7 +18,7 @@ type CmdConfig struct {
 	ServiceName string
 	RepoName    string
 	Commands    map[string]string
-	*generator.IOHelper
+	generator.IOHelper
 	generator.StringHelper
 }
 
@@ -83,16 +83,16 @@ func (config *CmdConfig) toExposed() ExposedCmdConfig {
 }
 
 // NewCmd create new cmd
-func NewCmd(ioHelper *generator.IOHelper, serviceName string, repoName string, commands map[string]string) CmdConfig {
+func NewCmd(g *generator.Generator, serviceName string, repoName string, commands map[string]string) CmdConfig {
 	return CmdConfig{
 		ServiceName: serviceName,
 		RepoName:    repoName,
 		Commands:    commands,
-		IOHelper:    ioHelper,
+		IOHelper:    g.IOHelper,
 	}
 }
 
 // NewEmptyCmd create new empty cmd
-func NewEmptyCmd(ioHelper *generator.IOHelper, serviceName string, repoName string) CmdConfig {
-	return NewCmd(ioHelper, serviceName, repoName, make(map[string]string))
+func NewEmptyCmd(g *generator.Generator, serviceName string, repoName string) CmdConfig {
+	return NewCmd(g, serviceName, repoName, make(map[string]string))
 }

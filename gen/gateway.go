@@ -12,7 +12,7 @@ type GatewayConfig struct {
 	ServiceName string
 	RepoName    string
 	Routes      []string
-	*generator.IOHelper
+	generator.IOHelper
 	generator.StringHelper
 }
 
@@ -59,16 +59,16 @@ func (config *GatewayConfig) AddRoute(route string) {
 }
 
 // NewGateway create new gateway
-func NewGateway(ioHelper *generator.IOHelper, serviceName string, repoName string, routes []string) GatewayConfig {
+func NewGateway(g *generator.Generator, serviceName string, repoName string, routes []string) GatewayConfig {
 	return GatewayConfig{
 		ServiceName: serviceName,
 		RepoName:    repoName,
 		Routes:      routes,
-		IOHelper:    ioHelper,
+		IOHelper:    g.IOHelper,
 	}
 }
 
 // NewEmptyGateway create new empty gateway
-func NewEmptyGateway(ioHelper *generator.IOHelper, serviceName string, repoName string) GatewayConfig {
-	return NewGateway(ioHelper, serviceName, repoName, []string{})
+func NewEmptyGateway(g *generator.Generator, serviceName string, repoName string) GatewayConfig {
+	return NewGateway(g, serviceName, repoName, []string{})
 }

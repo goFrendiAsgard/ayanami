@@ -8,7 +8,7 @@ import (
 func init() {
 
     // define flow
-	flow := gen.NewEmptyFlow(&IOHelper,
+	flow := gen.NewEmptyFlow(&Gen,
         "github.com/nerv/flowbanner", // repo name
         "banner",                     // flow name
         []string{"request"},          // inputs

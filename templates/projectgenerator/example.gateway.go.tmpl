@@ -8,7 +8,7 @@ import (
 func init() {
 
     // define gateway
-	gateway := gen.NewEmptyGateway(&IOHelper,
+	gateway := gen.NewEmptyGateway(&Gen,
         "gateway",                 // service name
         "github.com/nerv/gateway", // repo name
     )

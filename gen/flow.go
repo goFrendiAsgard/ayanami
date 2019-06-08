@@ -25,7 +25,7 @@ type FlowConfig struct {
 	Inputs   []string
 	Outputs  []string
 	Events   []Event
-	*generator.IOHelper
+	generator.IOHelper
 	generator.StringHelper
 }
 
@@ -211,18 +211,18 @@ func (config *FlowConfig) getPackagesForExposed() []string {
 }
 
 // NewFlow create new flow
-func NewFlow(ioHelper *generator.IOHelper, repoName, flowName string, inputs, outputs []string, events []Event) FlowConfig {
+func NewFlow(g *generator.Generator, repoName, flowName string, inputs, outputs []string, events []Event) FlowConfig {
 	return FlowConfig{
 		RepoName: repoName,
 		FlowName: flowName,
 		Inputs:   inputs,
 		Outputs:  outputs,
 		Events:   events,
-		IOHelper: ioHelper,
+		IOHelper: g.IOHelper,
 	}
 }
 
 // NewEmptyFlow create new empty flow
-func NewEmptyFlow(ioHelper *generator.IOHelper, repoName, flowName string, inputs, outputs []string) FlowConfig {
-	return NewFlow(ioHelper, repoName, flowName, inputs, outputs, []Event{})
+func NewEmptyFlow(g *generator.Generator, repoName, flowName string, inputs, outputs []string) FlowConfig {
+	return NewFlow(g, repoName, flowName, inputs, outputs, []Event{})
 }

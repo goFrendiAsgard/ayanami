@@ -20,7 +20,7 @@ type GoServiceConfig struct {
 	ServiceName string
 	RepoName    string
 	Functions   map[string]Function
-	*generator.IOHelper
+	generator.IOHelper
 	generator.StringHelper
 }
 
@@ -146,16 +146,16 @@ func (config *GoServiceConfig) toExposed() ExposedGoServiceConfig {
 }
 
 // NewGoService create new goservice
-func NewGoService(ioHelper *generator.IOHelper, serviceName, repoName string, functions map[string]Function) GoServiceConfig {
+func NewGoService(g *generator.Generator, serviceName, repoName string, functions map[string]Function) GoServiceConfig {
 	return GoServiceConfig{
 		RepoName:    repoName,
 		ServiceName: serviceName,
 		Functions:   functions,
-		IOHelper:    ioHelper,
+		IOHelper:    g.IOHelper,
 	}
 }
 
 // NewEmptyGoService create new empty service
-func NewEmptyGoService(ioHelper *generator.IOHelper, serviceName, repoName string) GoServiceConfig {
-	return NewGoService(ioHelper, serviceName, repoName, make(map[string]Function))
+func NewEmptyGoService(g *generator.Generator, serviceName, repoName string) GoServiceConfig {
+	return NewGoService(g, serviceName, repoName, make(map[string]Function))
 }
