@@ -16,11 +16,6 @@ type GatewayConfig struct {
 	generator.StringHelper
 }
 
-// AddRoute add route to gateway
-func (config *GatewayConfig) AddRoute(route string) {
-	config.Routes = append(config.Routes, route)
-}
-
 // Validate validating config
 func (config GatewayConfig) Validate() bool {
 	log.Printf("[INFO] Validating %s", config.ServiceName)
@@ -56,6 +51,11 @@ func (config GatewayConfig) Build() error {
 	goModPath := filepath.Join(dirPath, "go.mod")
 	err = config.WriteDep(goModPath, "go.mod", config)
 	return err
+}
+
+// AddRoute add route to gateway
+func (config *GatewayConfig) AddRoute(route string) {
+	config.Routes = append(config.Routes, route)
 }
 
 // NewGateway create new gateway

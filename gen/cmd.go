@@ -22,18 +22,6 @@ type CmdConfig struct {
 	generator.StringHelper
 }
 
-func (config *CmdConfig) toExposed() ExposedCmdConfig {
-	return ExposedCmdConfig{
-		ServiceName: config.ServiceName,
-		Commands:    config.QuoteMap(config.Commands),
-	}
-}
-
-// Set replace/add cmd's command
-func (config *CmdConfig) Set(method, command string) {
-	config.Commands[method] = command
-}
-
 // Validate validating config
 func (config CmdConfig) Validate() bool {
 	log.Printf("[INFO] Validating %s", config.ServiceName)
@@ -80,6 +68,18 @@ func (config CmdConfig) Build() error {
 	goModPath := filepath.Join(dirPath, "go.mod")
 	err = config.WriteDep(goModPath, "go.mod", config)
 	return err
+}
+
+// Set replace/add cmd's command
+func (config *CmdConfig) Set(method, command string) {
+	config.Commands[method] = command
+}
+
+func (config *CmdConfig) toExposed() ExposedCmdConfig {
+	return ExposedCmdConfig{
+		ServiceName: config.ServiceName,
+		Commands:    config.QuoteMap(config.Commands),
+	}
 }
 
 // NewCmd create new cmd

@@ -29,11 +29,6 @@ type FlowConfig struct {
 	generator.StringHelper
 }
 
-// AddEvent add input to inputEvents
-func (config *FlowConfig) AddEvent(event Event) {
-	config.Events = append(config.Events, event)
-}
-
 // Validate validating config
 func (config FlowConfig) Validate() bool {
 	serviceName := config.getServiceName()
@@ -153,6 +148,11 @@ func (config FlowConfig) Build() error {
 	goModPath := filepath.Join(depPath, "go.mod")
 	err = config.WriteDep(goModPath, "go.mod", config)
 	return err
+}
+
+// AddEvent add input to inputEvents
+func (config *FlowConfig) AddEvent(event Event) {
+	config.Events = append(config.Events, event)
 }
 
 func (config *FlowConfig) toExposed() ExposedFlowConfig {

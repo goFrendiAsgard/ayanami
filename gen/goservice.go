@@ -40,11 +40,6 @@ func (config *GoServiceConfig) toExposed() ExposedGoServiceConfig {
 	}
 }
 
-// Set replace/add service's function
-func (config *GoServiceConfig) Set(method string, function Function) {
-	config.Functions[method] = function
-}
-
 // Validate validating config
 func (config GoServiceConfig) Validate() bool {
 	log.Printf("[INFO] Validating %s", config.ServiceName)
@@ -143,6 +138,11 @@ func (config GoServiceConfig) Build() error {
 	goModPath := filepath.Join(depPath, "go.mod")
 	err = config.WriteDep(goModPath, "go.mod", config)
 	return err
+}
+
+// Set replace/add service's function
+func (config *GoServiceConfig) Set(method string, function Function) {
+	config.Functions[method] = function
 }
 
 // NewGoService create new goservice

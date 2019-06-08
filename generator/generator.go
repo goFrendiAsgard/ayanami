@@ -2,6 +2,7 @@ package generator
 
 import (
 	"errors"
+	"log"
 )
 
 // Generator used for scaffold and build
@@ -37,10 +38,12 @@ func (generator *Generator) AddProcedures(procedures []CommonProcedure) {
 // Validate validate all configs and procedures
 func (generator *Generator) Validate() bool {
 	// validate all configs
+	log.Println("VALIDATING CONFIGS")
 	if !generator.configs.Validate() {
 		return false
 	}
 	// validate all procedures
+	log.Println("VALIDATING PROCEDURES")
 	if !generator.procedures.Validate(generator.configs) {
 		return false
 	}
@@ -54,11 +57,13 @@ func (generator *Generator) Build() error {
 		return errors.New("Invalid config/procedure")
 	}
 	// build configs
+	log.Println("BUILD CONFIGS")
 	err := generator.configs.Build()
 	if err != nil {
 		return err
 	}
 	// build procedures
+	log.Println("BUILD PROCEDURES")
 	err = generator.procedures.Build(generator.configs)
 	if err != nil {
 		return err
@@ -73,11 +78,13 @@ func (generator *Generator) Scaffold() error {
 		return errors.New("Invalid config/procedure")
 	}
 	// scaffold configs
+	log.Println("SCAFFOLD CONFIGS")
 	err := generator.configs.Scaffold()
 	if err != nil {
 		return err
 	}
 	// scaffold procedures
+	log.Println("SCAFFOLD CONFIGS")
 	err = generator.procedures.Scaffold(generator.configs)
 	if err != nil {
 		return err
