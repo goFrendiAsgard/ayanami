@@ -6,14 +6,19 @@ import (
 )
 
 func init() {
-	gateway := gen.NewGateway(&IOHelper,
+
+    // define gateway
+	gateway := gen.NewEmptyGateway(&IOHelper,
         "gateway",                 // service name
         "github.com/nerv/gateway", // repo name
-        []string{                  // routes
-            "/",
-            "/banner",
-        },
     )
+
+    // add routes to gateway
+    gateway.AddRoute("/")
+    gateway.AddRoute("/banner")
+
+    // register gateway
 	Gen.AddConfig(gateway)
+
 }
 {{end}}

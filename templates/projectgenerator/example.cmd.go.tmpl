@@ -6,13 +6,18 @@ import (
 )
 
 func init() {
-	service := gen.NewCmd(&IOHelper,
+
+    // define service
+	service := gen.NewEmptyCmd(&IOHelper,
         "cmd",                 // service name
         "github.com/nerv/cmd", // repo name
-        map[string]string{     // commands
-            "banner": "figlet $input",
-        },
     )
+
+    // add command
+    service.Set("banner", "figlet $input")
+
+    // register service
 	Gen.AddConfig(service)
+
 }
 {{end}}
