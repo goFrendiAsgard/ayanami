@@ -155,6 +155,26 @@ func (config *FlowConfig) AddEvent(event Event) {
 	config.Events = append(config.Events, event)
 }
 
+// AddInputEvent create new Event
+func (config *FlowConfig) AddInputEvent(eventName, varName string) {
+	config.AddEvent(NewInputEvent(eventName, varName))
+}
+
+// AddOutputEvent create new Event
+func (config *FlowConfig) AddOutputEvent(eventName, varName string) {
+	config.AddEvent(NewOutputEvent(eventName, varName))
+}
+
+// AddOutputEventVal create new Event with value
+func (config *FlowConfig) AddOutputEventVal(eventName, varName string, value interface{}) {
+	config.AddEvent(NewOutputEventVal(eventName, varName, value))
+}
+
+// AddOutputEventFunc create new Event with function
+func (config *FlowConfig) AddOutputEventFunc(eventName, varName, functionPackage, functionName string, functionDependencies []string) {
+	config.AddEvent(NewOutputEventFunc(eventName, varName, functionPackage, functionName, functionDependencies))
+}
+
 func (config *FlowConfig) toExposed() ExposedFlowConfig {
 	return ExposedFlowConfig{
 		ServiceName: config.getServiceName(),

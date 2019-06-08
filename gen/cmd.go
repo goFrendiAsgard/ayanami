@@ -55,17 +55,17 @@ func (config CmdConfig) Scaffold() error {
 // Build building config
 func (config CmdConfig) Build() error {
 	log.Printf("[INFO] Building %s", config.ServiceName)
-	dirPath := fmt.Sprintf("srvc-%s", config.ServiceName)
+	depPath := fmt.Sprintf("srvc-%s", config.ServiceName)
 	// write main.go
 	log.Println("[INFO] Create main.go")
-	mainPath := filepath.Join(dirPath, "main.go")
+	mainPath := filepath.Join(depPath, "main.go")
 	err := config.WriteDep(mainPath, "cmd.main.go", config.toExposed())
 	if err != nil {
 		return err
 	}
 	// write go.mod
 	log.Println("[INFO] Create go.mod")
-	goModPath := filepath.Join(dirPath, "go.mod")
+	goModPath := filepath.Join(depPath, "go.mod")
 	err = config.WriteDep(goModPath, "go.mod", config)
 	return err
 }

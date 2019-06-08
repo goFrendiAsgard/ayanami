@@ -24,22 +24,6 @@ type GoServiceConfig struct {
 	generator.StringHelper
 }
 
-func (config *GoServiceConfig) toExposed() ExposedGoServiceConfig {
-	exposedFunctions := make(map[string]ExposedFunction)
-	packages := []string{}
-	for methodName, function := range config.Functions {
-		exposedFunction := function.ToExposed()
-		exposedFunctions[methodName] = exposedFunction
-		packages = append(packages, exposedFunction.FunctionPackage)
-	}
-	return ExposedGoServiceConfig{
-		Packages:    packages,
-		RepoName:    config.RepoName,
-		ServiceName: config.ServiceName,
-		Functions:   exposedFunctions,
-	}
-}
-
 // Validate validating config
 func (config GoServiceConfig) Validate() bool {
 	log.Printf("[INFO] Validating %s", config.ServiceName)
@@ -143,6 +127,22 @@ func (config GoServiceConfig) Build() error {
 // Set replace/add service's function
 func (config *GoServiceConfig) Set(method string, function Function) {
 	config.Functions[method] = function
+}
+
+func (config *GoServiceConfig) toExposed() ExposedGoServiceConfig {
+	exposedFunctions := make(map[string]ExposedFunction)
+	packages := []string{}
+	for methodName, function := range config.Functions {
+		exposedFunction := function.ToExposed()
+		exposedFunctions[methodName] = exposedFunction
+		packages = append(packages, exposedFunction.FunctionPackage)
+	}
+	return ExposedGoServiceConfig{
+		Packages:    packages,
+		RepoName:    config.RepoName,
+		ServiceName: config.ServiceName,
+		Functions:   exposedFunctions,
+	}
 }
 
 // NewGoService create new goservice

@@ -16,24 +16,24 @@ func init() {
     )
 
     // add input events
-    flow.AddEvent(gen.NewInputEvent(
+    flow.AddInputEvent(
         "trig.request.get.out.req",
         "request",
-    ))
+    )
 
     // add output events
-    flow.AddEvent(gen.NewOutputEventVal(
+    flow.AddOutputEventVal(
         "trig.response.get.in.code",
         "code",
         200,
-    ))
-    flow.AddEvent(gen.NewOutputEventFunc(
+    )
+    flow.AddOutputEventFunc(
         "trig.response.get.in.message",
         "request",
         "html",
         "CreateDefaultResponse",
         []string{},
-    ))
+    )
 
     // register flow
 	Gen.AddConfig(flow)

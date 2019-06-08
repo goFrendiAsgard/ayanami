@@ -39,16 +39,16 @@ func (config GatewayConfig) Scaffold() error {
 // Build building config
 func (config GatewayConfig) Build() error {
 	log.Printf("[INFO] Building %s", config.ServiceName)
-	dirPath := fmt.Sprintf("%s", config.ServiceName)
+	depPath := fmt.Sprintf("%s", config.ServiceName)
 	// write main.go
 	log.Println("[INFO] Create main.go")
-	mainPath := filepath.Join(dirPath, "main.go")
+	mainPath := filepath.Join(depPath, "main.go")
 	err := config.WriteDep(mainPath, "gateway.main.go", config)
 	if err != nil {
 		return err
 	}
 	log.Println("[INFO] Create go.mod")
-	goModPath := filepath.Join(dirPath, "go.mod")
+	goModPath := filepath.Join(depPath, "go.mod")
 	err = config.WriteDep(goModPath, "go.mod", config)
 	return err
 }

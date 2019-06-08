@@ -9,6 +9,7 @@ import (
 type Generator struct {
 	configs    Configs
 	procedures Procedures
+	IOHelper
 }
 
 // AddConfig add single config to generator
@@ -95,4 +96,14 @@ func (generator *Generator) Scaffold() error {
 // NewGenerator create new generator
 func NewGenerator() Generator {
 	return Generator{}
+}
+
+// NewProjectGenerator create new generator
+func NewProjectGenerator(projectPath string) (Generator, error) {
+	generator := NewGenerator()
+	ioHelper, err := NewIOHelperByProjectPath(projectPath)
+	if err == nil {
+		generator.IOHelper = ioHelper
+	}
+	return generator, err
 }
