@@ -9,6 +9,7 @@ import (
 
 // ExposedGoServiceConfig exposed ready flowConfig
 type ExposedGoServiceConfig struct {
+	Packages    []string
 	ServiceName string
 	RepoName    string
 	Functions   map[string]ExposedFunction
@@ -129,10 +130,14 @@ func (config GoServiceConfig) Build() error {
 
 func (config *GoServiceConfig) toExposed() ExposedGoServiceConfig {
 	exposedFunctions := make(map[string]ExposedFunction)
+	packages := []string{}
 	for methodName, function := range config.Functions {
-		exposedFunctions[methodName] = function.ToExposed()
+		exposedFunction := function.ToExposed()
+		exposedFunctions[methodName] = exposedFunction
+		packages = append(packages, exposedFunction.FunctionPackage)
 	}
 	return ExposedGoServiceConfig{
+		Packages:    packages,
 		RepoName:    config.RepoName,
 		ServiceName: config.ServiceName,
 		Functions:   exposedFunctions,

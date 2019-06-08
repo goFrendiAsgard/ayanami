@@ -7,6 +7,12 @@ import (
 	"path/filepath"
 )
 
+// ExposedCmdConfig exposed ready cmdConfig
+type ExposedCmdConfig struct {
+	ServiceName string
+	Commands    map[string]string
+}
+
 // CmdConfig configuration to generate Cmd
 type CmdConfig struct {
 	ServiceName string
@@ -14,6 +20,13 @@ type CmdConfig struct {
 	Commands    map[string]string
 	*generator.IOHelper
 	generator.StringHelper
+}
+
+func (config *CmdConfig) toExposed() ExposedCmdConfig {
+	return ExposedCmdConfig{
+		ServiceName: config.ServiceName,
+		Commands:    config.QuoteMap(config.Commands),
+	}
 }
 
 // Set replace/add cmd's command
@@ -57,7 +70,7 @@ func (config CmdConfig) Build() error {
 	// write main.go
 	log.Println("[INFO] Create main.go")
 	mainPath := filepath.Join(dirPath, "main.go")
-	err := config.WriteDep(mainPath, "cmd.main.go", config.QuoteMap(config.Commands))
+	err := config.WriteDep(mainPath, "cmd.main.go", config.toExposed())
 	if err != nil {
 		return err
 	}

@@ -1,12 +1,13 @@
 {{ define "gosrvc.main.go" }}
-package {{.PackageName}}
+package main
 
+{{ $repoName := .RepoName }}
 import (
 	"github.com/state-alchemists/ayanami/config"
 	"github.com/state-alchemists/ayanami/msgbroker"
 	"github.com/state-alchemists/ayanami/service"
 	"log"{{ range .Packages }}
-    "{{.PackageName}}/{{.}}"{{ end }}
+    "{{$repoName}}/{{.}}"{{ end }}
 )
 
 func main() {

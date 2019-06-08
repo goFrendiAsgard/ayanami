@@ -16,7 +16,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// define services
-	services := service.Services{ {{ range $methodName, $command := . }}
+	services := service.Services{ {{ range $methodName, $command := .Commands }}
         service.NewCmd(serviceName, "{{$methodName}}",
 			[]string{"/bin/sh", {{$command}}},
 		),{{ end }}
