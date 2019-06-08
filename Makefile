@@ -7,8 +7,14 @@ testv:
 coverage:
 	go tool cover -html=profile.out
 
-run:
-	go build && ./ayanami
+cleantest:
+	rm -R .test-*
 
-help:
-	go build && ./ayanami -h
+testgenerate:
+	mkdir -p .test-gen && go build && ./ayanami init -p whatever -r github.com/whoever/whatever -d .test-gen && go build -o .test-gen/whatever/generator/whatever .test-gen/whatever/generator/main.go
+
+testscaffold:
+	.test-gen/whatever/generator/whatever scaffold
+
+testbuild:
+	.test-gen/whatever/generator/whatever build

@@ -58,7 +58,7 @@ func NewProjectGenerator(dirName, projectName, repoName, templatePath, genPath s
 
 // Generate generating project skeleton
 func (p ProjectGenerator) Generate() error {
-	log.Println("Generate...")
+	log.Println("[INFO] Generate...")
 	// create deployable directory
 	err := os.MkdirAll(p.DeployablePath, os.ModePerm)
 	if err != nil {

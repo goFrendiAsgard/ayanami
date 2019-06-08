@@ -61,7 +61,7 @@ func (config *GoServiceConfig) Scaffold() error {
 		functionSourcePath := filepath.Join(packageSourcePath, functionFileName)
 		if !config.IsSourceExists(functionSourcePath) {
 			log.Printf("[INFO] Create %s", functionFileName)
-			err := config.WriteSource(functionSourcePath, "srvc.function.go", data)
+			err := config.WriteSource(functionSourcePath, "gosrvc.function.go", data)
 			if err != nil {
 				return err
 			}
@@ -116,7 +116,7 @@ func (config *GoServiceConfig) Build() error {
 	// write main.go
 	log.Println("[INFO] Create main.go")
 	mainPath := filepath.Join(depPath, "main.go")
-	err := config.WriteDep(mainPath, "srvc.main.go", config.toExposed())
+	err := config.WriteDep(mainPath, "gosrvc.main.go", config.toExposed())
 	if err != nil {
 		return err
 	}

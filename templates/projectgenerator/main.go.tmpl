@@ -4,8 +4,9 @@ package main
 import(
 	"fmt"
 	"github.com/state-alchemists/ayanami/generator"
-    "path/filepath"
+    "log"
     "os"
+    "path/filepath"
     "runtime"
 )
 
@@ -25,11 +26,15 @@ func main() {
 	}
     switch param {
     case "build":
+        log.Println("[INFO] Building...")
         Gen.Build()
+        log.Println("[INFO] Done...")
     case "scaffold":
+        log.Println("[INFO] Scaffolding...")
         Gen.Scaffold()
+        log.Println("[INFO] Done...")
     default:
-        fmt.Println("Unrecognized command. Currently only support `build` and `scaffold`")
+        fmt.Println("[ERROR] Unrecognized command. Currently only support `build` and `scaffold`")
     }
 }
 {{end}}
