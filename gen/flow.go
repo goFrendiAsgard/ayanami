@@ -30,30 +30,30 @@ type FlowConfig struct {
 }
 
 // Validate validating config
-func (config FlowConfig) Validate() bool {
-	serviceName := config.getServiceName()
+func (c FlowConfig) Validate() bool {
+	serviceName := c.getServiceName()
 	log.Printf("[INFO] Validating %s", serviceName)
-	for _, input := range config.Inputs {
-		if !config.IsMatch(input, "^[A-Za-z][a-zA-Z0-9]*$") {
+	for _, input := range c.Inputs {
+		if !c.IsMatch(input, "^[A-Za-z][a-zA-Z0-9]*$") {
 			log.Printf("[ERROR] Invalid input `%s`", input)
 			return false
 		}
 	}
-	for _, output := range config.Outputs {
-		if !config.IsMatch(output, "^[A-Za-z][a-zA-Z0-9]*$") {
+	for _, output := range c.Outputs {
+		if !c.IsMatch(output, "^[A-Za-z][a-zA-Z0-9]*$") {
 			log.Printf("[ERROR] Invalid output `%s`", output)
 			return false
 		}
 	}
-	if !config.IsAlphaNumeric(config.FlowName) {
-		log.Printf("[ERROR] Flow name should be alphanumeric, but `%s` found", config.FlowName)
+	if !c.IsAlphaNumeric(c.FlowName) {
+		log.Printf("[ERROR] Flow name should be alphanumeric, but `%s` found", c.FlowName)
 		return false
 	}
-	if config.RepoName == "" {
+	if c.RepoName == "" {
 		log.Printf("[ERROR] Repo name should not be empty")
 		return false
 	}
-	for index, event := range config.Events {
+	for index, event := range c.Events {
 		log.Printf("[INFO] Validating event %d", index)
 		if !event.Validate() {
 			return false
@@ -63,10 +63,10 @@ func (config FlowConfig) Validate() bool {
 }
 
 // Scaffold scaffolding config
-func (config FlowConfig) Scaffold() error {
-	serviceName := config.getServiceName()
+func (c FlowConfig) Scaffold() error {
+	serviceName := c.getServiceName()
 	log.Printf("[INFO] Scaffolding %s", serviceName)
-	for _, event := range config.Events {
+	for _, event := range c.Events {
 		if !event.UseFunction {
 			continue
 		}
@@ -78,9 +78,9 @@ func (config FlowConfig) Scaffold() error {
 		functionFileName := event.GetFunctionFileName()
 		// write function
 		functionSourcePath := filepath.Join(packageSourcePath, functionFileName)
-		if !config.IsSourceExists(functionSourcePath) {
+		if !c.IsSourceExists(functionSourcePath) {
 			log.Printf("[INFO] Create %s", functionFileName)
-			err := config.WriteSource(functionSourcePath, "flow.function.go", data)
+			err := c.WriteSource(functionSourcePath, "flow.function.go", data)
 			if err != nil {
 				return err
 			}
@@ -90,9 +90,9 @@ func (config FlowConfig) Scaffold() error {
 		// write dependencies
 		for _, dependency := range event.FunctionDependencies {
 			dependencySourcePath := filepath.Join(packageSourcePath, dependency)
-			if !config.IsSourceExists(dependencySourcePath) {
+			if !c.IsSourceExists(dependencySourcePath) {
 				log.Printf("[INFO] Create %s", dependency)
-				err := config.WriteSource(dependencySourcePath, "dependency.go", data)
+				err := c.WriteSource(dependencySourcePath, "dependency.go", data)
 				if err != nil {
 					return err
 				}
@@ -105,12 +105,12 @@ func (config FlowConfig) Scaffold() error {
 }
 
 // Build building config
-func (config FlowConfig) Build() error {
-	serviceName := config.getServiceName()
+func (c FlowConfig) Build() error {
+	serviceName := c.getServiceName()
 	log.Printf("[INFO] Building %s", serviceName)
-	depPath := fmt.Sprintf("flow-%s", config.FlowName)
+	depPath := fmt.Sprintf("flow-%s", c.FlowName)
 	// write functions and dependencies
-	for _, event := range config.Events {
+	for _, event := range c.Events {
 		if !event.UseFunction {
 			continue
 		}
@@ -121,7 +121,7 @@ func (config FlowConfig) Build() error {
 		log.Printf("[INFO] Create %s", functionFileName)
 		functionSourcePath := filepath.Join(packageSourcePath, functionFileName)
 		functionDepPath := filepath.Join(packageDepPath, functionFileName)
-		err := config.CopySourceToDep(functionSourcePath, functionDepPath)
+		err := c.CopySourceToDep(functionSourcePath, functionDepPath)
 		if err != nil {
 			return err
 		}
@@ -130,7 +130,7 @@ func (config FlowConfig) Build() error {
 			log.Printf("[INFO] Create %s", dependency)
 			dependencySourcePath := filepath.Join(packageSourcePath, dependency)
 			dependencyDepPath := filepath.Join(packageDepPath, dependency)
-			err := config.CopySourceToDep(dependencySourcePath, dependencyDepPath)
+			err := c.CopySourceToDep(dependencySourcePath, dependencyDepPath)
 			if err != nil {
 				return err
 			}
@@ -139,69 +139,74 @@ func (config FlowConfig) Build() error {
 	// write main.go
 	log.Println("[INFO] Create main.go")
 	mainPath := filepath.Join(depPath, "main.go")
-	err := config.WriteDep(mainPath, "flow.main.go", config.toExposed())
+	err := c.WriteDep(mainPath, "flow.main.go", c.toExposed())
 	if err != nil {
 		return err
 	}
 	// write go.mod
 	log.Println("[INFO] Create go.mod")
 	goModPath := filepath.Join(depPath, "go.mod")
-	err = config.WriteDep(goModPath, "go.mod", config)
+	err = c.WriteDep(goModPath, "go.mod", c)
 	return err
 }
 
+// CreateProgram create main.go and others
+func (c FlowConfig) CreateProgram(depPath, serviceName, repoName, mainFunction string) {
+	// TODO use this
+}
+
 // AddEvent add input to inputEvents
-func (config *FlowConfig) AddEvent(event Event) {
-	config.Events = append(config.Events, event)
+func (c *FlowConfig) AddEvent(event Event) {
+	c.Events = append(c.Events, event)
 }
 
 // AddInputEvent create new Event
-func (config *FlowConfig) AddInputEvent(eventName, varName string) {
-	config.AddEvent(NewInputEvent(eventName, varName))
+func (c *FlowConfig) AddInputEvent(eventName, varName string) {
+	c.AddEvent(NewInputEvent(eventName, varName))
 }
 
 // AddOutputEvent create new Event
-func (config *FlowConfig) AddOutputEvent(eventName, varName string) {
-	config.AddEvent(NewOutputEvent(eventName, varName))
+func (c *FlowConfig) AddOutputEvent(eventName, varName string) {
+	c.AddEvent(NewOutputEvent(eventName, varName))
 }
 
 // AddOutputEventVal create new Event with value
-func (config *FlowConfig) AddOutputEventVal(eventName, varName string, value interface{}) {
-	config.AddEvent(NewOutputEventVal(eventName, varName, value))
+func (c *FlowConfig) AddOutputEventVal(eventName, varName string, value interface{}) {
+	c.AddEvent(NewOutputEventVal(eventName, varName, value))
 }
 
 // AddOutputEventFunc create new Event with function
-func (config *FlowConfig) AddOutputEventFunc(eventName, varName, functionPackage, functionName string, functionDependencies []string) {
-	config.AddEvent(NewOutputEventFunc(eventName, varName, functionPackage, functionName, functionDependencies))
+func (c *FlowConfig) AddOutputEventFunc(eventName, varName, functionPackage, functionName string, functionDependencies []string) {
+	c.AddEvent(NewOutputEventFunc(eventName, varName, functionPackage, functionName, functionDependencies))
 }
 
-func (config *FlowConfig) toExposed() ExposedFlowConfig {
+func (c *FlowConfig) toExposed() ExposedFlowConfig {
 	return ExposedFlowConfig{
-		ServiceName: config.getServiceName(),
-		RepoName:    config.RepoName,
-		FlowName:    config.FlowName,
-		Packages:    config.getPackagesForExposed(),
-		Events:      config.getEventsForExposed(),
-		Outputs:     config.QuoteArrayAndJoin(config.Outputs, ", "),
-		Inputs:      config.QuoteArrayAndJoin(config.Inputs, ", "),
+		ServiceName: c.getServiceName(),
+		RepoName:    c.RepoName,
+		FlowName:    c.FlowName,
+		Packages:    c.getPackagesForExposed(),
+		Events:      c.getEventsForExposed(),
+		Outputs:     c.QuoteArrayAndJoin(c.Outputs, ", "),
+		Inputs:      c.QuoteArrayAndJoin(c.Inputs, ", "),
 	}
 }
 
-func (config *FlowConfig) getServiceName() string {
-	return fmt.Sprintf("flow%s", config.FlowName)
+func (c *FlowConfig) getServiceName() string {
+	return fmt.Sprintf("flow%s", c.FlowName)
 }
 
-func (config *FlowConfig) getEventsForExposed() []map[string]string {
+func (c *FlowConfig) getEventsForExposed() []map[string]string {
 	events := []map[string]string{}
-	for _, event := range config.Events {
+	for _, event := range c.Events {
 		events = append(events, event.ToMap())
 	}
 	return events
 }
 
-func (config *FlowConfig) getPackagesForExposed() []string {
+func (c *FlowConfig) getPackagesForExposed() []string {
 	packages := []string{}
-	for _, event := range config.Events {
+	for _, event := range c.Events {
 		if !event.UseFunction {
 			continue
 		}

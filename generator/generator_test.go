@@ -15,25 +15,25 @@ type testConfig struct {
 	BuildError    bool
 }
 
-func (config testConfig) Validate() bool {
-	return config.Valid
+func (c testConfig) Validate() bool {
+	return c.Valid
 }
 
-func (config testConfig) Scaffold() error {
-	if config.ScaffoldError {
-		config.State[fmt.Sprintf("config%sScaffoldError", config.Name)] = true
+func (c testConfig) Scaffold() error {
+	if c.ScaffoldError {
+		c.State[fmt.Sprintf("config%sScaffoldError", c.Name)] = true
 		return errors.New("error")
 	}
-	config.State[fmt.Sprintf("config%sScaffoldDone", config.Name)] = true
+	c.State[fmt.Sprintf("config%sScaffoldDone", c.Name)] = true
 	return nil
 }
 
-func (config testConfig) Build() error {
-	if config.BuildError {
-		config.State[fmt.Sprintf("config%sBuildError", config.Name)] = true
+func (c testConfig) Build() error {
+	if c.BuildError {
+		c.State[fmt.Sprintf("config%sBuildError", c.Name)] = true
 		return errors.New("error")
 	}
-	config.State[fmt.Sprintf("config%sBuildDone", config.Name)] = true
+	c.State[fmt.Sprintf("config%sBuildDone", c.Name)] = true
 	return nil
 }
 
@@ -45,25 +45,25 @@ type testProcedure struct {
 	BuildError    bool
 }
 
-func (procedure testProcedure) Validate(config Configs) bool {
-	return procedure.Valid
+func (p testProcedure) Validate(config Configs) bool {
+	return p.Valid
 }
 
-func (procedure testProcedure) Scaffold(config Configs) error {
-	if procedure.ScaffoldError {
-		procedure.State[fmt.Sprintf("procedure%sScaffoldError", procedure.Name)] = true
+func (p testProcedure) Scaffold(config Configs) error {
+	if p.ScaffoldError {
+		p.State[fmt.Sprintf("procedure%sScaffoldError", p.Name)] = true
 		return errors.New("error")
 	}
-	procedure.State[fmt.Sprintf("procedure%sScaffoldDone", procedure.Name)] = true
+	p.State[fmt.Sprintf("procedure%sScaffoldDone", p.Name)] = true
 	return nil
 }
 
-func (procedure testProcedure) Build(config Configs) error {
-	if procedure.BuildError {
-		procedure.State[fmt.Sprintf("procedure%sBuildError", procedure.Name)] = true
+func (p testProcedure) Build(config Configs) error {
+	if p.BuildError {
+		p.State[fmt.Sprintf("procedure%sBuildError", p.Name)] = true
 		return errors.New("error")
 	}
-	procedure.State[fmt.Sprintf("procedure%sBuildDone", procedure.Name)] = true
+	p.State[fmt.Sprintf("procedure%sBuildDone", p.Name)] = true
 	return nil
 }
 

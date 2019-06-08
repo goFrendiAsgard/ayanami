@@ -1,0 +1,20 @@
+{{define "example.gomonolith.go" }}
+package main
+
+import (
+	"{{.RepoName}}/gen"
+)
+
+func init() {
+
+    // define procedure
+	procedure := gen.NewGoMonolith(&Gen,
+        "all",                 // service name
+        "github.com/nerv/all", // repo name
+    )
+
+    // register procedure
+	Gen.AddProcedure(procedure)
+
+}
+{{end}}

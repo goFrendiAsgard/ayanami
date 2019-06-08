@@ -15,10 +15,10 @@ type mapOfInterface = map[string]interface{}
 type Dictionary mapOfInterface
 
 // Get get from dictionary
-func (dictionary Dictionary) Get(dottedKeys string) interface{} {
+func (d Dictionary) Get(dottedKeys string) interface{} {
 	keyParts := strings.Split(dottedKeys, ".")
 	var data interface{}
-	data = dictionary
+	data = d
 	for _, key := range keyParts {
 		reflectKind := getReflectKind(data)
 		if reflectKind == reflect.Map {
@@ -43,10 +43,10 @@ func (dictionary Dictionary) Get(dottedKeys string) interface{} {
 }
 
 // Has check whether key exists in dictionary
-func (dictionary Dictionary) Has(dottedKeys string) bool {
+func (d Dictionary) Has(dottedKeys string) bool {
 	keyParts := strings.Split(dottedKeys, ".")
 	var data interface{}
-	data = dictionary
+	data = d
 	for _, key := range keyParts {
 		reflectKind := getReflectKind(data)
 		if reflectKind == reflect.Map {
@@ -71,9 +71,9 @@ func (dictionary Dictionary) Has(dottedKeys string) bool {
 }
 
 // HasAll check whether all key in keyNames are available in dictionary
-func (dictionary *Dictionary) HasAll(keyNames []string) bool {
+func (d *Dictionary) HasAll(keyNames []string) bool {
 	for _, keyName := range keyNames {
-		if !dictionary.Has(keyName) {
+		if !d.Has(keyName) {
 			return false
 		}
 	}
@@ -81,8 +81,8 @@ func (dictionary *Dictionary) HasAll(keyNames []string) bool {
 }
 
 // Set set dictionary
-func (dictionary *Dictionary) Set(dottedKeys string, newValue interface{}) error {
-	var pointer interface{} = *dictionary
+func (d *Dictionary) Set(dottedKeys string, newValue interface{}) error {
+	var pointer interface{} = *d
 	keyParts := strings.Split(dottedKeys, ".")
 	if len(keyParts) == 1 { // dottedKeys is not nested, set the value and return
 		pointer.(Dictionary)[dottedKeys] = newValue

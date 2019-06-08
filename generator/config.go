@@ -11,8 +11,8 @@ type CommonConfig interface {
 type Configs []CommonConfig
 
 // Build build configurations
-func (configs Configs) Build() error {
-	for _, config := range configs {
+func (cfgs Configs) Build() error {
+	for _, config := range cfgs {
 		err := config.Build()
 		if err != nil {
 			return err
@@ -22,8 +22,8 @@ func (configs Configs) Build() error {
 }
 
 // Scaffold scaffold configurations
-func (configs Configs) Scaffold() error {
-	for _, config := range configs {
+func (cfgs Configs) Scaffold() error {
+	for _, config := range cfgs {
 		err := config.Scaffold()
 		if err != nil {
 			return err
@@ -33,8 +33,8 @@ func (configs Configs) Scaffold() error {
 }
 
 // Validate validate configurations
-func (configs Configs) Validate() bool {
-	for _, config := range configs {
+func (cfgs Configs) Validate() bool {
+	for _, config := range cfgs {
 		if !config.Validate() {
 			return false
 		}

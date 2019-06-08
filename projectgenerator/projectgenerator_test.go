@@ -73,6 +73,11 @@ func TestProjectGenerator(t *testing.T) {
 		t.Errorf("Get error: %s", err)
 	}
 
+	// check generator/gomonolith existance
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "monolith.go")); err != nil {
+		t.Errorf("Get error: %s", err)
+	}
+
 	// check generator/cmdservice existance
 	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "cmdservice.go")); err != nil {
 		t.Errorf("Get error: %s", err)

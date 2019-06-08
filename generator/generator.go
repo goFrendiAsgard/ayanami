@@ -13,59 +13,59 @@ type Generator struct {
 }
 
 // AddConfig add single config to generator
-func (generator *Generator) AddConfig(config CommonConfig) {
-	generator.configs = append(generator.configs, config)
+func (g *Generator) AddConfig(config CommonConfig) {
+	g.configs = append(g.configs, config)
 }
 
 // AddConfigs add single config to generator
-func (generator *Generator) AddConfigs(configs []CommonConfig) {
+func (g *Generator) AddConfigs(configs []CommonConfig) {
 	for _, config := range configs {
-		generator.AddConfig(config)
+		g.AddConfig(config)
 	}
 }
 
 // AddProcedure add single procedure to generator
-func (generator *Generator) AddProcedure(procedure CommonProcedure) {
-	generator.procedures = append(generator.procedures, procedure)
+func (g *Generator) AddProcedure(procedure CommonProcedure) {
+	g.procedures = append(g.procedures, procedure)
 }
 
 // AddProcedures add single procedure to generator
-func (generator *Generator) AddProcedures(procedures []CommonProcedure) {
+func (g *Generator) AddProcedures(procedures []CommonProcedure) {
 	for _, procedure := range procedures {
-		generator.AddProcedure(procedure)
+		g.AddProcedure(procedure)
 	}
 }
 
 // Validate validate all configs and procedures
-func (generator *Generator) Validate() bool {
+func (g *Generator) Validate() bool {
 	// validate all configs
 	log.Println("VALIDATING CONFIGS")
-	if !generator.configs.Validate() {
+	if !g.configs.Validate() {
 		return false
 	}
 	// validate all procedures
 	log.Println("VALIDATING PROCEDURES")
-	if !generator.procedures.Validate(generator.configs) {
+	if !g.procedures.Validate(g.configs) {
 		return false
 	}
 	return true
 }
 
 // Build build from config & procedures
-func (generator *Generator) Build() error {
+func (g *Generator) Build() error {
 	// validate configs & procedures
-	if !generator.Validate() {
+	if !g.Validate() {
 		return errors.New("Invalid config/procedure")
 	}
 	// build configs
 	log.Println("BUILDING CONFIGS")
-	err := generator.configs.Build()
+	err := g.configs.Build()
 	if err != nil {
 		return err
 	}
 	// build procedures
 	log.Println("BUILDING PROCEDURES")
-	err = generator.procedures.Build(generator.configs)
+	err = g.procedures.Build(g.configs)
 	if err != nil {
 		return err
 	}
@@ -73,20 +73,20 @@ func (generator *Generator) Build() error {
 }
 
 // Scaffold scaffold from config & procedures
-func (generator *Generator) Scaffold() error {
+func (g *Generator) Scaffold() error {
 	// validate configs & procedures
-	if !generator.Validate() {
+	if !g.Validate() {
 		return errors.New("Invalid config/procedure")
 	}
 	// scaffold configs
 	log.Println("SCAFFOLDING CONFIGS")
-	err := generator.configs.Scaffold()
+	err := g.configs.Scaffold()
 	if err != nil {
 		return err
 	}
 	// scaffold procedures
 	log.Println("SCAFFOLDING PROCEDURES")
-	err = generator.procedures.Scaffold(generator.configs)
+	err = g.procedures.Scaffold(g.configs)
 	if err != nil {
 		return err
 	}

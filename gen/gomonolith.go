@@ -15,23 +15,23 @@ type GoMonolithProc struct {
 }
 
 // Validate validating procedure
-func (procedure GoMonolithProc) Validate(configs generator.Configs) bool {
+func (p GoMonolithProc) Validate(configs generator.Configs) bool {
 	return true
 }
 
 // Scaffold scaffolding procedure
-func (procedure GoMonolithProc) Scaffold(configs generator.Configs) error {
+func (p GoMonolithProc) Scaffold(configs generator.Configs) error {
 	return nil
 }
 
 // Build building procedure
-func (procedure GoMonolithProc) Build(configs generator.Configs) error {
-	log.Printf("[INFO] Building %s", procedure.ServiceName)
-	depPath := fmt.Sprintf(procedure.ServiceName)
+func (p GoMonolithProc) Build(configs generator.Configs) error {
+	log.Printf("[INFO] Building %s", p.ServiceName)
+	depPath := fmt.Sprintf(p.ServiceName)
 	// write go.mod
 	log.Println("[INFO] Create go.mod")
 	goModPath := filepath.Join(depPath, "go.mod")
-	err := procedure.WriteDep(goModPath, "go.mod", procedure)
+	err := p.WriteDep(goModPath, "go.mod", p)
 	return err
 }
 

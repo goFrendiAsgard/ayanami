@@ -25,18 +25,18 @@ type GoServiceConfig struct {
 }
 
 // Validate validating config
-func (config GoServiceConfig) Validate() bool {
-	log.Printf("[INFO] Validating %s", config.ServiceName)
-	if !config.IsAlphaNumeric(config.ServiceName) {
-		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", config.ServiceName)
+func (c GoServiceConfig) Validate() bool {
+	log.Printf("[INFO] Validating %s", c.ServiceName)
+	if !c.IsAlphaNumeric(c.ServiceName) {
+		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", c.ServiceName)
 		return false
 	}
-	if config.RepoName == "" {
+	if c.RepoName == "" {
 		log.Println("[ERROR] Repo name should not be empty")
 		return false
 	}
-	for methodName, function := range config.Functions {
-		if !config.IsAlphaNumeric(methodName) {
+	for methodName, function := range c.Functions {
+		if !c.IsAlphaNumeric(methodName) {
 			log.Printf("[ERROR] method should be alphanumeric, but `%s` found", methodName)
 			return false
 		}
@@ -48,17 +48,17 @@ func (config GoServiceConfig) Validate() bool {
 }
 
 // Scaffold scaffolding config
-func (config GoServiceConfig) Scaffold() error {
-	log.Printf("[INFO] Scaffolding %s", config.ServiceName)
-	for _, function := range config.Functions {
+func (c GoServiceConfig) Scaffold() error {
+	log.Printf("[INFO] Scaffolding %s", c.ServiceName)
+	for _, function := range c.Functions {
 		data := function.ToExposed()
 		packageSourcePath := function.FunctionPackage
 		functionFileName := function.GetFunctionFileName()
 		// write function
 		functionSourcePath := filepath.Join(packageSourcePath, functionFileName)
-		if !config.IsSourceExists(functionSourcePath) {
+		if !c.IsSourceExists(functionSourcePath) {
 			log.Printf("[INFO] Create %s", functionFileName)
-			err := config.WriteSource(functionSourcePath, "gosrvc.function.go", data)
+			err := c.WriteSource(functionSourcePath, "gosrvc.function.go", data)
 			if err != nil {
 				return err
 			}
@@ -68,9 +68,9 @@ func (config GoServiceConfig) Scaffold() error {
 		// write dependencies
 		for _, dependency := range function.FunctionDependencies {
 			dependencySourcePath := filepath.Join(packageSourcePath, dependency)
-			if !config.IsSourceExists(dependencySourcePath) {
+			if !c.IsSourceExists(dependencySourcePath) {
 				log.Printf("[INFO] Create %s", dependency)
-				err := config.WriteSource(dependencySourcePath, "dependency.go", data)
+				err := c.WriteSource(dependencySourcePath, "dependency.go", data)
 				if err != nil {
 					return err
 				}
@@ -83,11 +83,11 @@ func (config GoServiceConfig) Scaffold() error {
 }
 
 // Build building config
-func (config GoServiceConfig) Build() error {
-	log.Printf("[INFO] Building %s", config.ServiceName)
-	depPath := fmt.Sprintf("srvc-%s", config.ServiceName)
+func (c GoServiceConfig) Build() error {
+	log.Printf("[INFO] Building %s", c.ServiceName)
+	depPath := fmt.Sprintf("srvc-%s", c.ServiceName)
 	// write functions and dependencies
-	for _, function := range config.Functions {
+	for _, function := range c.Functions {
 		packageSourcePath := function.FunctionPackage
 		packageDepPath := filepath.Join(depPath, function.FunctionPackage)
 		functionFileName := function.GetFunctionFileName()
@@ -95,7 +95,7 @@ func (config GoServiceConfig) Build() error {
 		log.Printf("[INFO] Create %s", functionFileName)
 		functionSourcePath := filepath.Join(packageSourcePath, functionFileName)
 		functionDepPath := filepath.Join(packageDepPath, functionFileName)
-		err := config.CopySourceToDep(functionSourcePath, functionDepPath)
+		err := c.CopySourceToDep(functionSourcePath, functionDepPath)
 		if err != nil {
 			return err
 		}
@@ -104,7 +104,7 @@ func (config GoServiceConfig) Build() error {
 			log.Printf("[INFO] Create %s", dependency)
 			dependencySourcePath := filepath.Join(packageSourcePath, dependency)
 			dependencyDepPath := filepath.Join(packageDepPath, dependency)
-			err := config.CopySourceToDep(dependencySourcePath, dependencyDepPath)
+			err := c.CopySourceToDep(dependencySourcePath, dependencyDepPath)
 			if err != nil {
 				return err
 			}
@@ -113,34 +113,39 @@ func (config GoServiceConfig) Build() error {
 	// write main.go
 	log.Println("[INFO] Create main.go")
 	mainPath := filepath.Join(depPath, "main.go")
-	err := config.WriteDep(mainPath, "gosrvc.main.go", config.toExposed())
+	err := c.WriteDep(mainPath, "gosrvc.main.go", c.toExposed())
 	if err != nil {
 		return err
 	}
 	// write go.mod
 	log.Println("[INFO] Create go.mod")
 	goModPath := filepath.Join(depPath, "go.mod")
-	err = config.WriteDep(goModPath, "go.mod", config)
+	err = c.WriteDep(goModPath, "go.mod", c)
 	return err
 }
 
-// Set replace/add service's function
-func (config *GoServiceConfig) Set(method string, function Function) {
-	config.Functions[method] = function
+// CreateProgram create main.go and others
+func (c GoServiceConfig) CreateProgram(depPath, serviceName, repoName, mainFunction string) {
+	// TODO use this
 }
 
-func (config *GoServiceConfig) toExposed() ExposedGoServiceConfig {
+// Set replace/add service's function
+func (c *GoServiceConfig) Set(method string, function Function) {
+	c.Functions[method] = function
+}
+
+func (c *GoServiceConfig) toExposed() ExposedGoServiceConfig {
 	exposedFunctions := make(map[string]ExposedFunction)
 	packages := []string{}
-	for methodName, function := range config.Functions {
+	for methodName, function := range c.Functions {
 		exposedFunction := function.ToExposed()
 		exposedFunctions[methodName] = exposedFunction
 		packages = append(packages, exposedFunction.FunctionPackage)
 	}
 	return ExposedGoServiceConfig{
 		Packages:    packages,
-		RepoName:    config.RepoName,
-		ServiceName: config.ServiceName,
+		RepoName:    c.RepoName,
+		ServiceName: c.ServiceName,
 		Functions:   exposedFunctions,
 	}
 }

@@ -16,26 +16,6 @@ type IOHelper struct {
 	template   *template.Template
 }
 
-// NewIOHelper create new IOHelper
-func NewIOHelper(sourcePath, depPath, templatePath string) (IOHelper, error) {
-	projectTemplatePattern := filepath.Join(templatePath, "*")
-	projectTemplate := template.Must(template.ParseGlob(projectTemplatePattern))
-	io := IOHelper{
-		sourcePath: sourcePath,
-		depPath:    depPath,
-		template:   projectTemplate,
-	}
-	return io, nil
-}
-
-// NewIOHelperByProjectPath create new io by using projectPath
-func NewIOHelperByProjectPath(projectPath string) (IOHelper, error) {
-	sourceCodePath := filepath.Join(projectPath, "sourcecode")
-	deployablePath := filepath.Join(projectPath, "deployable")
-	templatePath := filepath.Join(projectPath, "generator", "templates")
-	return NewIOHelper(sourceCodePath, deployablePath, templatePath)
-}
-
 // GetSourcePath get sourcePath
 func (io *IOHelper) GetSourcePath() string {
 	return io.sourcePath
@@ -141,3 +121,24 @@ func (io *IOHelper) WriteFile(filePath string, content string) error {
 	_, err = f.WriteString(content)
 	return err
 }
+
+// NewIOHelper create new IOHelper
+func NewIOHelper(sourcePath, depPath, templatePath string) (IOHelper, error) {
+	projectTemplatePattern := filepath.Join(templatePath, "*")
+	projectTemplate := template.Must(template.ParseGlob(projectTemplatePattern))
+	io := IOHelper{
+		sourcePath: sourcePath,
+		depPath:    depPath,
+		template:   projectTemplate,
+	}
+	return io, nil
+}
+
+// NewIOHelperByProjectPath create new io by using projectPath
+func NewIOHelperByProjectPath(projectPath string) (IOHelper, error) {
+	sourceCodePath := filepath.Join(projectPath, "sourcecode")
+	deployablePath := filepath.Join(projectPath, "deployable")
+	templatePath := filepath.Join(projectPath, "generator", "templates")
+	return NewIOHelper(sourceCodePath, deployablePath, templatePath)
+}
+

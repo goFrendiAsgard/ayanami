@@ -17,13 +17,13 @@ type GatewayConfig struct {
 }
 
 // Validate validating config
-func (config GatewayConfig) Validate() bool {
-	log.Printf("[INFO] Validating %s", config.ServiceName)
-	if !config.IsAlphaNumeric(config.ServiceName) {
-		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", config.ServiceName)
+func (c GatewayConfig) Validate() bool {
+	log.Printf("[INFO] Validating %s", c.ServiceName)
+	if !c.IsAlphaNumeric(c.ServiceName) {
+		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", c.ServiceName)
 		return false
 	}
-	if config.RepoName == "" {
+	if c.RepoName == "" {
 		log.Printf("[ERROR] Repo name should not be empty")
 		return false
 	}
@@ -31,31 +31,36 @@ func (config GatewayConfig) Validate() bool {
 }
 
 // Scaffold scaffolding config
-func (config GatewayConfig) Scaffold() error {
-	log.Printf("[SKIP] Scaffolding %s", config.ServiceName)
+func (c GatewayConfig) Scaffold() error {
+	log.Printf("[SKIP] Scaffolding %s", c.ServiceName)
 	return nil
 }
 
 // Build building config
-func (config GatewayConfig) Build() error {
-	log.Printf("[INFO] Building %s", config.ServiceName)
-	depPath := fmt.Sprintf("%s", config.ServiceName)
+func (c GatewayConfig) Build() error {
+	log.Printf("[INFO] Building %s", c.ServiceName)
+	depPath := fmt.Sprintf("%s", c.ServiceName)
 	// write main.go
 	log.Println("[INFO] Create main.go")
 	mainPath := filepath.Join(depPath, "main.go")
-	err := config.WriteDep(mainPath, "gateway.main.go", config)
+	err := c.WriteDep(mainPath, "gateway.main.go", c)
 	if err != nil {
 		return err
 	}
 	log.Println("[INFO] Create go.mod")
 	goModPath := filepath.Join(depPath, "go.mod")
-	err = config.WriteDep(goModPath, "go.mod", config)
+	err = c.WriteDep(goModPath, "go.mod", c)
 	return err
 }
 
+// CreateProgram create main.go and others
+func (c GatewayConfig) CreateProgram(depPath, serviceName, repoName, mainFunction string) {
+	// TODO use this
+}
+
 // AddRoute add route to gateway
-func (config *GatewayConfig) AddRoute(route string) {
-	config.Routes = append(config.Routes, route)
+func (c *GatewayConfig) AddRoute(route string) {
+	c.Routes = append(c.Routes, route)
 }
 
 // NewGateway create new gateway

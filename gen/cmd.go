@@ -23,18 +23,18 @@ type CmdConfig struct {
 }
 
 // Validate validating config
-func (config CmdConfig) Validate() bool {
-	log.Printf("[INFO] Validating %s", config.ServiceName)
-	if !config.IsAlphaNumeric(config.ServiceName) {
-		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", config.ServiceName)
+func (c CmdConfig) Validate() bool {
+	log.Printf("[INFO] Validating %s", c.ServiceName)
+	if !c.IsAlphaNumeric(c.ServiceName) {
+		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", c.ServiceName)
 		return false
 	}
-	if config.RepoName == "" {
+	if c.RepoName == "" {
 		log.Println("[ERROR] Repo name should not be empty")
 		return false
 	}
-	for methodName, command := range config.Commands {
-		if !config.IsAlphaNumeric(methodName) {
+	for methodName, command := range c.Commands {
+		if !c.IsAlphaNumeric(methodName) {
 			log.Printf("[ERROR] method should be alphanumeric, but `%s` found", methodName)
 			return false
 		}
@@ -47,38 +47,43 @@ func (config CmdConfig) Validate() bool {
 }
 
 // Scaffold scaffolding config
-func (config CmdConfig) Scaffold() error {
-	log.Printf("[SKIP] Scaffolding %s", config.ServiceName)
+func (c CmdConfig) Scaffold() error {
+	log.Printf("[SKIP] Scaffolding %s", c.ServiceName)
 	return nil
 }
 
 // Build building config
-func (config CmdConfig) Build() error {
-	log.Printf("[INFO] Building %s", config.ServiceName)
-	depPath := fmt.Sprintf("srvc-%s", config.ServiceName)
+func (c CmdConfig) Build() error {
+	log.Printf("[INFO] Building %s", c.ServiceName)
+	depPath := fmt.Sprintf("srvc-%s", c.ServiceName)
 	// write main.go
 	log.Println("[INFO] Create main.go")
 	mainPath := filepath.Join(depPath, "main.go")
-	err := config.WriteDep(mainPath, "cmd.main.go", config.toExposed())
+	err := c.WriteDep(mainPath, "cmd.main.go", c.toExposed())
 	if err != nil {
 		return err
 	}
 	// write go.mod
 	log.Println("[INFO] Create go.mod")
 	goModPath := filepath.Join(depPath, "go.mod")
-	err = config.WriteDep(goModPath, "go.mod", config)
+	err = c.WriteDep(goModPath, "go.mod", c)
 	return err
 }
 
-// Set replace/add cmd's command
-func (config *CmdConfig) Set(method, command string) {
-	config.Commands[method] = command
+// CreateProgram create main.go and others
+func (c CmdConfig) CreateProgram(depPath, serviceName, repoName, mainFunction string) {
+	// TODO use this
 }
 
-func (config *CmdConfig) toExposed() ExposedCmdConfig {
+// Set replace/add cmd's command
+func (c *CmdConfig) Set(method, command string) {
+	c.Commands[method] = command
+}
+
+func (c *CmdConfig) toExposed() ExposedCmdConfig {
 	return ExposedCmdConfig{
-		ServiceName: config.ServiceName,
-		Commands:    config.QuoteMap(config.Commands),
+		ServiceName: c.ServiceName,
+		Commands:    c.QuoteMap(c.Commands),
 	}
 }
 

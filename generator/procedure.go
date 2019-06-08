@@ -11,8 +11,8 @@ type CommonProcedure interface {
 type Procedures []CommonProcedure
 
 // Build build configurations
-func (procedures Procedures) Build(configs Configs) error {
-	for _, procedure := range procedures {
+func (procs Procedures) Build(configs Configs) error {
+	for _, procedure := range procs {
 		err := procedure.Build(configs)
 		if err != nil {
 			return err
@@ -22,8 +22,8 @@ func (procedures Procedures) Build(configs Configs) error {
 }
 
 // Scaffold scaffold configurations
-func (procedures Procedures) Scaffold(configs Configs) error {
-	for _, procedure := range procedures {
+func (procs Procedures) Scaffold(configs Configs) error {
+	for _, procedure := range procs {
 		err := procedure.Scaffold(configs)
 		if err != nil {
 			return err
@@ -33,8 +33,8 @@ func (procedures Procedures) Scaffold(configs Configs) error {
 }
 
 // Validate validate configurations
-func (procedures Procedures) Validate(configs Configs) bool {
-	for _, procedure := range procedures {
+func (procs Procedures) Validate(configs Configs) bool {
+	for _, procedure := range procs {
 		if !procedure.Validate(configs) {
 			return false
 		}
