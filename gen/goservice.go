@@ -9,10 +9,11 @@ import (
 
 // ExposedGoServiceConfig exposed ready flowConfig
 type ExposedGoServiceConfig struct {
-	Packages    []string
-	ServiceName string
-	RepoName    string
-	Functions   map[string]ExposedFunction
+	MainFunctionName string
+	ServiceName      string
+	RepoName         string
+	Packages         []string
+	Functions        map[string]ExposedFunction
 }
 
 // GoServiceConfig configuration to generate GoService
@@ -125,8 +126,9 @@ func (c GoServiceConfig) Build() error {
 }
 
 // CreateProgram create main.go and others
-func (c GoServiceConfig) CreateProgram(depPath, serviceName, repoName, mainFunction string) {
+func (c GoServiceConfig) CreateProgram(depPath, serviceName, repoName, mainFunctionName string) error {
 	// TODO use this
+	return nil
 }
 
 // Set replace/add service's function

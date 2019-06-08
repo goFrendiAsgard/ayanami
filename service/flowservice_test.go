@@ -129,7 +129,7 @@ func createFlowEventsTest() FlowEvents {
 
 func createFlowServiceTest(broker msgbroker.CommonBroker) CommonService {
 	// define flow
-	service := NewFlow("flow", "test", broker,
+	service := NewFlow("test", broker,
 		// inputs
 		[]string{"container", "b"},
 		// output

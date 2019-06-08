@@ -7,6 +7,14 @@ import (
 	"path/filepath"
 )
 
+// ExposedGatewayConfig configuration to generate Gateway
+type ExposedGatewayConfig struct {
+	MainFunctionName string
+	ServiceName      string
+	RepoName         string
+	Routes           []string
+}
+
 // GatewayConfig configuration to generate Gateway
 type GatewayConfig struct {
 	ServiceName string
@@ -54,8 +62,9 @@ func (c GatewayConfig) Build() error {
 }
 
 // CreateProgram create main.go and others
-func (c GatewayConfig) CreateProgram(depPath, serviceName, repoName, mainFunction string) {
+func (c GatewayConfig) CreateProgram(depPath, serviceName, repoName, mainFunctionName string) error {
 	// TODO use this
+	return nil
 }
 
 // AddRoute add route to gateway

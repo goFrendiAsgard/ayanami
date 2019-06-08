@@ -78,7 +78,7 @@ func (flows FlowEvents) GetOutputEventByVarNames(varName string) []string {
 }
 
 // NewFlow create new service for flow
-func NewFlow(serviceName, flowName string, broker msgbroker.CommonBroker, inputs, outputs []string, flows FlowEvents) CommonService {
+func NewFlow(flowName string, broker msgbroker.CommonBroker, inputs, outputs []string, flows FlowEvents) CommonService {
 	// populate inputs
 	var serviceInputs []IO
 	for _, inputName := range inputs {
@@ -106,7 +106,7 @@ func NewFlow(serviceName, flowName string, broker msgbroker.CommonBroker, inputs
 	// get errorEventName
 	errorEventName := fmt.Sprintf("flow.%s.err.message", flowName)
 	// get flowWrappedFunction
-	wrappedFunction := createFlowWrapper(serviceName, flowName, broker, flows, inputs, outputs)
+	wrappedFunction := createFlowWrapper(flowName, broker, flows, inputs, outputs)
 	return CommonService{
 		Input:          serviceInputs,
 		Output:         serviceOutputs,
@@ -115,7 +115,7 @@ func NewFlow(serviceName, flowName string, broker msgbroker.CommonBroker, inputs
 	}
 }
 
-func createFlowWrapper(serviceName, flowName string, broker msgbroker.CommonBroker, flows FlowEvents, inputVarNames, outputVarNames []string) WrappedFunction {
+func createFlowWrapper(flowName string, broker msgbroker.CommonBroker, flows FlowEvents, inputVarNames, outputVarNames []string) WrappedFunction {
 	return func(vars Dictionary) (Dictionary, error) {
 		var lock sync.RWMutex // protecting vars
 		ID, err := CreateID()
@@ -129,17 +129,17 @@ func createFlowWrapper(serviceName, flowName string, broker msgbroker.CommonBrok
 		for rawInputEventIndex := range rawInputEvents {
 			rawInputEvent := rawInputEvents[rawInputEventIndex]
 			inputEvent := fmt.Sprintf("%s.%s", ID, rawInputEvent)
-			log.Printf("[INFO: %s.%s] Consuming from %s", serviceName, flowName, inputEvent)
+			log.Printf("[INFO: flow.%s] Consuming from %s", flowName, inputEvent)
 			broker.Consume(inputEvent,
 				func(pkg servicedata.Package) { // consume success
-					log.Printf("[INFO: %s.%s] Getting message from %s: %#v", serviceName, flowName, inputEvent, pkg.Data)
+					log.Printf("[INFO: flow.%s] Getting message from %s: %#v", flowName, inputEvent, pkg.Data)
 					for varName, varFlow := range flows.GetVarFlowByInputEvent(rawInputEvent) {
 						allConsumerDeclared.Wait()
 						lock.RLock()
 						varExists := vars.Has(varName)
 						lock.RUnlock()
 						if varExists {
-							log.Printf("[INFO: %s.%s] `%s` already defined, no need to set", serviceName, flowName, varName)
+							log.Printf("[INFO: flow.%s] `%s` already defined, no need to set", flowName, varName)
 							continue
 						}
 						publishedData := pkg.Data
@@ -149,12 +149,12 @@ func createFlowWrapper(serviceName, flowName string, broker msgbroker.CommonBrok
 						if varFlow.UseFunction && varFlow.Function != nil {
 							publishedData = varFlow.Function(publishedData)
 						}
-						log.Printf("[INFO: %s.%s] Set `%s` into: `%#v`", serviceName, flowName, varName, publishedData)
+						log.Printf("[INFO: flow.%s] Set `%s` into: `%#v`", flowName, varName, publishedData)
 						lock.Lock()
 						vars.Set(varName, publishedData)
 						lock.Unlock()
 						lock.RLock()
-						publishFlowVar(serviceName, flowName, broker, ID, flows, outputVarNames, varName, vars)
+						publishFlowVar(flowName, broker, ID, flows, outputVarNames, varName, vars)
 						lock.RUnlock()
 					}
 					lock.RLock()
@@ -162,7 +162,7 @@ func createFlowWrapper(serviceName, flowName string, broker msgbroker.CommonBrok
 					lock.RUnlock()
 				},
 				func(err error) { // consume error
-					log.Printf("[ERROR: %s.%s] Error: %s", serviceName, flowName, err)
+					log.Printf("[ERROR: flow.%s] Error: %s", flowName, err)
 					outputCompleted <- true
 				},
 			)
@@ -175,16 +175,16 @@ func createFlowWrapper(serviceName, flowName string, broker msgbroker.CommonBrok
 		for varName, value := range defaultVars {
 			lock.Lock()
 			if !vars.Has(varName) {
-				log.Printf("[INFO: %s.%s] Internally set `%s` into: `%#v`", serviceName, flowName, varName, value)
+				log.Printf("[INFO: flow.%s] Internally set `%s` into: `%#v`", flowName, varName, value)
 				vars.Set(varName, value)
 			} else {
-				log.Printf("[INFO: %s.%s] `%s` already defined, no need to internal set", serviceName, flowName, varName)
+				log.Printf("[INFO: flow.%s] `%s` already defined, no need to internal set", flowName, varName)
 			}
 			lock.Unlock()
 		}
 		for varName := range vars {
 			lock.RLock()
-			publishFlowVar(serviceName, flowName, broker, ID, flows, outputVarNames, varName, vars)
+			publishFlowVar(flowName, broker, ID, flows, outputVarNames, varName, vars)
 			lock.RUnlock()
 		}
 		lock.RLock()
@@ -193,7 +193,7 @@ func createFlowWrapper(serviceName, flowName string, broker msgbroker.CommonBrok
 		<-outputCompleted
 		lock.RLock()
 		outputs := createOutputs(outputVarNames, vars)
-		log.Printf("[INFO: %s.%s] Internal flow `%s` ended. Outputs are: `%#v`", serviceName, flowName, ID, outputs)
+		log.Printf("[INFO: flow.%s] Internal flow `%s` ended. Outputs are: `%#v`", flowName, ID, outputs)
 		return outputs, err
 	}
 }
@@ -251,7 +251,7 @@ func getFlowDefaultVars(flows FlowEvents, vars Dictionary) map[string]interface{
 	return defaultVars
 }
 
-func publishFlowVar(serviceName, flowName string, broker msgbroker.CommonBroker, ID string, flows FlowEvents, outputVarNames []string, currentVarName string, vars Dictionary) {
+func publishFlowVar(flowName string, broker msgbroker.CommonBroker, ID string, flows FlowEvents, outputVarNames []string, currentVarName string, vars Dictionary) {
 	// if var is part of outputVarNames, ignore it. CommonBroker will do the job
 	if IsStringInArray(currentVarName, outputVarNames) {
 		return
@@ -270,7 +270,7 @@ func publishFlowVar(serviceName, flowName string, broker msgbroker.CommonBroker,
 			varValue := vars.Get(varName)
 			pkg := servicedata.Package{ID: ID, Data: varValue}
 			outputEvent := fmt.Sprintf("%s.%s", ID, rawOutputEvent)
-			log.Printf("[INFO: %s.%s] Publish into `%s`: `%#v`", serviceName, flowName, outputEvent, pkg)
+			log.Printf("[INFO: flow.%s] Publish into `%s`: `%#v`", flowName, outputEvent, pkg)
 			broker.Publish(outputEvent, pkg)
 		}
 	}

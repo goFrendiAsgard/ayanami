@@ -5,12 +5,15 @@ import (
 	"github.com/state-alchemists/ayanami/generator"
 	"log"
 	"path/filepath"
+	"strings"
 )
 
 // ExposedCmdConfig exposed ready cmdConfig
 type ExposedCmdConfig struct {
-	ServiceName string
-	Commands    map[string]string
+	MainFunctionName string
+	ServiceName      string
+	RepoName         string
+	Commands         map[string]string
 }
 
 // CmdConfig configuration to generate Cmd
@@ -56,10 +59,11 @@ func (c CmdConfig) Scaffold() error {
 func (c CmdConfig) Build() error {
 	log.Printf("[INFO] Building %s", c.ServiceName)
 	depPath := fmt.Sprintf("srvc-%s", c.ServiceName)
-	// write main.go
-	log.Println("[INFO] Create main.go")
-	mainPath := filepath.Join(depPath, "main.go")
-	err := c.WriteDep(mainPath, "cmd.main.go", c.toExposed())
+	serviceName := c.ServiceName
+	repoName := c.RepoName
+	mainFunctionName := "main"
+	// create program
+	err := c.CreateProgram(depPath, serviceName, repoName, mainFunctionName)
 	if err != nil {
 		return err
 	}
@@ -71,8 +75,13 @@ func (c CmdConfig) Build() error {
 }
 
 // CreateProgram create main.go and others
-func (c CmdConfig) CreateProgram(depPath, serviceName, repoName, mainFunction string) {
-	// TODO use this
+func (c CmdConfig) CreateProgram(depPath, serviceName, repoName, mainFunctionName string) error {
+	// write main file
+	mainFileName := fmt.Sprintf("%s.go", strings.ToLower(mainFunctionName))
+	log.Printf("[INFO] Create %s", mainFileName)
+	mainPath := filepath.Join(depPath, mainFileName)
+	err := c.WriteDep(mainPath, "cmd.main.go", c.toExposed(serviceName, repoName, mainFunctionName))
+	return err
 }
 
 // Set replace/add cmd's command
@@ -80,10 +89,12 @@ func (c *CmdConfig) Set(method, command string) {
 	c.Commands[method] = command
 }
 
-func (c *CmdConfig) toExposed() ExposedCmdConfig {
+func (c *CmdConfig) toExposed(serviceName, repoName, mainFunctionName string) ExposedCmdConfig {
 	return ExposedCmdConfig{
-		ServiceName: c.ServiceName,
-		Commands:    c.QuoteMap(c.Commands),
+		ServiceName:      serviceName,
+		RepoName:         repoName,
+		MainFunctionName: mainFunctionName,
+		Commands:         c.QuoteMap(c.Commands),
 	}
 }
 

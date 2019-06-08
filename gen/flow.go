@@ -5,17 +5,19 @@ import (
 	"github.com/state-alchemists/ayanami/generator"
 	"log"
 	"path/filepath"
+	"strings"
 )
 
 // ExposedFlowConfig exposed ready flowConfig
 type ExposedFlowConfig struct {
-	ServiceName string
-	RepoName    string
-	FlowName    string
-	Packages    []string
-	Events      []map[string]string
-	Outputs     string
-	Inputs      string
+	MainFunctionName string
+	ServiceName      string
+	RepoName         string
+	FlowName         string
+	Packages         []string
+	Events           []map[string]string
+	Outputs          string
+	Inputs           string
 }
 
 // FlowConfig definition
@@ -31,8 +33,7 @@ type FlowConfig struct {
 
 // Validate validating config
 func (c FlowConfig) Validate() bool {
-	serviceName := c.getServiceName()
-	log.Printf("[INFO] Validating %s", serviceName)
+	log.Printf("[INFO] Validating Flow %s", c.FlowName)
 	for _, input := range c.Inputs {
 		if !c.IsMatch(input, "^[A-Za-z][a-zA-Z0-9]*$") {
 			log.Printf("[ERROR] Invalid input `%s`", input)
@@ -64,8 +65,7 @@ func (c FlowConfig) Validate() bool {
 
 // Scaffold scaffolding config
 func (c FlowConfig) Scaffold() error {
-	serviceName := c.getServiceName()
-	log.Printf("[INFO] Scaffolding %s", serviceName)
+	log.Printf("[INFO] Scaffolding Flow %s", c.FlowName)
 	for _, event := range c.Events {
 		if !event.UseFunction {
 			continue
@@ -106,9 +106,24 @@ func (c FlowConfig) Scaffold() error {
 
 // Build building config
 func (c FlowConfig) Build() error {
-	serviceName := c.getServiceName()
-	log.Printf("[INFO] Building %s", serviceName)
+	log.Printf("[INFO] Building Flow %s", c.FlowName)
 	depPath := fmt.Sprintf("flow-%s", c.FlowName)
+	repoName := c.RepoName
+	mainFunctionName := "main"
+	// create program
+	err := c.CreateProgram(depPath, c.FlowName, repoName, mainFunctionName)
+	if err != nil {
+		return err
+	}
+	// write go.mod
+	log.Println("[INFO] Create go.mod")
+	goModPath := filepath.Join(depPath, "go.mod")
+	err = c.WriteDep(goModPath, "go.mod", c)
+	return err
+}
+
+// CreateProgram create main.go and others
+func (c FlowConfig) CreateProgram(depPath, serviceName, repoName, mainFunctionName string) error {
 	// write functions and dependencies
 	for _, event := range c.Events {
 		if !event.UseFunction {
@@ -136,23 +151,12 @@ func (c FlowConfig) Build() error {
 			}
 		}
 	}
-	// write main.go
-	log.Println("[INFO] Create main.go")
-	mainPath := filepath.Join(depPath, "main.go")
-	err := c.WriteDep(mainPath, "flow.main.go", c.toExposed())
-	if err != nil {
-		return err
-	}
-	// write go.mod
-	log.Println("[INFO] Create go.mod")
-	goModPath := filepath.Join(depPath, "go.mod")
-	err = c.WriteDep(goModPath, "go.mod", c)
+	// write main file
+	mainFileName := fmt.Sprintf("%s.go", strings.ToLower(mainFunctionName))
+	log.Printf("[INFO] Create %s", mainFileName)
+	mainPath := filepath.Join(depPath, mainFileName)
+	err := c.WriteDep(mainPath, "flow.main.go", c.toExposed(serviceName, repoName, mainFunctionName))
 	return err
-}
-
-// CreateProgram create main.go and others
-func (c FlowConfig) CreateProgram(depPath, serviceName, repoName, mainFunction string) {
-	// TODO use this
 }
 
 // AddEvent add input to inputEvents
@@ -180,20 +184,17 @@ func (c *FlowConfig) AddOutputEventFunc(eventName, varName, functionPackage, fun
 	c.AddEvent(NewOutputEventFunc(eventName, varName, functionPackage, functionName, functionDependencies))
 }
 
-func (c *FlowConfig) toExposed() ExposedFlowConfig {
+func (c *FlowConfig) toExposed(serviceName, repoName, mainFunctionName string) ExposedFlowConfig {
 	return ExposedFlowConfig{
-		ServiceName: c.getServiceName(),
-		RepoName:    c.RepoName,
-		FlowName:    c.FlowName,
-		Packages:    c.getPackagesForExposed(),
-		Events:      c.getEventsForExposed(),
-		Outputs:     c.QuoteArrayAndJoin(c.Outputs, ", "),
-		Inputs:      c.QuoteArrayAndJoin(c.Inputs, ", "),
+		ServiceName:      serviceName,
+		RepoName:         repoName,
+		MainFunctionName: mainFunctionName,
+		FlowName:         c.FlowName,
+		Packages:         c.getPackagesForExposed(),
+		Events:           c.getEventsForExposed(),
+		Outputs:          c.QuoteArrayAndJoin(c.Outputs, ", "),
+		Inputs:           c.QuoteArrayAndJoin(c.Inputs, ", "),
 	}
-}
-
-func (c *FlowConfig) getServiceName() string {
-	return fmt.Sprintf("flow%s", c.FlowName)
 }
 
 func (c *FlowConfig) getEventsForExposed() []map[string]string {
