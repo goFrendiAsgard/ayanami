@@ -10,7 +10,7 @@ import (
 // CmdConfig configuration to generate Cmd
 type CmdConfig struct {
 	ServiceName string
-	PackageName string
+	RepoName    string
 	Commands    map[string]string
 	*generator.IOHelper
 	generator.StringHelper
@@ -22,14 +22,14 @@ func (config *CmdConfig) Set(method, command string) {
 }
 
 // Validate validating config
-func (config *CmdConfig) Validate() bool {
+func (config CmdConfig) Validate() bool {
 	log.Printf("[INFO] Validating %s", config.ServiceName)
 	if config.IsAlphaNumeric(config.ServiceName) {
 		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", config.ServiceName)
 		return false
 	}
-	if config.PackageName == "" {
-		log.Println("[ERROR] Package name should not be empty")
+	if config.RepoName == "" {
+		log.Println("[ERROR] Repo name should not be empty")
 		return false
 	}
 	for methodName, command := range config.Commands {
@@ -46,12 +46,12 @@ func (config *CmdConfig) Validate() bool {
 }
 
 // Scaffold scaffolding config
-func (config *CmdConfig) Scaffold() error {
+func (config CmdConfig) Scaffold() error {
 	return nil
 }
 
 // Build building config
-func (config *CmdConfig) Build() error {
+func (config CmdConfig) Build() error {
 	log.Printf("[INFO] Building %s", config.ServiceName)
 	dirPath := fmt.Sprintf("srvc-%s", config.ServiceName)
 	// write main.go
@@ -64,21 +64,21 @@ func (config *CmdConfig) Build() error {
 	// write go.mod
 	log.Println("[INFO] Create go.mod")
 	goModPath := filepath.Join(dirPath, "go.mod")
-	err = config.WriteDep(goModPath, "go.mod", config.PackageName)
+	err = config.WriteDep(goModPath, "go.mod", config)
 	return err
 }
 
 // NewCmd create new cmd
-func NewCmd(ioHelper *generator.IOHelper, serviceName string, packageName string, commands map[string]string) CmdConfig {
+func NewCmd(ioHelper *generator.IOHelper, serviceName string, repoName string, commands map[string]string) CmdConfig {
 	return CmdConfig{
 		ServiceName: serviceName,
-		PackageName: packageName,
+		RepoName:    repoName,
 		Commands:    commands,
 		IOHelper:    ioHelper,
 	}
 }
 
 // NewEmptyCmd create new empty cmd
-func NewEmptyCmd(ioHelper *generator.IOHelper, serviceName string, packageName string) CmdConfig {
-	return NewCmd(ioHelper, serviceName, packageName, make(map[string]string))
+func NewEmptyCmd(ioHelper *generator.IOHelper, serviceName string, repoName string) CmdConfig {
+	return NewCmd(ioHelper, serviceName, repoName, make(map[string]string))
 }

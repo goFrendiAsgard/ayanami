@@ -68,4 +68,29 @@ func TestProjectGenerator(t *testing.T) {
 		t.Errorf("Get error: %s", err)
 	}
 
+	// check generator/gateway existance
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "gateway")); err != nil {
+		t.Errorf("Get error: %s", err)
+	}
+
+	// check generator/cmdservice existance
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "cmdservice")); err != nil {
+		t.Errorf("Get error: %s", err)
+	}
+
+	// check generator/htmlservice existance
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "htmlservice")); err != nil {
+		t.Errorf("Get error: %s", err)
+	}
+
+	// check generator/flowbanner existance
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "flowbanner")); err != nil {
+		t.Errorf("Get error: %s", err)
+	}
+
+	// check generator/flowroot existance
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "flowroot")); err != nil {
+		t.Errorf("Get error: %s", err)
+	}
+
 }

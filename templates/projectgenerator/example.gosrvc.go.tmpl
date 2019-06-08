@@ -1,0 +1,22 @@
+{{define "example.gosrvc.go" }}
+package main
+
+import (
+	"{{.RepoName}}/gen"
+)
+
+func init() {
+	service := gen.NewGoService(&IOHelper,
+        "html",                               // service name
+        "github.com/nerv/html",               // repo name
+        map[string]Function{                  // functions
+            "pre": NewFunction("html", "pre", // `html.pre` function definition
+                []string{"input"},            // inputs
+                []string{"output"},           // outputs
+                []string{}                    // other dependencies
+            ),
+        },
+    )
+	Gen.AddConfig(service)
+}
+{{end}}

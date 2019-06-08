@@ -11,16 +11,16 @@ type GoMonolithProcedure struct {
 }
 
 // Validate validating procedure
-func (procedure *GoMonolithProcedure) Validate(config generator.CommonConfig) bool {
+func (procedure GoMonolithProcedure) Validate(config generator.CommonConfig) bool {
 	return true
 }
 
 // Scaffold scaffolding procedure
-func (procedure *GoMonolithProcedure) Scaffold(config generator.CommonConfig) error {
+func (procedure GoMonolithProcedure) Scaffold(config generator.CommonConfig) error {
 	return nil
 }
 
 // Build building procedure
-func (procedure *GoMonolithProcedure) Build(config generator.CommonConfig) error {
+func (procedure GoMonolithProcedure) Build(config generator.CommonConfig) error {
 	return nil
 }

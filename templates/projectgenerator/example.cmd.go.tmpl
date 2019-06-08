@@ -1,0 +1,18 @@
+{{define "example.cmd.go" }}
+package main
+
+import (
+	"{{.RepoName}}/gen"
+)
+
+func init() {
+	service := gen.NewCmd(&IOHelper,
+        "cmd",                 // service name
+        "github.com/nerv/cmd", // repo name
+        map[string]string{     // commands
+            "banner": "figlet $input",
+        },
+    )
+	Gen.AddConfig(service)
+}
+{{end}}

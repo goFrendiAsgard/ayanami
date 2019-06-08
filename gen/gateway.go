@@ -10,35 +10,40 @@ import (
 // GatewayConfig configuration to generate Gateway
 type GatewayConfig struct {
 	ServiceName string
-	PackageName string
+	RepoName    string
 	Routes      []string
 	*generator.IOHelper
 	generator.StringHelper
 }
 
+// AddRoute add route to gateway
+func (config *GatewayConfig) AddRoute(route string) {
+	config.Routes = append(config.Routes, route)
+}
+
 // Validate validating config
-func (config *GatewayConfig) Validate() bool {
+func (config GatewayConfig) Validate() bool {
 	log.Printf("[INFO] Validating %s", config.ServiceName)
-	if config.IsAlphaNumeric(config.ServiceName) {
+	if !config.IsAlphaNumeric(config.ServiceName) {
 		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", config.ServiceName)
 		return false
 	}
-	if config.PackageName == "" {
-		log.Printf("[ERROR] Package name should not be empty")
+	if config.RepoName == "" {
+		log.Printf("[ERROR] Repo name should not be empty")
 		return false
 	}
 	return true
 }
 
 // Scaffold scaffolding config
-func (config *GatewayConfig) Scaffold() error {
+func (config GatewayConfig) Scaffold() error {
 	return nil
 }
 
 // Build building config
-func (config *GatewayConfig) Build() error {
+func (config GatewayConfig) Build() error {
 	log.Printf("[INFO] Building %s", config.ServiceName)
-	dirPath := fmt.Sprintf("gateway-%s", config.ServiceName)
+	dirPath := fmt.Sprintf("%s", config.ServiceName)
 	// write main.go
 	log.Println("[INFO] Create main.go")
 	mainPath := filepath.Join(dirPath, "main.go")
@@ -48,16 +53,21 @@ func (config *GatewayConfig) Build() error {
 	}
 	log.Println("[INFO] Create go.mod")
 	goModPath := filepath.Join(dirPath, "go.mod")
-	err = config.WriteDep(goModPath, "go.mod", config.PackageName)
+	err = config.WriteDep(goModPath, "go.mod", config)
 	return err
 }
 
 // NewGateway create new gateway
-func NewGateway(ioHelper *generator.IOHelper, serviceName string, packageName string, routes []string) GatewayConfig {
+func NewGateway(ioHelper *generator.IOHelper, serviceName string, repoName string, routes []string) GatewayConfig {
 	return GatewayConfig{
 		ServiceName: serviceName,
-		PackageName: packageName,
+		RepoName:    repoName,
 		Routes:      routes,
 		IOHelper:    ioHelper,
 	}
+}
+
+// NewEmptyGateway create new empty gateway
+func NewEmptyGateway(ioHelper *generator.IOHelper, serviceName string, repoName string) GatewayConfig {
+	return NewGateway(ioHelper, serviceName, repoName, []string{})
 }

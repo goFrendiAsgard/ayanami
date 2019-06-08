@@ -10,14 +10,14 @@ import (
 // ExposedGoServiceConfig exposed ready flowConfig
 type ExposedGoServiceConfig struct {
 	ServiceName string
-	PackageName string
+	RepoName    string
 	Functions   map[string]ExposedFunction
 }
 
 // GoServiceConfig configuration to generate GoService
 type GoServiceConfig struct {
 	ServiceName string
-	PackageName string
+	RepoName    string
 	Functions   map[string]Function
 	*generator.IOHelper
 	generator.StringHelper
@@ -29,14 +29,14 @@ func (config *GoServiceConfig) Set(method string, function Function) {
 }
 
 // Validate validating config
-func (config *GoServiceConfig) Validate() bool {
+func (config GoServiceConfig) Validate() bool {
 	log.Printf("[INFO] Validating %s", config.ServiceName)
-	if config.IsAlphaNumeric(config.ServiceName) {
+	if !config.IsAlphaNumeric(config.ServiceName) {
 		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", config.ServiceName)
 		return false
 	}
-	if config.PackageName == "" {
-		log.Println("[ERROR] Package name should not be empty")
+	if config.RepoName == "" {
+		log.Println("[ERROR] Repo name should not be empty")
 		return false
 	}
 	for methodName, function := range config.Functions {
@@ -52,7 +52,7 @@ func (config *GoServiceConfig) Validate() bool {
 }
 
 // Scaffold scaffolding config
-func (config *GoServiceConfig) Scaffold() error {
+func (config GoServiceConfig) Scaffold() error {
 	for _, function := range config.Functions {
 		data := function.ToExposed()
 		packageSourcePath := function.FunctionPackage
@@ -86,7 +86,7 @@ func (config *GoServiceConfig) Scaffold() error {
 }
 
 // Build building config
-func (config *GoServiceConfig) Build() error {
+func (config GoServiceConfig) Build() error {
 	log.Printf("[INFO] Building %s", config.ServiceName)
 	depPath := fmt.Sprintf("srvc-%s", config.ServiceName)
 	// write functions and dependencies
@@ -123,7 +123,7 @@ func (config *GoServiceConfig) Build() error {
 	// write go.mod
 	log.Println("[INFO] Create go.mod")
 	goModPath := filepath.Join(depPath, "go.mod")
-	err = config.WriteDep(goModPath, "go.mod", config.PackageName)
+	err = config.WriteDep(goModPath, "go.mod", config)
 	return err
 }
 
@@ -133,16 +133,16 @@ func (config *GoServiceConfig) toExposed() ExposedGoServiceConfig {
 		exposedFunctions[methodName] = function.ToExposed()
 	}
 	return ExposedGoServiceConfig{
-		PackageName: config.PackageName,
+		RepoName:    config.RepoName,
 		ServiceName: config.ServiceName,
 		Functions:   exposedFunctions,
 	}
 }
 
 // NewGoService create new goservice
-func NewGoService(ioHelper *generator.IOHelper, packageName, serviceName string, functions map[string]Function) GoServiceConfig {
+func NewGoService(ioHelper *generator.IOHelper, repoName, serviceName string, functions map[string]Function) GoServiceConfig {
 	return GoServiceConfig{
-		PackageName: packageName,
+		RepoName:    repoName,
 		ServiceName: serviceName,
 		Functions:   functions,
 		IOHelper:    ioHelper,
@@ -150,6 +150,6 @@ func NewGoService(ioHelper *generator.IOHelper, packageName, serviceName string,
 }
 
 // NewEmptyGoService create new empty service
-func NewEmptyGoService(ioHelper *generator.IOHelper, packageName, serviceName string) GoServiceConfig {
-	return NewGoService(ioHelper, packageName, serviceName, make(map[string]Function))
+func NewEmptyGoService(ioHelper *generator.IOHelper, repoName, serviceName string) GoServiceConfig {
+	return NewGoService(ioHelper, repoName, serviceName, make(map[string]Function))
 }

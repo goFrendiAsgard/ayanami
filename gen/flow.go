@@ -9,21 +9,21 @@ import (
 
 // ExposedFlowConfig exposed ready flowConfig
 type ExposedFlowConfig struct {
-	PackageName string
-	FlowName    string
-	Packages    []string
-	Events      []map[string]string
-	Outputs     []string
-	Inputs      []string
+	RepoName string
+	FlowName string
+	Packages []string
+	Events   []map[string]string
+	Outputs  []string
+	Inputs   []string
 }
 
 // FlowConfig definition
 type FlowConfig struct {
-	PackageName string
-	FlowName    string
-	Inputs      []string
-	Outputs     []string
-	Events      []Event
+	RepoName string
+	FlowName string
+	Inputs   []string
+	Outputs  []string
+	Events   []Event
 	*generator.IOHelper
 	generator.StringHelper
 }
@@ -34,7 +34,7 @@ func (config *FlowConfig) AddEvent(event Event) {
 }
 
 // Validate validating config
-func (config *FlowConfig) Validate() bool {
+func (config FlowConfig) Validate() bool {
 	log.Printf("[INFO] Validating %s", config.FlowName)
 	for _, input := range config.Inputs {
 		if !config.IsMatch(input, "^[A-Za-z][a-zA-Z0-9]*$") {
@@ -48,12 +48,12 @@ func (config *FlowConfig) Validate() bool {
 			return false
 		}
 	}
-	if config.IsAlphaNumeric(config.FlowName) {
+	if !config.IsAlphaNumeric(config.FlowName) {
 		log.Printf("[ERROR] Flow name should be alphanumeric, but `%s` found", config.FlowName)
 		return false
 	}
-	if config.PackageName == "" {
-		log.Printf("[ERROR] Package name should not be empty")
+	if config.RepoName == "" {
+		log.Printf("[ERROR] Repo name should not be empty")
 		return false
 	}
 	for index, event := range config.Events {
@@ -66,13 +66,13 @@ func (config *FlowConfig) Validate() bool {
 }
 
 // Scaffold scaffolding config
-func (config *FlowConfig) Scaffold() error {
+func (config FlowConfig) Scaffold() error {
 	for _, event := range config.Events {
 		if !event.UseFunction {
 			continue
 		}
 		data := map[string]string{
-			"PackageName":  event.FunctionPackage,
+			"RepoName":  event.FunctionPackage,
 			"FunctionName": event.FunctionName,
 		}
 		packageSourcePath := event.FunctionPackage
@@ -106,7 +106,7 @@ func (config *FlowConfig) Scaffold() error {
 }
 
 // Build building config
-func (config *FlowConfig) Build() error {
+func (config FlowConfig) Build() error {
 	log.Printf("[INFO] Building %s", config.FlowName)
 	depPath := fmt.Sprintf("flow-%s", config.FlowName)
 	// write functions and dependencies
@@ -146,18 +146,18 @@ func (config *FlowConfig) Build() error {
 	// write go.mod
 	log.Println("[INFO] Create go.mod")
 	goModPath := filepath.Join(depPath, "go.mod")
-	err = config.WriteDep(goModPath, "go.mod", config.PackageName)
+	err = config.WriteDep(goModPath, "go.mod", config)
 	return err
 }
 
 func (config *FlowConfig) toExposed() ExposedFlowConfig {
 	return ExposedFlowConfig{
-		PackageName: config.PackageName,
-		FlowName:    config.FlowName,
-		Packages:    config.getPackagesForExposed(),
-		Events:      config.getEventsForExposed(),
-		Outputs:     config.QuoteArray(config.Outputs),
-		Inputs:      config.QuoteArray(config.Inputs),
+		RepoName: config.RepoName,
+		FlowName: config.FlowName,
+		Packages: config.getPackagesForExposed(),
+		Events:   config.getEventsForExposed(),
+		Outputs:  config.QuoteArray(config.Outputs),
+		Inputs:   config.QuoteArray(config.Inputs),
 	}
 }
 
@@ -181,18 +181,18 @@ func (config *FlowConfig) getPackagesForExposed() []string {
 }
 
 // NewFlow create new flow
-func NewFlow(ioHelper *generator.IOHelper, packageName, flowName string, inputs, outputs []string, events []Event) FlowConfig {
+func NewFlow(ioHelper *generator.IOHelper, repoName, flowName string, inputs, outputs []string, events []Event) FlowConfig {
 	return FlowConfig{
-		PackageName: packageName,
-		FlowName:    flowName,
-		Inputs:      inputs,
-		Outputs:     outputs,
-		Events:      events,
-		IOHelper:    ioHelper,
+		RepoName: repoName,
+		FlowName: flowName,
+		Inputs:   inputs,
+		Outputs:  outputs,
+		Events:   events,
+		IOHelper: ioHelper,
 	}
 }
 
 // NewEmptyFlow create new empty flow
-func NewEmptyFlow(ioHelper *generator.IOHelper, packageName, flowName string, inputs, outputs []string) FlowConfig {
-	return NewFlow(ioHelper, packageName, flowName, inputs, outputs, []Event{})
+func NewEmptyFlow(ioHelper *generator.IOHelper, repoName, flowName string, inputs, outputs []string) FlowConfig {
+	return NewFlow(ioHelper, repoName, flowName, inputs, outputs, []Event{})
 }

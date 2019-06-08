@@ -10,11 +10,8 @@ coverage:
 cleantest:
 	rm -R .test-*
 
+build:
+	go build
+
 testgenerate:
-	mkdir -p .test-gen && go build && ./ayanami init -p whatever -r github.com/whoever/whatever -d .test-gen && go build -o .test-gen/whatever/generator/whatever .test-gen/whatever/generator/main.go
-
-testscaffold:
-	.test-gen/whatever/generator/whatever scaffold
-
-testbuild:
-	.test-gen/whatever/generator/whatever build
+	mkdir -p .test-gen && go build && ./ayanami init -p whatever -r github.com/whoever/whatever -d .test-gen && cd .test-gen/whatever/generator && go build && ./whatever scaffold && ./whatever build

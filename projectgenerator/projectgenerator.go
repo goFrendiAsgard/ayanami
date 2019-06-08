@@ -107,6 +107,41 @@ func (p ProjectGenerator) Generate() error {
 		return err
 	}
 	log.Printf("[INFO] Create %s", genDstPath)
+	// create `generator/gateway.go`
+	gatewayDstPath := filepath.Join(p.GeneratorPath, "gateway.go")
+	err = p.Write(gatewayDstPath, "example.gateway.go", p)
+	if err != nil {
+		return err
+	}
+	log.Printf("[INFO] Create %s", gatewayDstPath)
+	// create `generator/cmdservice.go`
+	cmdServiceDstPath := filepath.Join(p.GeneratorPath, "cmdservice.go")
+	err = p.Write(cmdServiceDstPath, "example.cmd.go", p)
+	if err != nil {
+		return err
+	}
+	log.Printf("[INFO] Create %s", cmdServiceDstPath)
+	// create `generator/htmlservice.go`
+	htmlServiceDstPath := filepath.Join(p.GeneratorPath, "htmlservice.go")
+	err = p.Write(htmlServiceDstPath, "example.gosrvc.go", p)
+	if err != nil {
+		return err
+	}
+	log.Printf("[INFO] Create %s", htmlServiceDstPath)
+	// create `generator/flowbanner.go`
+	flowBannerServiceDstPath := filepath.Join(p.GeneratorPath, "flowbanner.go")
+	err = p.Write(flowBannerServiceDstPath, "example.flow.banner.go", p)
+	if err != nil {
+		return err
+	}
+	log.Printf("[INFO] Create %s", flowBannerServiceDstPath)
+	// create `generator/flowroot.go`
+	flowRootServiceDstPath := filepath.Join(p.GeneratorPath, "flowroot.go")
+	err = p.Write(flowRootServiceDstPath, "example.flow.root.go", p)
+	if err != nil {
+		return err
+	}
+	log.Printf("[INFO] Create %s", flowRootServiceDstPath)
 	return nil
 }
 
