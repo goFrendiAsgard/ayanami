@@ -69,27 +69,27 @@ func TestProjectGenerator(t *testing.T) {
 	}
 
 	// check generator/gateway existance
-	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "gateway")); err != nil {
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "gateway.go")); err != nil {
 		t.Errorf("Get error: %s", err)
 	}
 
 	// check generator/cmdservice existance
-	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "cmdservice")); err != nil {
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "cmdservice.go")); err != nil {
 		t.Errorf("Get error: %s", err)
 	}
 
 	// check generator/htmlservice existance
-	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "htmlservice")); err != nil {
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "htmlservice.go")); err != nil {
 		t.Errorf("Get error: %s", err)
 	}
 
 	// check generator/flowbanner existance
-	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "flowbanner")); err != nil {
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "flowbanner.go")); err != nil {
 		t.Errorf("Get error: %s", err)
 	}
 
 	// check generator/flowroot existance
-	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "flowroot")); err != nil {
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "flowroot.go")); err != nil {
 		t.Errorf("Get error: %s", err)
 	}
 
