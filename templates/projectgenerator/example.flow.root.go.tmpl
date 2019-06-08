@@ -9,7 +9,6 @@ func init() {
 
     // define flow
 	flow := gen.NewEmptyFlow(&IOHelper,
-        "flowroot",                  // service name
         "github.com/nerv/flowroot",  // repo name
         "root",                      // flow name
         []string{"request"},         // inputs
@@ -17,18 +16,18 @@ func init() {
     )
 
     // add input events
-    flow.AddEvent(NewInputEvent(
+    flow.AddEvent(gen.NewInputEvent(
         "trig.request.get.out.req",
         "request",
     ))
 
     // add output events
-    flow.AddEvent(NewOutputEventVal(
+    flow.AddEvent(gen.NewOutputEventVal(
         "trig.response.get.in.code",
         "code",
         200,
     ))
-    flow.AddEvent(NewOutputEventVal(
+    flow.AddEvent(gen.NewOutputEventVal(
         "trig.response.get.in.message",
         "message",
         "Hello world",

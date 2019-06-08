@@ -24,7 +24,7 @@ func (config *CmdConfig) Set(method, command string) {
 // Validate validating config
 func (config CmdConfig) Validate() bool {
 	log.Printf("[INFO] Validating %s", config.ServiceName)
-	if config.IsAlphaNumeric(config.ServiceName) {
+	if !config.IsAlphaNumeric(config.ServiceName) {
 		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", config.ServiceName)
 		return false
 	}

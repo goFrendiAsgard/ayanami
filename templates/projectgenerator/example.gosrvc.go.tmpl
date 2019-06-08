@@ -14,7 +14,7 @@ func init() {
     )
 
     // add html.pre
-    service.Set("pre", NewFunction("html", "pre", 
+    service.Set("pre", gen.NewFunction("html", "pre", 
         []string{"input"},  // inputs
         []string{"output"}, // outputs
         []string{},         // dependencies

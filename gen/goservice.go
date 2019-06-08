@@ -140,7 +140,7 @@ func (config *GoServiceConfig) toExposed() ExposedGoServiceConfig {
 }
 
 // NewGoService create new goservice
-func NewGoService(ioHelper *generator.IOHelper, repoName, serviceName string, functions map[string]Function) GoServiceConfig {
+func NewGoService(ioHelper *generator.IOHelper, serviceName, repoName string, functions map[string]Function) GoServiceConfig {
 	return GoServiceConfig{
 		RepoName:    repoName,
 		ServiceName: serviceName,
@@ -150,6 +150,6 @@ func NewGoService(ioHelper *generator.IOHelper, repoName, serviceName string, fu
 }
 
 // NewEmptyGoService create new empty service
-func NewEmptyGoService(ioHelper *generator.IOHelper, repoName, serviceName string) GoServiceConfig {
+func NewEmptyGoService(ioHelper *generator.IOHelper, serviceName, repoName string) GoServiceConfig {
 	return NewGoService(ioHelper, repoName, serviceName, make(map[string]Function))
 }

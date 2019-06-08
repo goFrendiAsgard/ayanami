@@ -9,7 +9,6 @@ func init() {
 
     // define flow
 	flow := gen.NewEmptyFlow(&IOHelper,
-        "flowbanner",                 // service name
         "github.com/nerv/flowbanner", // repo name
         "banner",                     // flow name
         []string{"request"},          // inputs
@@ -17,61 +16,61 @@ func init() {
     )
 
     // add input events
-    flow.AddEvent(NewInputEvent(
+    flow.AddEvent(gen.NewInputEvent(
         "trig.request.get.banner.out.req",
         "request",
     ))
 
     // once we are able to extract `text` from `request` send it to `cmd.figlet`
-    flow.AddEvent(NewOutputEvent(
+    flow.AddEvent(gen.NewOutputEvent(
         "srvc.cmd.figlet.in.input",
         "request.form.text.0",
     ))
 
     // once we get output from `cmd.figlet`, store it it as `figletOut`
-    flow.AddEvent(NewInputEvent(
+    flow.AddEvent(gen.NewInputEvent(
         "srvc.cmd.get.out.output",
         "figletOut",
     ))
 
     // once we get `figletOut`, send it to `html.pre`
-    flow.AddEvent(NewOutputEvent(
+    flow.AddEvent(gen.NewOutputEvent(
         "srvc.html.pre.in.input",
         "figletOut",
     ))
 
     // once we get output from `html.pre`, stor it as `preOut`
-    flow.AddEvent(NewInputEvent(
+    flow.AddEvent(gen.NewInputEvent(
         "srvc.html.pre.out.output",
         "preOut",
     ))
 
     // once we get `preOut`, set it as response's message and set response code to 200
-    flow.AddEvent(NewOutputEventVal(
+    flow.AddEvent(gen.NewOutputEventVal(
         "trig.response.get.banner.in.code",
         "code",
         200,
     ))
-    flow.AddEvent(NewOutputEvent(
+    flow.AddEvent(gen.NewOutputEvent(
         "trig.response.get.banner.in.message",
         "preOut",
     ))
 
     // however, if `cmd.figlet` or `html.pre` give us error, catch it and stop there
-    flow.AddEvent(NewInputEvent(
+    flow.AddEvent(gen.NewInputEvent(
         "srvc.cmd.figlet.err.message",
         "errorMessage",
     ))
-    flow.AddEvent(NewInputEvent(
+    flow.AddEvent(gen.NewInputEvent(
         "srvc.html.pre.err.message",
         "errorMessage",
     ))
-    flow.AddEvent(NewOutputEventVal(
+    flow.AddEvent(gen.NewOutputEventVal(
         "trig.response.get.banner.in.code",
         "errorMessage",
         500,
     ))
-    flow.AddEvent(NewOutputEventVal(
+    flow.AddEvent(gen.NewOutputEventVal(
         "trig.response.get.banner.in.message",
         "errorMessage",
         "Internal server error",
