@@ -54,8 +54,10 @@ func (config GoServiceConfig) Validate() bool {
 
 // Scaffold scaffolding config
 func (config GoServiceConfig) Scaffold() error {
+	log.Printf("[INFO] Scaffolding %s", config.ServiceName)
 	for _, function := range config.Functions {
 		data := function.ToExposed()
+		log.Printf("[WOIII] %#v", data)
 		packageSourcePath := function.FunctionPackage
 		functionFileName := function.GetFunctionFileName()
 		// write function

@@ -18,18 +18,20 @@ func (s StringHelper) Quote(str string) string {
 
 // QuoteMap quote array's elements
 func (s StringHelper) QuoteMap(data map[string]string) map[string]string {
+	newData := map[string]string{}
 	for index, str := range data {
-		data[index] = s.Quote(str)
+		newData[index] = s.Quote(str)
 	}
-	return data
+	return newData
 }
 
 // QuoteArray quote array's elements
 func (s StringHelper) QuoteArray(arr []string) []string {
-	for index, str := range arr {
-		arr[index] = s.Quote(str)
+	newArr := []string{}
+	for _, str := range arr {
+		newArr = append(newArr, s.Quote(str))
 	}
-	return arr
+	return newArr
 }
 
 // QuoteArrayAndJoin quote elements of array and join it using delimiter
