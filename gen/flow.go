@@ -9,12 +9,13 @@ import (
 
 // ExposedFlowConfig exposed ready flowConfig
 type ExposedFlowConfig struct {
-	RepoName string
-	FlowName string
-	Packages []string
-	Events   []map[string]string
-	Outputs  []string
-	Inputs   []string
+	ServiceName string
+	RepoName    string
+	FlowName    string
+	Packages    []string
+	Events      []map[string]string
+	Outputs     []string
+	Inputs      []string
 }
 
 // FlowConfig definition
@@ -72,7 +73,7 @@ func (config FlowConfig) Scaffold() error {
 			continue
 		}
 		data := map[string]string{
-			"RepoName":  event.FunctionPackage,
+			"RepoName":     event.FunctionPackage,
 			"FunctionName": event.FunctionName,
 		}
 		packageSourcePath := event.FunctionPackage
@@ -152,12 +153,13 @@ func (config FlowConfig) Build() error {
 
 func (config *FlowConfig) toExposed() ExposedFlowConfig {
 	return ExposedFlowConfig{
-		RepoName: config.RepoName,
-		FlowName: config.FlowName,
-		Packages: config.getPackagesForExposed(),
-		Events:   config.getEventsForExposed(),
-		Outputs:  config.QuoteArray(config.Outputs),
-		Inputs:   config.QuoteArray(config.Inputs),
+		ServiceName: fmt.Sprintf("flow%s", config.FlowName),
+		RepoName:    config.RepoName,
+		FlowName:    config.FlowName,
+		Packages:    config.getPackagesForExposed(),
+		Events:      config.getEventsForExposed(),
+		Outputs:     config.QuoteArray(config.Outputs),
+		Inputs:      config.QuoteArray(config.Inputs),
 	}
 }
 

@@ -10,10 +10,10 @@ func {{.FunctionDeclaration}} {
 }
 
 func Wrapped{{.FunctionName}}(inputs service.Dictionary) (service.Dictionary, error) {
-    outputs := make(service.Dictionary){{ range .Inputs }}
+    Result := make(service.Dictionary){{ range .Inputs }}
     {{.}} := inputs.Get("{{.}}"){{end}}
     {{.FunctionAssignment}}{{ range .Outputs }}
-    outputs.Set("{{.}}", {{.}}){{ end }}
-    return outputs, nil
+    Result.Set("{{.}}", {{.}}){{ end }}
+    return Result, nil
 }
 {{end}}
