@@ -8,12 +8,28 @@ import (
 	"github.com/state-alchemists/ayanami/servicedata"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 )
 
+type routeSorter []string
+
+func (r routeSorter) Len() int {
+	return len(r)
+}
+
+func (r routeSorter) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
+}
+
+func (r routeSorter) Less(i, j int) bool {
+	return len(r[i]) < len(r[j])
+}
+
 // Serve handle HTTP request
 func Serve(broker msgbroker.CommonBroker, port int64, multipartFormLimit int64, routes []string) {
+	sort.Sort(sort.Reverse(routeSorter(routes)))
 	for _, route := range routes {
 		handler := createRouteHandler(broker, multipartFormLimit, route)
 		http.HandleFunc(route, handler)
