@@ -97,6 +97,7 @@ func createFlowEventsTest() FlowEvents {
 		FlowEvent{
 			VarName:     "c",
 			Value:       100,
+			UseValue:    true,
 			OutputEvent: "srvc.service.method.in.gamma",
 		},
 		FlowEvent{

@@ -232,17 +232,25 @@ func getFlowDefaultVars(flows FlowEvents, vars Dictionary) map[string]interface{
 	// determine candidates from flows
 	candidates := flows.GetVarNamesByInputEvent("")
 	for _, candidate := range candidates {
-		candidatePass := true
+		candidatePass := false
 		var value interface{}
+		var function func(interface{}) interface{}
+		useFunction := false
 		for _, flow := range flows {
-			if flow.VarName == candidate && flow.InputEvent == "" {
+			if flow.VarName == candidate && flow.InputEvent == "" && flow.UseValue {
 				value = flow.Value
+				function = flow.Function
+				useFunction = flow.UseFunction
+				candidatePass = true
 			} else if isSubVarOf(flow.VarName, candidate) {
 				candidatePass = false
 				break
 			}
 		}
 		if candidatePass {
+			if useFunction {
+				value = function(value)
+			}
 			defaultVars[candidate] = value
 		}
 	}
