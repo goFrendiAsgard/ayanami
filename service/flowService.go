@@ -108,6 +108,8 @@ func NewFlow(flowName string, broker msgbroker.CommonBroker, inputs, outputs []s
 	// get flowWrappedFunction
 	wrappedFunction := createFlowWrapper(flowName, broker, flows, inputs, outputs)
 	return CommonService{
+		ServiceName:    "flow",
+		MethodName:     flowName,
 		Input:          serviceInputs,
 		Output:         serviceOutputs,
 		ErrorEventName: errorEventName,
