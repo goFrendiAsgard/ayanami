@@ -85,30 +85,55 @@ func (e *Event) addValIndentationToMap(m map[string]string) {
 	}
 }
 
-// NewInputEvent create new Event
-func NewInputEvent(eventName, varName string) Event {
-	return Event{InputEventName: eventName, VarName: varName}
+// NewEvent create new Event
+func NewEvent(inputEventName, outputEventName, varName string) Event {
+	return Event{InputEventName: inputEventName, OutputEventName: outputEventName, VarName: varName}
 }
 
-// NewOutputEvent create new Event
-func NewOutputEvent(eventName, varName string) Event {
-	return Event{OutputEventName: eventName, VarName: varName}
-}
-
-// NewOutputEventVal create new Event with value
-func NewOutputEventVal(eventName, varName string, value interface{}) Event {
-	event := NewOutputEvent(eventName, varName)
+// NewEventVal create new Event with val
+func NewEventVal(inputEventName, outputEventName, varName string, value interface{}) Event {
+	event := NewEvent(inputEventName, outputEventName, varName)
 	event.UseValue = true
 	event.Value = value
 	return event
 }
 
-// NewOutputEventFunc create new Event with function
-func NewOutputEventFunc(eventName, varName, functionPackage, functionName string, functionDependencies []string) Event {
-	event := NewOutputEvent(eventName, varName)
+// NewEventFunc create new Event with function
+func NewEventFunc(inputEventName, outputEventName, varName, functionPackage, functionName string, functionDependencies []string) Event {
+	event := NewEvent(inputEventName, outputEventName, varName)
 	event.UseFunction = true
 	event.FunctionName = functionName
 	event.FunctionPackage = functionPackage
 	event.FunctionDependencies = functionDependencies
 	return event
+}
+
+// NewInputEvent create new InputEvent
+func NewInputEvent(eventName, varName string) Event {
+	return NewEvent(eventName, "", varName)
+}
+
+// NewInputEventVal create new InputEvent
+func NewInputEventVal(eventName, varName string, value interface{}) Event {
+	return NewEventVal(eventName, "", varName, value)
+}
+
+// NewInputEventFunc create new InputEvent with function
+func NewInputEventFunc(eventName, varName, functionPackage, functionName string, functionDependencies []string) Event {
+	return NewEventFunc(eventName, "", varName, functionPackage, functionName, functionDependencies)
+}
+
+// NewOutputEvent create new OutputEvent
+func NewOutputEvent(eventName, varName string) Event {
+	return NewEvent("", eventName, varName)
+}
+
+// NewOutputEventVal create new OutputEvent
+func NewOutputEventVal(eventName, varName string, value interface{}) Event {
+	return NewEventVal("", eventName, varName, value)
+}
+
+// NewOutputEventFunc create new OutputEvent with function
+func NewOutputEventFunc(eventName, varName, functionPackage, functionName string, functionDependencies []string) Event {
+	return NewEventFunc("", eventName, varName, functionPackage, functionName, functionDependencies)
 }

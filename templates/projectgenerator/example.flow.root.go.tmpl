@@ -15,24 +15,20 @@ func init() {
         []string{"request", "code"}, // outputs
     )
 
-    // add input events
-    flow.AddInputEvent(
-        "trig.request.get.out.req",
-        "request",
+    flow.AddEventVal(
+        "trig.request.get.out.req",  // whenever get `request.get.out.req`
+        "trig.response.get.in.code", // prepare reply to `respose.get.in.code`
+        "code",                      // the variable name is `code`
+        200,                         // and it's value is 200
     )
 
-    // add output events
-    flow.AddOutputEventVal(
-        "trig.response.get.in.code",
-        "code",
-        200,
-    )
-    flow.AddOutputEventFunc(
-        "trig.response.get.in.content",
-        "request",
-        "html",
-        "CreateDefaultResponse",
-        []string{},
+    flow.AddEventFunc(
+        "trig.request.get.out.req",     // whenever get `request.get.out.req`
+        "trig.response.get.in.content", // prepare reply to `response.get.in.content`
+        "content",                      // the variable name is `content`, and we get it's value by running a function
+        "html",                         // function's package is `html`
+        "CreateDefaultResponse",        // function's name is `CreateDefaultResponse`
+        []string{},                     // and the function has no dependency to other source code
     )
 
     // register flow

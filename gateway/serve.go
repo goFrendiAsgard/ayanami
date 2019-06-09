@@ -30,7 +30,7 @@ func (r routeSorter) Less(i, j int) bool {
 // Serve handle HTTP request
 func Serve(broker msgbroker.CommonBroker, port int64, multipartFormLimit int64, routes []string) {
 	sort.Sort(sort.Reverse(routeSorter(routes)))
-	log.Printf("[INFO: Gateway] Routes `%v`", routes)
+	log.Printf("[INFO: Gateway] Routes `%#v`", routes)
 	for _, route := range routes {
 		handler := createRouteHandler(broker, multipartFormLimit, route)
 		http.HandleFunc(route, handler)
