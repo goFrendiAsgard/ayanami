@@ -18,9 +18,9 @@ The name is inspired from `Evangelion-Unit-00's pilot`: `Ayanami Rei`. The name 
 
 Providing an environment with minimum dependencies in order to:
 
-* Build & deploy FaaS
+* Build & deploy microservices/monolithic
 * Make kubernetes-ready artifacts
-* Run the entire infrastructure locally without kubernetes
+* Run the entire infrastructure locally without kubernetes (either as microservices or as single monolithic)
 
 # Dependencies
 
@@ -29,20 +29,19 @@ Providing an environment with minimum dependencies in order to:
 
 # How
 
-* Developer create functions. The functions can be written in any language, even binary
-* Developer define flows (how the functions are connected to each others)
-* Developer create templates if necessary
-* Ayanami compose flows and functions into several microservices that can talk to each other using nats messaging.
-
-# Getting started
+* Developer define `composition` and `templates` (what services are available, and how do they interact to each other, how everything should be generated)
+* Developer scaffold the `source code`
+* Developer edit the `source code` to match their need
+* Developer build a `deployable`
 
 ```
-ayanami init -p awesomeproject -r "github.com/gofrendi/awesomeproject"
+Nothing                             --> [init]     --> composition + template
+composition + template              --> [scaffold] --> sourceCode
+composition + sourceCode + template --> [build]    --> deployable
 ```
 
 # Terminologies
 
-* `Source Code`: The source code you write, typically implementation of `functions`.
 * `Composition`: Define the logic architecture of your program.
     - `Flow`: Your business logic. Basically, flow should receive `package` from the `trigger`, send the message to other `flows` or `services`, and finally send package to output `trigger`
     - `Trigger`: Trigger might send/receive a `package`. It is how you communicate with the outside world (e.g: HTTP request trigger, HTTP response trigger, scheduler, etc)
@@ -51,10 +50,12 @@ ayanami init -p awesomeproject -r "github.com/gofrendi/awesomeproject"
     - `Package`: The message sent/received from `service`, `flow`, or `trigger`
 * `Template`: The template to generate `deployable` based on your `source code` and `composition`
 * `Deployable`: The generated source code of your program, final output of ayanami.
+* `Source Code`: The source code you write, typically implementation of `functions`.
+* `Scaffold`: The process to create `source code` prototype based on `composition` and `template`
+* `Build`: The process to create `deployable` based on `composition`, `source code` and `template`
+* `Event Name`: Event names, see Convention section.
 
-# Convention
-
-## Event Name
+# Event Name Convention
 
 Event Name should comply one of these formats
 
@@ -72,7 +73,14 @@ Event Name should comply one of these formats
 
 __Note:__ We strip `hyphens` from UUID because Nats documentation said it only accept alpha numeric and dots as event name.
 
-# Gateway
+# Getting started
+
+```
+ayanami init -p awesomeproject -r "github.com/nerv/awesomeproject"
+```
+
+
+# Gateway (Tech Spec)
 
 Whenever gateway receive HTTP request from the client, it will send message to `<ID>.trig.request.out.req` containing:
 
@@ -120,7 +128,7 @@ func MainGateway() {
 }
 ```
 
-# Service
+# Service (Tech Spec)
 
 Service listen message from input and send message to both, output, and error events:
 * Input events: `<ID>.srvc.<serviceName>.<methodName>.in.<varName>`
@@ -221,7 +229,7 @@ func MainServiceCmd() {
 }
 ```
 
-# Flow
+# Flow (Tech Spec)
 
 Flow is your business logic. Let's say you have develop several services like in our previous examples. Your architecture should looks like this:
 
