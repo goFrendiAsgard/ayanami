@@ -74,17 +74,17 @@ func TestProjectGenerator(t *testing.T) {
 	}
 
 	// check generator/gomonolith existance
-	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "monolith.go")); err != nil {
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "megazord.go")); err != nil {
 		t.Errorf("Get error: %s", err)
 	}
 
 	// check generator/cmdservice existance
-	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "cmdservice.go")); err != nil {
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "servicecmd.go")); err != nil {
 		t.Errorf("Get error: %s", err)
 	}
 
 	// check generator/htmlservice existance
-	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "htmlservice.go")); err != nil {
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "servicehtml.go")); err != nil {
 		t.Errorf("Get error: %s", err)
 	}
 

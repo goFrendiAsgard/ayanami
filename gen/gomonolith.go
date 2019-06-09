@@ -8,6 +8,11 @@ import (
 	"strings"
 )
 
+// ExposedGomonolithProc GomonolithProc for template
+type ExposedGomonolithProc struct {
+	Functions []string
+}
+
 // GoMonolithProc procedureuration to generate GoMonolith
 type GoMonolithProc struct {
 	ServiceName string
@@ -66,11 +71,17 @@ func (p GoMonolithProc) Build(configs generator.Configs) error {
 			}
 		}
 	}
-	// TODO prepare to create main.go
+	// write main.go
+	data := ExposedGomonolithProc{Functions: mainFunctionList}
+	mainPath := filepath.Join(depPath, "main.go")
+	err := p.WriteDep(mainPath, "gomonolith.main.go", data)
+	if err != nil {
+		return err
+	}
 	// write go.mod
 	log.Println("[INFO] Create go.mod")
 	goModPath := filepath.Join(depPath, "go.mod")
-	err := p.WriteDep(goModPath, "go.mod", p)
+	err = p.WriteDep(goModPath, "go.mod", p)
 	return err
 }
 

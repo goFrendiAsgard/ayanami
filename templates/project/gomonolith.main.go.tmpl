@@ -1,0 +1,9 @@
+{{define "gomonolith.main.go"}}
+package main
+
+func main() {
+    forever := make(chan bool){{ range .Functions }}
+    go {{.}}(){{ end }}
+	<-forever
+}
+{{end}}

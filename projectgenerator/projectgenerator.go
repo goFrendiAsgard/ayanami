@@ -81,21 +81,21 @@ func (pg ProjectGenerator) Generate() error {
 	}
 	log.Printf("[INFO] Create %s", gatewayDstPath)
 	// create `generator/gomonolith.go`
-	gomonolithDstPath := filepath.Join(pg.GeneratorPath, "monolith.go")
+	gomonolithDstPath := filepath.Join(pg.GeneratorPath, "megazord.go")
 	err = pg.Write(gomonolithDstPath, "example.gomonolith.go", pg)
 	if err != nil {
 		return err
 	}
 	log.Printf("[INFO] Create %s", gomonolithDstPath)
 	// create `generator/cmdservice.go`
-	cmdServiceDstPath := filepath.Join(pg.GeneratorPath, "cmdservice.go")
+	cmdServiceDstPath := filepath.Join(pg.GeneratorPath, "servicecmd.go")
 	err = pg.Write(cmdServiceDstPath, "example.cmd.go", pg)
 	if err != nil {
 		return err
 	}
 	log.Printf("[INFO] Create %s", cmdServiceDstPath)
 	// create `generator/htmlservice.go`
-	htmlServiceDstPath := filepath.Join(pg.GeneratorPath, "htmlservice.go")
+	htmlServiceDstPath := filepath.Join(pg.GeneratorPath, "servicehtml.go")
 	err = pg.Write(htmlServiceDstPath, "example.gosrvc.go", pg)
 	if err != nil {
 		return err
