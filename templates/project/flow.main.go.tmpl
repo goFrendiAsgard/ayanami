@@ -10,7 +10,8 @@ import (
     "{{$repoName}}/{{.}}"{{ end }}
 )
 
-func main() {
+// {{.MainFunctionName}} declaration
+func {{.MainFunctionName}}() {
 	// define broker
 	broker, err := msgbroker.NewNats(config.GetNatsURL())
 	if err != nil {

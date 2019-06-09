@@ -8,7 +8,8 @@ import (
 	"log"
 )
 
-func main() {
+// {{.MainFunctionName}} declaration
+func {{.MainFunctionName}}() {
 	routes := []string{ // define your routes here{{range .Routes}}
         "{{.}}",{{end}}
 	}

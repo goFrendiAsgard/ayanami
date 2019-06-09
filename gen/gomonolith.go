@@ -5,6 +5,7 @@ import (
 	"github.com/state-alchemists/ayanami/generator"
 	"log"
 	"path/filepath"
+	"strings"
 )
 
 // GoMonolithProc procedureuration to generate GoMonolith
@@ -26,8 +27,46 @@ func (p GoMonolithProc) Scaffold(configs generator.Configs) error {
 
 // Build building procedure
 func (p GoMonolithProc) Build(configs generator.Configs) error {
-	log.Printf("[INFO] Building %s", p.ServiceName)
-	depPath := fmt.Sprintf(p.ServiceName)
+	log.Printf("[INFO] BUILDING MONOLITH: %s", p.ServiceName)
+	depPath := p.ServiceName
+	mainFunctionList := []string{}
+	for _, config := range configs {
+		switch config.(type) {
+		case CmdConfig:
+			c := config.(CmdConfig)
+			mainFunctionName := fmt.Sprintf("Service%s", strings.Title(c.ServiceName))
+			mainFunctionList = append(mainFunctionList, mainFunctionName)
+			err := c.CreateProgram(depPath, p.ServiceName, p.RepoName, mainFunctionName)
+			if err != nil {
+				return err
+			}
+		case GoServiceConfig:
+			c := config.(GoServiceConfig)
+			mainFunctionName := fmt.Sprintf("Service%s", strings.Title(c.ServiceName))
+			mainFunctionList = append(mainFunctionList, mainFunctionName)
+			err := c.CreateProgram(depPath, p.ServiceName, p.RepoName, mainFunctionName)
+			if err != nil {
+				return err
+			}
+		case GatewayConfig:
+			c := config.(GatewayConfig)
+			mainFunctionName := fmt.Sprintf("Gateway%s", strings.Title(c.ServiceName))
+			mainFunctionList = append(mainFunctionList, mainFunctionName)
+			err := c.CreateProgram(depPath, p.ServiceName, p.RepoName, mainFunctionName)
+			if err != nil {
+				return err
+			}
+		case FlowConfig:
+			c := config.(FlowConfig)
+			mainFunctionName := fmt.Sprintf("Flow%s", strings.Title(c.FlowName))
+			mainFunctionList = append(mainFunctionList, mainFunctionName)
+			err := c.CreateProgram(depPath, p.ServiceName, p.RepoName, mainFunctionName)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// TODO prepare to create main.go
 	// write go.mod
 	log.Println("[INFO] Create go.mod")
 	goModPath := filepath.Join(depPath, "go.mod")
