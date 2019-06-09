@@ -5,6 +5,7 @@ import (
 	"github.com/state-alchemists/ayanami/generator"
 	"log"
 	"path/filepath"
+	"strings"
 )
 
 // ExposedGoServiceConfig exposed ready flowConfig
@@ -27,7 +28,7 @@ type GoServiceConfig struct {
 
 // Validate validating config
 func (c GoServiceConfig) Validate() bool {
-	log.Printf("[INFO] Validating %s", c.ServiceName)
+	log.Printf("[INFO] VALIDATING GO SERVICE: %s", c.ServiceName)
 	if !c.IsAlphaNumeric(c.ServiceName) {
 		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", c.ServiceName)
 		return false
@@ -50,7 +51,7 @@ func (c GoServiceConfig) Validate() bool {
 
 // Scaffold scaffolding config
 func (c GoServiceConfig) Scaffold() error {
-	log.Printf("[INFO] Scaffolding %s", c.ServiceName)
+	log.Printf("[INFO] SCAFFOLDING GO SERVICE: %s", c.ServiceName)
 	for _, function := range c.Functions {
 		data := function.ToExposed()
 		packageSourcePath := function.FunctionPackage
@@ -85,8 +86,25 @@ func (c GoServiceConfig) Scaffold() error {
 
 // Build building config
 func (c GoServiceConfig) Build() error {
-	log.Printf("[INFO] Building %s", c.ServiceName)
+	log.Printf("[INFO] BUILDING GO SERVICE: %s", c.ServiceName)
 	depPath := fmt.Sprintf("srvc-%s", c.ServiceName)
+	serviceName := c.ServiceName
+	repoName := c.RepoName
+	mainFunctionName := "main"
+	// create program
+	err := c.CreateProgram(depPath, serviceName, repoName, mainFunctionName)
+	if err != nil {
+		return err
+	}
+	// write go.mod
+	log.Println("[INFO] Create go.mod")
+	goModPath := filepath.Join(depPath, "go.mod")
+	err = c.WriteDep(goModPath, "go.mod", c)
+	return err
+}
+
+// CreateProgram create main.go and others
+func (c GoServiceConfig) CreateProgram(depPath, serviceName, repoName, mainFunctionName string) error {
 	// write functions and dependencies
 	for _, function := range c.Functions {
 		packageSourcePath := function.FunctionPackage
@@ -111,24 +129,11 @@ func (c GoServiceConfig) Build() error {
 			}
 		}
 	}
-	// write main.go
-	log.Println("[INFO] Create main.go")
-	mainPath := filepath.Join(depPath, "main.go")
-	err := c.WriteDep(mainPath, "gosrvc.main.go", c.toExposed())
-	if err != nil {
-		return err
-	}
-	// write go.mod
-	log.Println("[INFO] Create go.mod")
-	goModPath := filepath.Join(depPath, "go.mod")
-	err = c.WriteDep(goModPath, "go.mod", c)
-	return err
-}
-
-// CreateProgram create main.go and others
-func (c GoServiceConfig) CreateProgram(depPath, serviceName, repoName, mainFunctionName string) error {
-	// TODO use this
-	return nil
+	// write main file
+	mainFileName := fmt.Sprintf("%s.go", strings.ToLower(mainFunctionName))
+	log.Printf("[INFO] Create %s", mainFileName)
+	mainPath := filepath.Join(depPath, mainFileName)
+	return c.WriteDep(mainPath, "gosrvc.main.go", c.toExposed(serviceName, repoName, mainFunctionName))
 }
 
 // Set replace/add service's function
@@ -136,7 +141,7 @@ func (c *GoServiceConfig) Set(method string, function Function) {
 	c.Functions[method] = function
 }
 
-func (c *GoServiceConfig) toExposed() ExposedGoServiceConfig {
+func (c *GoServiceConfig) toExposed(serviceName, repoName, mainFunctionName string) ExposedGoServiceConfig {
 	exposedFunctions := make(map[string]ExposedFunction)
 	packages := []string{}
 	for methodName, function := range c.Functions {
@@ -145,10 +150,11 @@ func (c *GoServiceConfig) toExposed() ExposedGoServiceConfig {
 		packages = append(packages, exposedFunction.FunctionPackage)
 	}
 	return ExposedGoServiceConfig{
-		Packages:    packages,
-		RepoName:    c.RepoName,
-		ServiceName: c.ServiceName,
-		Functions:   exposedFunctions,
+		Packages:         packages,
+		ServiceName:      serviceName,
+		RepoName:         repoName,
+		MainFunctionName: mainFunctionName,
+		Functions:        exposedFunctions,
 	}
 }
 

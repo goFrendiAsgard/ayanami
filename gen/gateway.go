@@ -5,6 +5,7 @@ import (
 	"github.com/state-alchemists/ayanami/generator"
 	"log"
 	"path/filepath"
+	"strings"
 )
 
 // ExposedGatewayConfig configuration to generate Gateway
@@ -26,7 +27,7 @@ type GatewayConfig struct {
 
 // Validate validating config
 func (c GatewayConfig) Validate() bool {
-	log.Printf("[INFO] Validating %s", c.ServiceName)
+	log.Printf("[INFO] VALIDATING GATEWAY: %s", c.ServiceName)
 	if !c.IsAlphaNumeric(c.ServiceName) {
 		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", c.ServiceName)
 		return false
@@ -40,18 +41,18 @@ func (c GatewayConfig) Validate() bool {
 
 // Scaffold scaffolding config
 func (c GatewayConfig) Scaffold() error {
-	log.Printf("[SKIP] Scaffolding %s", c.ServiceName)
 	return nil
 }
 
 // Build building config
 func (c GatewayConfig) Build() error {
-	log.Printf("[INFO] Building %s", c.ServiceName)
+	log.Printf("[INFO] BUILDING GATEWAY: %s", c.ServiceName)
 	depPath := fmt.Sprintf("%s", c.ServiceName)
-	// write main.go
-	log.Println("[INFO] Create main.go")
-	mainPath := filepath.Join(depPath, "main.go")
-	err := c.WriteDep(mainPath, "gateway.main.go", c)
+	serviceName := c.ServiceName
+	repoName := c.RepoName
+	mainFunctionName := "main"
+	// create program
+	err := c.CreateProgram(depPath, serviceName, repoName, mainFunctionName)
 	if err != nil {
 		return err
 	}
@@ -63,13 +64,24 @@ func (c GatewayConfig) Build() error {
 
 // CreateProgram create main.go and others
 func (c GatewayConfig) CreateProgram(depPath, serviceName, repoName, mainFunctionName string) error {
-	// TODO use this
-	return nil
+	mainFileName := fmt.Sprintf("%s.go", strings.ToLower(mainFunctionName))
+	log.Printf("[INFO] Create %s", mainFileName)
+	mainPath := filepath.Join(depPath, mainFileName)
+	return c.WriteDep(mainPath, "gateway.main.go", c.toExposed(serviceName, repoName, mainFunctionName))
 }
 
 // AddRoute add route to gateway
 func (c *GatewayConfig) AddRoute(route string) {
 	c.Routes = append(c.Routes, route)
+}
+
+func (c *GatewayConfig) toExposed(serviceName, repoName, mainFunctionName string) ExposedGatewayConfig {
+	return ExposedGatewayConfig{
+		ServiceName:      serviceName,
+		RepoName:         repoName,
+		MainFunctionName: mainFunctionName,
+		Routes:           c.Routes,
+	}
 }
 
 // NewGateway create new gateway

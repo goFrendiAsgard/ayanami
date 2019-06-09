@@ -11,7 +11,6 @@ import (
 // ExposedFlowConfig exposed ready flowConfig
 type ExposedFlowConfig struct {
 	MainFunctionName string
-	ServiceName      string
 	RepoName         string
 	FlowName         string
 	Packages         []string
@@ -33,7 +32,7 @@ type FlowConfig struct {
 
 // Validate validating config
 func (c FlowConfig) Validate() bool {
-	log.Printf("[INFO] Validating Flow %s", c.FlowName)
+	log.Printf("[INFO] VALIDATING FLOW: %s", c.FlowName)
 	for _, input := range c.Inputs {
 		if !c.IsMatch(input, "^[A-Za-z][a-zA-Z0-9]*$") {
 			log.Printf("[ERROR] Invalid input `%s`", input)
@@ -55,7 +54,7 @@ func (c FlowConfig) Validate() bool {
 		return false
 	}
 	for index, event := range c.Events {
-		log.Printf("[INFO] Validating event %d", index)
+		log.Printf("[INFO] Validating event %d: %v", index, event.ToMap())
 		if !event.Validate() {
 			return false
 		}
@@ -65,7 +64,7 @@ func (c FlowConfig) Validate() bool {
 
 // Scaffold scaffolding config
 func (c FlowConfig) Scaffold() error {
-	log.Printf("[INFO] Scaffolding Flow %s", c.FlowName)
+	log.Printf("[INFO] SCAFFOLDING FLOW: %s", c.FlowName)
 	for _, event := range c.Events {
 		if !event.UseFunction {
 			continue
@@ -106,7 +105,7 @@ func (c FlowConfig) Scaffold() error {
 
 // Build building config
 func (c FlowConfig) Build() error {
-	log.Printf("[INFO] Building Flow %s", c.FlowName)
+	log.Printf("[INFO] BUILDING FLOW: %s", c.FlowName)
 	depPath := fmt.Sprintf("flow-%s", c.FlowName)
 	repoName := c.RepoName
 	mainFunctionName := "main"
@@ -186,7 +185,6 @@ func (c *FlowConfig) AddOutputEventFunc(eventName, varName, functionPackage, fun
 
 func (c *FlowConfig) toExposed(serviceName, repoName, mainFunctionName string) ExposedFlowConfig {
 	return ExposedFlowConfig{
-		ServiceName:      serviceName,
 		RepoName:         repoName,
 		MainFunctionName: mainFunctionName,
 		FlowName:         c.FlowName,
@@ -200,7 +198,7 @@ func (c *FlowConfig) toExposed(serviceName, repoName, mainFunctionName string) E
 func (c *FlowConfig) getEventsForExposed() []map[string]string {
 	events := []map[string]string{}
 	for _, event := range c.Events {
-		events = append(events, event.ToMap())
+		events = append(events, event.ToIndentedMap())
 	}
 	return events
 }

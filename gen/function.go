@@ -9,15 +9,16 @@ import (
 
 // ExposedFunction exposed ready function definition
 type ExposedFunction struct {
-	FunctionName        string
-	FunctionReturn      string
-	FunctionDeclaration string
-	FunctionPackage     string
-	FunctionAssignment  string
-	Inputs              []string
-	Outputs             []string
-	JoinedInputs        string
-	JoinedOutputs       string
+	FunctionName       string
+	FunctionReturn     string
+	FunctionPackage    string
+	FunctionAssignment string
+	InputDeclaration   string
+	OutputDeclaration  string
+	Inputs             []string
+	Outputs            []string
+	JoinedInputs       string
+	JoinedOutputs      string
 }
 
 // Function a definition of function
@@ -38,7 +39,7 @@ func (f *Function) GetFileName() string {
 // ToExposed change function to it exposed counterpart
 func (f *Function) ToExposed() ExposedFunction {
 	// get declaration
-	inputDeclaration := strings.Join(f.Inputs, ", ")
+	inputDeclaration := fmt.Sprintf("%s interface{}", strings.Join(f.Inputs, ", "))
 	outputTypes := []string{}
 	functionReturns := []string{}
 	for range f.Outputs {
@@ -47,21 +48,21 @@ func (f *Function) ToExposed() ExposedFunction {
 	}
 	outputDeclaration := strings.Join(outputTypes, ", ")
 	functionReturn := strings.Join(functionReturns, ", ")
-	functionDeclaration := fmt.Sprintf("%s (%s interface{}) (%s)", f.FunctionName, inputDeclaration, outputDeclaration)
 	// get assignment
 	outputAssignment := strings.Join(f.Outputs, ", ")
 	inputAssignment := strings.Join(f.Inputs, ", ")
 	functionAssignment := fmt.Sprintf("%s := %s(%s)", outputAssignment, f.FunctionName, inputAssignment)
 	return ExposedFunction{
-		FunctionName:        f.FunctionName,
-		FunctionReturn:      functionReturn,
-		FunctionDeclaration: functionDeclaration,
-		FunctionPackage:     f.FunctionPackage,
-		FunctionAssignment:  functionAssignment,
-		Inputs:              f.Inputs,
-		Outputs:             f.Outputs,
-		JoinedInputs:        f.QuoteArrayAndJoin(f.Inputs, ", "),
-		JoinedOutputs:       f.QuoteArrayAndJoin(f.Outputs, ", "),
+		FunctionName:       f.FunctionName,
+		FunctionReturn:     functionReturn,
+		FunctionPackage:    f.FunctionPackage,
+		FunctionAssignment: functionAssignment,
+		InputDeclaration:   inputDeclaration,
+		OutputDeclaration:  outputDeclaration,
+		Inputs:             f.Inputs,
+		Outputs:            f.Outputs,
+		JoinedInputs:       f.QuoteArrayAndJoin(f.Inputs, ", "),
+		JoinedOutputs:      f.QuoteArrayAndJoin(f.Outputs, ", "),
 	}
 }
 

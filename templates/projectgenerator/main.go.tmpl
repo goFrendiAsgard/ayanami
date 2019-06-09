@@ -24,24 +24,32 @@ func main() {
 		param = os.Args[1]
 	}
     switch param {
+    case "validate":
+        log.Println("START VALIDATING...")
+        validated := Gen.Validate()
+        if validated {
+            log.Println("VALIDATION SUCCESS !!!\n")
+        } else {
+            log.Println("VALIDATION FAILED\n")
+        }
     case "build":
         log.Println("START BUILDING...")
         err = Gen.Build()
         if err == nil {
-            log.Println("TASK DONE...\n")
+            log.Println("BUILD SUCCESS !!!\n")
         } else {
-            log.Printf("[ERROR] %s\n", err)
+            log.Printf("BUILD FAILED: %s\n", err)
         }
     case "scaffold":
         log.Println("START SCAFFOLDING...")
         err = Gen.Scaffold()
         if err == nil {
-            log.Println("TASK DONE...\n")
+            log.Println("SCAFFOLD SUCCESS !!!\n")
         } else {
-            log.Printf("[ERROR] %s\n", err)
+            log.Printf("SCAFFOLD FAILED: %s\n", err)
         }
     default:
-        log.Println("[ERROR] Unrecognized command. Currently only support `build` and `scaffold`")
+        log.Println("[ERROR] Unrecognized command. Only support `validate`, `build` and `scaffold`")
     }
 }
 {{end}}

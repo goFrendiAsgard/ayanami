@@ -27,7 +27,7 @@ type CmdConfig struct {
 
 // Validate validating config
 func (c CmdConfig) Validate() bool {
-	log.Printf("[INFO] Validating %s", c.ServiceName)
+	log.Printf("[INFO] VALIDATING CMD SERVICE: %s", c.ServiceName)
 	if !c.IsAlphaNumeric(c.ServiceName) {
 		log.Printf("[ERROR] Service name should be alphanumeric, but `%s` found", c.ServiceName)
 		return false
@@ -51,13 +51,12 @@ func (c CmdConfig) Validate() bool {
 
 // Scaffold scaffolding config
 func (c CmdConfig) Scaffold() error {
-	log.Printf("[SKIP] Scaffolding %s", c.ServiceName)
 	return nil
 }
 
 // Build building config
 func (c CmdConfig) Build() error {
-	log.Printf("[INFO] Building %s", c.ServiceName)
+	log.Printf("[INFO] BUILDING CMD SERVICE: %s", c.ServiceName)
 	depPath := fmt.Sprintf("srvc-%s", c.ServiceName)
 	serviceName := c.ServiceName
 	repoName := c.RepoName
@@ -80,8 +79,7 @@ func (c CmdConfig) CreateProgram(depPath, serviceName, repoName, mainFunctionNam
 	mainFileName := fmt.Sprintf("%s.go", strings.ToLower(mainFunctionName))
 	log.Printf("[INFO] Create %s", mainFileName)
 	mainPath := filepath.Join(depPath, mainFileName)
-	err := c.WriteDep(mainPath, "cmd.main.go", c.toExposed(serviceName, repoName, mainFunctionName))
-	return err
+	return c.WriteDep(mainPath, "cmd.main.go", c.toExposed(serviceName, repoName, mainFunctionName))
 }
 
 // Set replace/add cmd's command

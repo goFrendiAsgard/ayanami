@@ -245,7 +245,6 @@ import (
 
 // MainFlow emulating flow's main function
 func MainFlow() {
-	serviceName := "flow"
 	// define broker
 	broker, err := msgbroker.NewNats(config.GetNatsURL())
 	if err != nil {
@@ -253,7 +252,7 @@ func MainFlow() {
 	}
 	// define services
 	services := service.Services{
-		service.NewFlow(serviceName, "main", broker,
+		service.NewFlow("main", broker,
 			// inputs
 			[]string{"request"},
 			// outputs

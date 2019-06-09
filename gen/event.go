@@ -53,6 +53,12 @@ func (e *Event) ToMap() map[string]string {
 		result["UseFunction"] = "true"
 		result["Function"] = fmt.Sprintf("%s.%s", e.FunctionPackage, e.FunctionName)
 	}
+	return result
+}
+
+// ToIndentedMap change event to map with value indented, ready for templating
+func (e *Event) ToIndentedMap() map[string]string {
+	result := e.ToMap()
 	e.addValIndentationToMap(result)
 	return result
 }
