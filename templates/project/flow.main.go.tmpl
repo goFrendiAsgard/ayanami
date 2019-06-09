@@ -32,7 +32,7 @@ func {{.MainFunctionName}}() {
 		),
 	}
 	// consume and publish forever
-	forever := make(ch bool)
+	forever := make(chan bool)
 	services.ConsumeAndPublish(broker, "flow")
 	<-forever
 }

@@ -7,11 +7,11 @@ testv:
 coverage:
 	go tool cover -html=profile.out
 
-cleantest:
-	rm -R .test-*
-
 build:
 	./build.sh
 
-testgenerate:
-	mkdir -p .test-gen && go build && ./ayanami init -p whatever -r github.com/whoever/whatever -d .test-gen && cd .test-gen/whatever/generator && go build && ./whatever scaffold && ./whatever build
+deletemegazord:
+	rm ./.test-gen/whatever/deployable -R && rm ./.test-gen/whatever/generator
+
+runmegazord:
+	mkdir -p .test-gen && go build && ./ayanami init -p whatever -r github.com/whoever/whatever -d .test-gen && cd .test-gen/whatever/generator && go build && ./whatever scaffold && ./whatever build && cd ../deployable/megazord && go build && ./megazord

@@ -45,9 +45,9 @@ func init() {
         "preOut",
     )
 
-    // once we get `preOut`, set it as response's message and set response code to 200
+    // once we get `preOut`, set it as response's content and set response's code to 200
     flow.AddOutputEvent(
-        "trig.response.get.banner.in.message",
+        "trig.response.get.banner.in.content",
         "preOut",
     )
     flow.AddOutputEventVal(
@@ -71,7 +71,7 @@ func init() {
         500,
     )
     flow.AddOutputEventVal(
-        "trig.response.get.banner.in.message",
+        "trig.response.get.banner.in.content",
         "errorMessage",
         "Internal server error",
     )

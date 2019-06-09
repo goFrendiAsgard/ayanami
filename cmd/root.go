@@ -15,7 +15,8 @@ const longDescription = `
         |___/       
 
 Ayanami is a FaaS-like framework for your own infrastructure.
-To make a project, please use --help for seeing available commands`
+You can create project by using "init" command.
+Please use --help for seeing available commands`
 
 var rootCmd = &cobra.Command{
 	Use:   "ayanami",

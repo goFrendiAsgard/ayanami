@@ -41,6 +41,73 @@ composition + template              --> [scaffold] --> sourceCode
 composition + sourceCode + template --> [build]    --> deployable
 ```
 
+# Getting started
+
+## Prerequisite
+
+To follow this tutorial you should have `git`, `go 1.12`, and `nats`. Using docker is recommended but not required.
+
+## Clone Ayanami
+
+First of all, you have to clone ayanami's repository by performing `git clone git@github.com:state-alchemists/ayanami.git`. This will make a directory named `ayanami`.
+
+After you have ayanami cloned to your local computer, you should build the executable by performing `make build` or `go build`.
+
+For convenience, you can temporarily add alias to ayanami executable, so that you can run the executable from everywhere. To do so, just type `alias="<ayanami-directory-location>/ayanami"`. To make this permanent, you can add the same command to your `.bashrc` or `.zshrc`.
+
+## Create Project
+
+To create project you can invoke `ayanami init`. In the following example, we want to create a project named `awesomeProject` which has a repo name `github.com/goFrendiAsgard/awesomeProject`. Feel free to set your own project/repo name. You can also press enter to let ayanami generate random project/repo name.
+
+```bash
+-> % ayanami init
+Enter your project name (default: yellowZeruel9459): awesomeProject
+Enter your repo name (default: github.com/toji/awesomeProject): github.com/goFrendiAsgard/awesomeProject
+```
+
+Once the command has been executed, you will see some logs showing that several files has been created. Once it is done, you can move to your project directory and seeing around.
+
+```bash
+-> % cd awesomeProject
+-> % tree
+.
+├── deployable
+├── generator
+│   ├── flowbanner.go
+│   ├── flowroot.go
+│   ├── gateway.go
+│   ├── gen
+│   │   ├── cmd.go
+│   │   ├── event.go
+│   │   ├── flow.go
+│   │   ├── function.go
+│   │   ├── gateway.go
+│   │   ├── gomonolith.go
+│   │   └── goservice.go
+│   ├── go.mod
+│   ├── main.go
+│   ├── megazord.go
+│   ├── servicecmd.go
+│   ├── servicehtml.go
+│   └── templates
+│       ├── cmd.main.go.tmpl
+│       ├── dependency.go.tmpl
+│       ├── flow.function.go.tmpl
+│       ├── flow.main.go.tmpl
+│       ├── gateway.main.go.tmpl
+│       ├── go.mod.tmpl
+│       ├── gomonolith.main.go.tmpl
+│       ├── gosrvc.function.go.tmpl
+│       └── gosrvc.main.go.tmpl
+└── sourcecode
+```
+
+The project is already stuffed with several examples. Let's have a look into it:
+* `deployable`: All deployed artifact will be placed in this directory. All code here are generated and not supposed to be edited. If you want to change anything, please take a look at `generator/gen`, `generator/templates` or `sourcecode`
+* `generator`: Almost all you need is located in this directory. Here, you will find `main.go`, `gen`, `templates`, and several composition example.
+* `sourcecode`: Sometime composition need external source code written by users. This is where you will find them. After defining compoisitions, most of your time should be spent here. Writing source codes and unittest.
+
+
 # Terminologies
 
 * `Composition`: Define the logic architecture of your program.
@@ -72,13 +139,7 @@ Event Name should comply one of these formats
 * `<out|in>` is either `out` or `in`. Typically services consume `in` event and omit `out` event.
 * `<varName>` is variable name.
 
-__Note:__ We strip `hyphens` from UUID because Nats documentation said it only accept alpha numeric and dots as event name.
-
-# Getting started
-
-```
-ayanami init -p awesomeproject -r "github.com/nerv/awesomeproject"
-```
+__NOTE:__ We strip `hyphens` from UUID because Nats documentation said it only accept alpha numeric and dots as event name.
 
 # For Developer
 
@@ -89,9 +150,8 @@ A makefile is available to help you while developing `Ayanami`. The possible com
 * `make test`: Test integration & unittest and create profile.out. Make sure you already has `nats` running before execute this command.
 * `make testv`: Same as `make test`, but verbose.
 * `make coverage`: Get code coverage as HTML.
-* `make cleantest`: Remove all `.test-*` files
 * `make build`: Build ayanami for mac, windows, and linux. For each platform, there will be 2 executables (for i386 and amd64)
-* `make testgenerate`: Emulate `init`, `scaffold`, and `build`. Since there is no easy way to test generated project, it is strongly recommend to check out the content of `.test-gen`. This command just make sure that at least our `templates` and `gen` doesn't yield runtime error.
+* `make deletemegazord || make runmegazord`: Emulate `init`, `scaffold`, and `build`. Since there is no easy way to test generated project, it is strongly recommend to check out the content of `.test-gen`. This command just make sure that at least our `templates` and `gen` doesn't yield runtime error and run `megazord`
 
 ## Distribution
 
@@ -114,7 +174,7 @@ Whenever gateway receive HTTP request from the client, it will send message to `
 
 Please refer to go's `net/http` documentation for more information about the message.
 
-Once the message sent, gateway will listen to `<ID>.trig.response.<http-verb>.<url-segments>.in.code` and `<ID>.trig.response.<http-verb>.<url-segments>.in.message`. `Code` should contains HTTP response code, while `message` should contains HTTP Message.
+Once the message sent, gateway will listen to `<ID>.trig.response.<http-verb>.<url-segments>.in.code` and `<ID>.trig.response.<http-verb>.<url-segments>.in.content`. `Code` should contains HTTP response code, while `content` should contains HTTP Message.
 
 It is flow's responsibility to
 
