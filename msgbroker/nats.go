@@ -23,7 +23,7 @@ func (broker Nats) Consume(eventName string, successCallback ConsumeSuccessFunc,
 			errorCallback(err)
 			return
 		}
-		log.Printf("[NATS CONSUME]\n  Event  : %s\n  Content: %#v", eventName, pkg)
+		// log.Printf("[NATS CONSUME]\n  Event  : %s\n  Content: %#v", eventName, pkg)
 		successCallback(pkg)
 	})
 	if err != nil {
@@ -39,7 +39,7 @@ func (broker Nats) Publish(eventName string, pkg servicedata.Package) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("[NATS PUBLISH]\n  Event  : %s\n  Content: %#v", eventName, pkg)
+	// log.Printf("[NATS PUBLISH]\n  Event  : %s\n  Content: %#v", eventName, pkg)
 	return broker.Connection.Publish(eventName, JSONByte)
 }
 

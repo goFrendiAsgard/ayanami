@@ -110,7 +110,7 @@ func (c FlowConfig) Build() error {
 	repoName := c.RepoName
 	mainFunctionName := "main"
 	// create program
-	err := c.CreateProgram(depPath, c.FlowName, repoName, mainFunctionName)
+	err := c.CreateProgram(depPath, repoName, mainFunctionName)
 	if err != nil {
 		return err
 	}
@@ -122,7 +122,7 @@ func (c FlowConfig) Build() error {
 }
 
 // CreateProgram create main.go and others
-func (c FlowConfig) CreateProgram(depPath, serviceName, repoName, mainFunctionName string) error {
+func (c FlowConfig) CreateProgram(depPath, repoName, mainFunctionName string) error {
 	// write functions and dependencies
 	for _, event := range c.Events {
 		if !event.UseFunction {
@@ -154,7 +154,7 @@ func (c FlowConfig) CreateProgram(depPath, serviceName, repoName, mainFunctionNa
 	mainFileName := fmt.Sprintf("%s.go", strings.ToLower(mainFunctionName))
 	log.Printf("[INFO] Create %s", mainFileName)
 	mainPath := filepath.Join(depPath, mainFileName)
-	err := c.WriteDep(mainPath, "flow.main.go", c.toExposed(serviceName, repoName, mainFunctionName))
+	err := c.WriteDep(mainPath, "flow.main.go", c.toExposed(repoName, mainFunctionName))
 	return err
 }
 
@@ -183,7 +183,7 @@ func (c *FlowConfig) AddOutputEventFunc(eventName, varName, functionPackage, fun
 	c.AddEvent(NewOutputEventFunc(eventName, varName, functionPackage, functionName, functionDependencies))
 }
 
-func (c *FlowConfig) toExposed(serviceName, repoName, mainFunctionName string) ExposedFlowConfig {
+func (c *FlowConfig) toExposed(repoName, mainFunctionName string) ExposedFlowConfig {
 	return ExposedFlowConfig{
 		RepoName:         repoName,
 		MainFunctionName: mainFunctionName,

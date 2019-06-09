@@ -15,8 +15,8 @@ type ExposedGomonolithProc struct {
 
 // GoMonolithProc procedureuration to generate GoMonolith
 type GoMonolithProc struct {
-	ServiceName string
-	RepoName    string
+	DirName  string
+	RepoName string
 	generator.IOHelper
 }
 
@@ -32,8 +32,8 @@ func (p GoMonolithProc) Scaffold(configs generator.Configs) error {
 
 // Build building procedure
 func (p GoMonolithProc) Build(configs generator.Configs) error {
-	log.Printf("[INFO] BUILDING MONOLITH: %s", p.ServiceName)
-	depPath := p.ServiceName
+	log.Printf("[INFO] BUILDING MONOLITH: %s", p.DirName)
+	depPath := p.DirName
 	mainFunctionList := []string{}
 	for _, config := range configs {
 		switch config.(type) {
@@ -41,7 +41,7 @@ func (p GoMonolithProc) Build(configs generator.Configs) error {
 			c := config.(CmdConfig)
 			mainFunctionName := fmt.Sprintf("Service%s", strings.Title(c.ServiceName))
 			mainFunctionList = append(mainFunctionList, mainFunctionName)
-			err := c.CreateProgram(depPath, p.ServiceName, p.RepoName, mainFunctionName)
+			err := c.CreateProgram(depPath, p.RepoName, mainFunctionName)
 			if err != nil {
 				return err
 			}
@@ -49,7 +49,7 @@ func (p GoMonolithProc) Build(configs generator.Configs) error {
 			c := config.(GoServiceConfig)
 			mainFunctionName := fmt.Sprintf("Service%s", strings.Title(c.ServiceName))
 			mainFunctionList = append(mainFunctionList, mainFunctionName)
-			err := c.CreateProgram(depPath, p.ServiceName, p.RepoName, mainFunctionName)
+			err := c.CreateProgram(depPath, p.RepoName, mainFunctionName)
 			if err != nil {
 				return err
 			}
@@ -57,7 +57,7 @@ func (p GoMonolithProc) Build(configs generator.Configs) error {
 			c := config.(GatewayConfig)
 			mainFunctionName := fmt.Sprintf("Gateway%s", strings.Title(c.ServiceName))
 			mainFunctionList = append(mainFunctionList, mainFunctionName)
-			err := c.CreateProgram(depPath, p.ServiceName, p.RepoName, mainFunctionName)
+			err := c.CreateProgram(depPath, p.RepoName, mainFunctionName)
 			if err != nil {
 				return err
 			}
@@ -65,7 +65,7 @@ func (p GoMonolithProc) Build(configs generator.Configs) error {
 			c := config.(FlowConfig)
 			mainFunctionName := fmt.Sprintf("Flow%s", strings.Title(c.FlowName))
 			mainFunctionList = append(mainFunctionList, mainFunctionName)
-			err := c.CreateProgram(depPath, p.ServiceName, p.RepoName, mainFunctionName)
+			err := c.CreateProgram(depPath, p.RepoName, mainFunctionName)
 			if err != nil {
 				return err
 			}
@@ -86,10 +86,10 @@ func (p GoMonolithProc) Build(configs generator.Configs) error {
 }
 
 // NewGoMonolith make monolithic app
-func NewGoMonolith(g *generator.Generator, serviceName, repoName string) GoMonolithProc {
+func NewGoMonolith(g *generator.Generator, dirName, repoName string) GoMonolithProc {
 	return GoMonolithProc{
-		ServiceName: serviceName,
-		RepoName:    repoName,
-		IOHelper:    g.IOHelper,
+		DirName:  dirName,
+		RepoName: repoName,
+		IOHelper: g.IOHelper,
 	}
 }

@@ -25,7 +25,7 @@ func (broker Memory) Consume(eventName string, successCallback ConsumeSuccessFun
 func (broker Memory) Publish(eventName string, pkg servicedata.Package) error {
 	broker.lock.RLock()
 	defer broker.lock.RUnlock()
-	log.Printf("[MEMORY PUBLISH]\n  Event  : %s\n  Content: %#v", eventName, pkg)
+	// log.Printf("[MEMORY PUBLISH]\n  Event  : %s\n  Content: %#v", eventName, pkg)
 	if handler, exists := broker.handlers[eventName]; exists {
 		log.Printf("[MEMORY CONSUME]\n  Event  : %s\n  Content: %#v", eventName, pkg)
 		go handler(pkg)
@@ -35,7 +35,7 @@ func (broker Memory) Publish(eventName string, pkg servicedata.Package) error {
 	wildCardEventName := fmt.Sprintf("*.%s", strings.Join(eventParts[1:], "."))
 	handler, exists := broker.handlers[wildCardEventName]
 	if exists {
-		log.Printf("[MEMORY CONSUME]\n  Event  : %s\n  Content: %#v", wildCardEventName, pkg)
+		// log.Printf("[MEMORY CONSUME]\n  Event  : %s\n  Content: %#v", wildCardEventName, pkg)
 		go handler(pkg)
 	}
 	return nil

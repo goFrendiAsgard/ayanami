@@ -58,11 +58,10 @@ func (c CmdConfig) Scaffold() error {
 func (c CmdConfig) Build() error {
 	log.Printf("[INFO] BUILDING CMD SERVICE: %s", c.ServiceName)
 	depPath := fmt.Sprintf("srvc-%s", c.ServiceName)
-	serviceName := c.ServiceName
 	repoName := c.RepoName
 	mainFunctionName := "main"
 	// create program
-	err := c.CreateProgram(depPath, serviceName, repoName, mainFunctionName)
+	err := c.CreateProgram(depPath, repoName, mainFunctionName)
 	if err != nil {
 		return err
 	}
@@ -74,12 +73,12 @@ func (c CmdConfig) Build() error {
 }
 
 // CreateProgram create main.go and others
-func (c CmdConfig) CreateProgram(depPath, serviceName, repoName, mainFunctionName string) error {
+func (c CmdConfig) CreateProgram(depPath, repoName, mainFunctionName string) error {
 	// write main file
 	mainFileName := fmt.Sprintf("%s.go", strings.ToLower(mainFunctionName))
 	log.Printf("[INFO] Create %s", mainFileName)
 	mainPath := filepath.Join(depPath, mainFileName)
-	return c.WriteDep(mainPath, "cmd.main.go", c.toExposed(serviceName, repoName, mainFunctionName))
+	return c.WriteDep(mainPath, "cmd.main.go", c.toExposed(repoName, mainFunctionName))
 }
 
 // Set replace/add cmd's command
@@ -87,9 +86,9 @@ func (c *CmdConfig) Set(method, command string) {
 	c.Commands[method] = command
 }
 
-func (c *CmdConfig) toExposed(serviceName, repoName, mainFunctionName string) ExposedCmdConfig {
+func (c *CmdConfig) toExposed(repoName, mainFunctionName string) ExposedCmdConfig {
 	return ExposedCmdConfig{
-		ServiceName:      serviceName,
+		ServiceName:      c.ServiceName,
 		RepoName:         repoName,
 		MainFunctionName: mainFunctionName,
 		Commands:         c.QuoteMap(c.Commands),

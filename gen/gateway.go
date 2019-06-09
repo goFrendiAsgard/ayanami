@@ -48,11 +48,10 @@ func (c GatewayConfig) Scaffold() error {
 func (c GatewayConfig) Build() error {
 	log.Printf("[INFO] BUILDING GATEWAY: %s", c.ServiceName)
 	depPath := fmt.Sprintf("%s", c.ServiceName)
-	serviceName := c.ServiceName
 	repoName := c.RepoName
 	mainFunctionName := "main"
 	// create program
-	err := c.CreateProgram(depPath, serviceName, repoName, mainFunctionName)
+	err := c.CreateProgram(depPath, repoName, mainFunctionName)
 	if err != nil {
 		return err
 	}
@@ -63,11 +62,11 @@ func (c GatewayConfig) Build() error {
 }
 
 // CreateProgram create main.go and others
-func (c GatewayConfig) CreateProgram(depPath, serviceName, repoName, mainFunctionName string) error {
+func (c GatewayConfig) CreateProgram(depPath, repoName, mainFunctionName string) error {
 	mainFileName := fmt.Sprintf("%s.go", strings.ToLower(mainFunctionName))
 	log.Printf("[INFO] Create %s", mainFileName)
 	mainPath := filepath.Join(depPath, mainFileName)
-	return c.WriteDep(mainPath, "gateway.main.go", c.toExposed(serviceName, repoName, mainFunctionName))
+	return c.WriteDep(mainPath, "gateway.main.go", c.toExposed(repoName, mainFunctionName))
 }
 
 // AddRoute add route to gateway
@@ -75,9 +74,9 @@ func (c *GatewayConfig) AddRoute(route string) {
 	c.Routes = append(c.Routes, route)
 }
 
-func (c *GatewayConfig) toExposed(serviceName, repoName, mainFunctionName string) ExposedGatewayConfig {
+func (c *GatewayConfig) toExposed(repoName, mainFunctionName string) ExposedGatewayConfig {
 	return ExposedGatewayConfig{
-		ServiceName:      serviceName,
+		ServiceName:      c.ServiceName,
 		RepoName:         repoName,
 		MainFunctionName: mainFunctionName,
 		Routes:           c.Routes,

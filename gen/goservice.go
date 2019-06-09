@@ -88,11 +88,10 @@ func (c GoServiceConfig) Scaffold() error {
 func (c GoServiceConfig) Build() error {
 	log.Printf("[INFO] BUILDING GO SERVICE: %s", c.ServiceName)
 	depPath := fmt.Sprintf("srvc-%s", c.ServiceName)
-	serviceName := c.ServiceName
 	repoName := c.RepoName
 	mainFunctionName := "main"
 	// create program
-	err := c.CreateProgram(depPath, serviceName, repoName, mainFunctionName)
+	err := c.CreateProgram(depPath, repoName, mainFunctionName)
 	if err != nil {
 		return err
 	}
@@ -104,7 +103,7 @@ func (c GoServiceConfig) Build() error {
 }
 
 // CreateProgram create main.go and others
-func (c GoServiceConfig) CreateProgram(depPath, serviceName, repoName, mainFunctionName string) error {
+func (c GoServiceConfig) CreateProgram(depPath, repoName, mainFunctionName string) error {
 	// write functions and dependencies
 	for _, function := range c.Functions {
 		packageSourcePath := function.FunctionPackage
@@ -133,7 +132,7 @@ func (c GoServiceConfig) CreateProgram(depPath, serviceName, repoName, mainFunct
 	mainFileName := fmt.Sprintf("%s.go", strings.ToLower(mainFunctionName))
 	log.Printf("[INFO] Create %s", mainFileName)
 	mainPath := filepath.Join(depPath, mainFileName)
-	return c.WriteDep(mainPath, "gosrvc.main.go", c.toExposed(serviceName, repoName, mainFunctionName))
+	return c.WriteDep(mainPath, "gosrvc.main.go", c.toExposed(repoName, mainFunctionName))
 }
 
 // Set replace/add service's function
@@ -141,7 +140,7 @@ func (c *GoServiceConfig) Set(method string, function Function) {
 	c.Functions[method] = function
 }
 
-func (c *GoServiceConfig) toExposed(serviceName, repoName, mainFunctionName string) ExposedGoServiceConfig {
+func (c *GoServiceConfig) toExposed(repoName, mainFunctionName string) ExposedGoServiceConfig {
 	exposedFunctions := make(map[string]ExposedFunction)
 	packages := []string{}
 	for methodName, function := range c.Functions {
@@ -151,7 +150,7 @@ func (c *GoServiceConfig) toExposed(serviceName, repoName, mainFunctionName stri
 	}
 	return ExposedGoServiceConfig{
 		Packages:         packages,
-		ServiceName:      serviceName,
+		ServiceName:      c.ServiceName,
 		RepoName:         repoName,
 		MainFunctionName: mainFunctionName,
 		Functions:        exposedFunctions,

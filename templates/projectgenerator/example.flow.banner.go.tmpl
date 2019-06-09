@@ -29,7 +29,7 @@ func init() {
 
     // once we get result from `cmd.figlet`, store it it as `figletOut`
     flow.AddInputEvent(
-        "srvc.cmd.get.out.output",
+        "srvc.cmd.figlet.out.output",
         "figletOut",
     )
 
@@ -67,12 +67,12 @@ func init() {
     )
     flow.AddOutputEventVal(
         "trig.response.get.banner.in.code",
-        "errorMessage",
+        "code",
         500,
     )
     flow.AddOutputEventVal(
         "trig.response.get.banner.in.content",
-        "errorMessage",
+        "content",
         "Internal server error",
     )
 
