@@ -29,10 +29,11 @@ Providing an environment with minimum dependencies in order to:
 
 # How
 
-* Developer define `composition` and `templates` (what services are available, and how do they interact to each other, how everything should be generated)
-* Developer scaffold the `source code`
-* Developer edit the `source code` to match their need
-* Developer build a `deployable`
+* User define `composition` and `templates` (what services are available, and how do they interact to each other, how everything should be generated)
+* User scaffold the `source code`
+* User edit the `source code` to match their need
+* User build a `deployable`
+* Done :)
 
 ```
 Nothing                             --> [init]     --> composition + template
@@ -79,6 +80,22 @@ __Note:__ We strip `hyphens` from UUID because Nats documentation said it only a
 ayanami init -p awesomeproject -r "github.com/nerv/awesomeproject"
 ```
 
+# For Developer
+
+## Makefile
+
+A makefile is available to help you while developing `Ayanami`. The possible commands are as following:
+
+* `make test`: Test integration & unittest and create profile.out. Make sure you already has `nats` running before execute this command.
+* `make testv`: Same as `make test`, but verbose.
+* `make coverage`: Get code coverage as HTML.
+* `make cleantest`: Remove all `.test-*` files
+* `make build`: Build ayanami for mac, windows, and linux. For each platform, there will be 2 executables (for i386 and amd64)
+* `make testgenerate`: Emulate `init`, `scaffold`, and `build`. Since there is no easy way to test generated project, it is strongly recommend to check out the content of `.test-gen`. This command just make sure that at least our `templates` and `gen` doesn't yield runtime error.
+
+## Distribution
+
+To distribute `Ayanami`, you should copy at least one of our executable, along with `templates` and `gen` directory. When installed, the directories should be in the same location with the executable.
 
 # Gateway (Tech Spec)
 
