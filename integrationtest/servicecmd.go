@@ -25,7 +25,7 @@ func MainServiceCmd() {
 		),
 	}
 	// consume and publish forever
-	ch := make(chan bool)
+	forever := make(chan bool)
 	services.ConsumeAndPublish(broker, serviceName)
-	<-ch
+	<-forever
 }

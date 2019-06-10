@@ -19,7 +19,7 @@ func {{.MainFunctionName}}() {
 	// define services
 	services := service.Services{ {{ range $methodName, $command := .Commands }}
         service.NewCmd(serviceName, "{{$methodName}}",
-			[]string{"/bin/sh", {{$command}}},
+			[]string{"/bin/sh", "-c", {{$command}}},
 		),{{ end }}
 	}
 	// consume and publish forever

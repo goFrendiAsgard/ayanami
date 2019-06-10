@@ -10,7 +10,7 @@ import (
 )
 
 func TestAll(t *testing.T) {
-	expected := fmt.Sprintf("%s%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
+	expectedBanner := fmt.Sprintf("%s%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
 		"<pre>",
 		` _____________________________________________________________________________ `,
 		`/  _   _      _ _         _   _                       ___    _______   _   _  \`,
@@ -28,25 +28,46 @@ func TestAll(t *testing.T) {
 		`                ||     ||`,
 		"</pre>",
 	)
+
 	// run services
 	go MainGateway()
-	go MainFlow()
+	go MainFlowBanner()
+	go MainFlowRoot()
 	go MainServiceCmd()
 	go MainServiceHTML()
-	// wait for two seconds
+
+	// wait for a while
 	time.Sleep(100 * time.Millisecond)
-	// emulate request
-	response, err := http.Get(fmt.Sprintf("http://localhost:8080/?text=%s", url.QueryEscape("Hello there, I <3 U")))
+
+	// emulate root request
+	responseRoot, err := http.Get("http://localhost:8080")
 	if err != nil {
 		t.Errorf("Get error %s", err)
 	}
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	defer responseRoot.Body.Close()
+	bodyRoot, err := ioutil.ReadAll(responseRoot.Body)
 	if err != nil {
 		t.Errorf("Get error %s", err)
 	}
-	actual := string(body)
-	if actual != expected {
-		t.Errorf("expected :\n%s, get :\n%s", expected, actual)
+	expectedRootResponse := "hello world"
+	actualRootResponse := string(bodyRoot)
+	if actualRootResponse != expectedRootResponse {
+		t.Errorf("expected :\n%s, get :\n%s", expectedRootResponse, actualRootResponse)
 	}
+
+	// emulate banner request
+	responseBanner, err := http.Get(fmt.Sprintf("http://localhost:8080/banner?text=%s", url.QueryEscape("Hello there, I <3 U")))
+	if err != nil {
+		t.Errorf("Get error %s", err)
+	}
+	defer responseBanner.Body.Close()
+	bodyBanner, err := ioutil.ReadAll(responseBanner.Body)
+	if err != nil {
+		t.Errorf("Get error %s", err)
+	}
+	actualBanner := string(bodyBanner)
+	if actualBanner != expectedBanner {
+		t.Errorf("expected :\n%s, get :\n%s", expectedBanner, actualBanner)
+	}
+
 }

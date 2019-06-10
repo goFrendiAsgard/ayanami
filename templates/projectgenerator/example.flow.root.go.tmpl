@@ -11,8 +11,8 @@ func init() {
 	flow := gen.NewEmptyFlow(&Gen,
         "github.com/nerv/flowroot",  // repo name
         "root",                      // flow name
-        []string{"request"},         // inputs
-        []string{"request", "code"}, // outputs
+        []string{"content", "code"}, // inputs
+        []string{"content", "code"}, // outputs
     )
 
     flow.AddEventVal(

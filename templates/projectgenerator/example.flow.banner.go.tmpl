@@ -31,35 +31,41 @@ func init() {
         "figletOut",
     )
 
-    flow.AddOutputEvent(
+    flow.AddEvent(
         "srvc.html.pre.out.output",
+        "trig.response.get.banner.in.content",
         "content",
     )
 
-    flow.AddOutputEventVal(
+    flow.AddEventVal(
         "srvc.html.pre.out.output",
+        "trig.response.get.banner.in.code",
         "code",
         200,
     )
 
-    flow.AddOutputEvent(
+    flow.AddEvent(
         "srvc.cmd.figlet.err.message",
+        "trig.response.get.banner.in.content",
         "content",
     )
 
-    flow.AddOutputEventVal(
+    flow.AddEventVal(
         "srvc.cmd.figlet.err.message",
+        "trig.response.get.banner.in.code",
         "code",
         500,
     )
 
-    flow.AddOutputEvent(
+    flow.AddEvent(
         "srvc.html.pre.err.message",
+        "trig.response.get.banner.in.content",
         "content",
     )
 
-    flow.AddOutputEventVal(
+    flow.AddEventVal(
         "srvc.html.pre.err.message",
+        "trig.response.get.banner.in.code",
         "code",
         500,
     )

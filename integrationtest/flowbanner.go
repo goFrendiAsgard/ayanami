@@ -7,8 +7,8 @@ import (
 	"log"
 )
 
-// MainFlow emulating flow's main function
-func MainFlow() {
+// MainFlowBanner emulating flow's main function
+func MainFlowBanner() {
 	// define broker
 	broker, err := msgbroker.NewNats(config.GetNatsURL())
 	if err != nil {
@@ -16,14 +16,14 @@ func MainFlow() {
 	}
 	// define services
 	services := service.Services{
-		service.NewFlow("main", broker,
+		service.NewFlow("banner", broker,
 			// inputs
 			[]string{"request"},
 			// outputs
 			[]string{"content", "code"},
 			[]service.FlowEvent{
 				service.FlowEvent{
-					InputEvent: "trig.request.get.out.req",
+					InputEvent: "trig.request.get.banner.out.req",
 					VarName:    "request",
 				},
 				service.FlowEvent{
@@ -44,14 +44,14 @@ func MainFlow() {
 				service.FlowEvent{
 					InputEvent:  "srvc.html.pre.out.output",
 					VarName:     "content",
-					OutputEvent: "trig.response.get.in.content",
+					OutputEvent: "trig.response.get.banner.in.content",
 				},
 				service.FlowEvent{
 					InputEvent:  "srvc.html.pre.out.output",
 					VarName:     "code",
 					UseValue:    true,
 					Value:       200,
-					OutputEvent: "trig.response.get.in.code",
+					OutputEvent: "trig.response.get.banner.in.code",
 				},
 				// error response from figlet
 				service.FlowEvent{
@@ -90,7 +90,7 @@ func MainFlow() {
 		),
 	}
 	// consume and publish forever
-	ch := make(chan bool)
+	forever := make(chan bool)
 	services.ConsumeAndPublish(broker, "flow")
-	<-ch
+	<-forever
 }

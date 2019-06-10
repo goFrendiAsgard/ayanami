@@ -42,6 +42,17 @@ func (flows FlowEvents) GetInputEvents() []string {
 	return inputEvents
 }
 
+// GetInputEventByVarName get unique input events by var
+func (flows FlowEvents) GetInputEventByVarName(varName string) []string {
+	inputEvents := []string{}
+	for _, flow := range flows {
+		if flow.InputEvent != "" && flow.VarName == varName {
+			inputEvents = AppendUniqueString(flow.InputEvent, inputEvents)
+		}
+	}
+	return inputEvents
+}
+
 // GetVarFlowByInputEvent get unique vars by inputEvent
 func (flows FlowEvents) GetVarFlowByInputEvent(inputEvent string) map[string]FlowEvent {
 	varFlows := make(map[string]FlowEvent)
@@ -118,8 +129,9 @@ func NewFlow(flowName string, broker msgbroker.CommonBroker, inputs, outputs []s
 }
 
 func createFlowWrapper(flowName string, broker msgbroker.CommonBroker, flows FlowEvents, inputVarNames, outputVarNames []string) WrappedFunction {
-	return func(vars Dictionary) (Dictionary, error) {
+	return func(presetVars Dictionary) (Dictionary, error) {
 		var lock sync.RWMutex // protecting vars
+		vars := make(Dictionary)
 		ID, err := CreateID()
 		if err != nil {
 			return nil, err
@@ -128,76 +140,112 @@ func createFlowWrapper(flowName string, broker msgbroker.CommonBroker, flows Flo
 		var allConsumerDeclared sync.WaitGroup
 		allConsumerDeclared.Add(len(rawInputEvents))
 		outputCompleted := make(chan bool, 1)
+		successHandlers := map[string]func(servicedata.Package){}
 		for rawInputEventIndex := range rawInputEvents {
 			rawInputEvent := rawInputEvents[rawInputEventIndex]
 			inputEvent := fmt.Sprintf("%s.%s", ID, rawInputEvent)
+			// create handlers & consume
+			successHandler := createFlowConsumeSuccessHandler(flowName, broker, ID, rawInputEvent, flows, outputVarNames, vars, &lock, &allConsumerDeclared, outputCompleted)
+			successHandlers[rawInputEvent] = successHandler
+			errorHandler := createFlowConsumerErrorHandler(flowName, outputCompleted)
 			log.Printf("[INFO: flow.%s] Consuming from %s", flowName, inputEvent)
-			broker.Consume(inputEvent,
-				func(pkg servicedata.Package) { // consume success
-					log.Printf("[INFO: flow.%s] Getting message from %s: %#v", flowName, inputEvent, pkg.Data)
-					for varName, varFlow := range flows.GetVarFlowByInputEvent(rawInputEvent) {
-						allConsumerDeclared.Wait()
-						lock.RLock()
-						varExists := vars.Has(varName)
-						lock.RUnlock()
-						if varExists {
-							log.Printf("[INFO: flow.%s] `%s` already defined, no need to set", flowName, varName)
-							continue
-						}
-						publishedData := pkg.Data
-						if varFlow.UseValue {
-							publishedData = varFlow.Value
-						}
-						if varFlow.UseFunction && varFlow.Function != nil {
-							publishedData = varFlow.Function(publishedData)
-						}
-						log.Printf("[INFO: flow.%s] Set `%s` into: `%#v`", flowName, varName, publishedData)
-						lock.Lock()
-						vars.Set(varName, publishedData)
-						lock.Unlock()
-						lock.RLock()
-						publishFlowVar(flowName, broker, ID, flows, outputVarNames, varName, vars)
-						lock.RUnlock()
-					}
-					lock.RLock()
-					notifyIfOutputCompleted(vars, outputVarNames, outputCompleted)
-					lock.RUnlock()
-				},
-				func(err error) { // consume error
-					log.Printf("[ERROR: flow.%s] Error: %s", flowName, err)
-					outputCompleted <- true
-				},
-			)
+			broker.Consume(inputEvent, successHandler, errorHandler)
 			allConsumerDeclared.Done()
 		}
-		// set default values
+		// set default vars (`var -> output` scenario)
+		setDefaultVars(flowName, flows, outputVarNames, vars, &lock, outputCompleted)
+		allConsumerDeclared.Wait()
+		// publish default vars
 		lock.RLock()
-		defaultVars := getFlowDefaultVars(flows, vars)
+		publishFlowVar(flowName, broker, ID, flows, outputVarNames, getKeys(vars), vars)
 		lock.RUnlock()
-		for varName, value := range defaultVars {
-			lock.Lock()
-			if !vars.Has(varName) {
-				log.Printf("[INFO: flow.%s] Internally set `%s` into: `%#v`", flowName, varName, value)
-				vars.Set(varName, value)
-			} else {
-				log.Printf("[INFO: flow.%s] `%s` already defined, no need to internal set", flowName, varName)
+		// publish preset vars
+		executed := map[string]bool{}
+		for presetVarName, presetValue := range presetVars {
+			for _, rawInputEvent := range flows.GetInputEventByVarName(presetVarName) {
+				if !executed[rawInputEvent] {
+					handler := successHandlers[rawInputEvent]
+					handler(servicedata.Package{ID: ID, Data: presetValue})
+					executed[rawInputEvent] = true
+				}
 			}
-			lock.Unlock()
 		}
-		for varName := range vars {
-			lock.RLock()
-			publishFlowVar(flowName, broker, ID, flows, outputVarNames, varName, vars)
-			lock.RUnlock()
-		}
-		lock.RLock()
-		notifyIfOutputCompleted(vars, outputVarNames, outputCompleted)
-		lock.RUnlock()
 		<-outputCompleted
 		lock.RLock()
 		outputs := createOutputs(outputVarNames, vars)
+		lock.RUnlock()
 		log.Printf("[INFO: flow.%s] Internal flow `%s` ended. Outputs are: `%#v`", flowName, ID, outputs)
 		return outputs, err
 	}
+}
+
+func setDefaultVars(flowName string, flows FlowEvents, outputVarNames []string, vars Dictionary, lock *sync.RWMutex, outputCompleted chan bool) {
+	defaultVars := getFlowDefaultVars(flows)
+	for varName, value := range defaultVars {
+		log.Printf("[INFO: flow.%s] Internally set `%s` into: `%#v`", flowName, varName, value)
+		vars.Set(varName, value)
+	}
+	lock.RLock()
+	completed := vars.HasAll(outputVarNames)
+	lock.RUnlock()
+	if completed {
+		outputCompleted <- true
+	}
+}
+
+func createFlowConsumeSuccessHandler(flowName string, broker msgbroker.CommonBroker, ID, rawInputEvent string, flows FlowEvents, outputVarNames []string, vars Dictionary, lock *sync.RWMutex, allConsumerDeclared *sync.WaitGroup, outputCompleted chan bool) func(servicedata.Package) {
+	return func(pkg servicedata.Package) { // consume success
+		inputEvent := fmt.Sprintf("%s.%s", ID, rawInputEvent)
+		log.Printf("[INFO: flow.%s] Getting message from %s: %#v", flowName, inputEvent, pkg.Data)
+		for varName, varFlow := range flows.GetVarFlowByInputEvent(rawInputEvent) {
+			allConsumerDeclared.Wait()
+			lock.RLock()
+			varExists := vars.Has(varName)
+			lock.RUnlock()
+			if varExists {
+				log.Printf("[INFO: flow.%s] `%s` already defined, no need to set", flowName, varName)
+				continue
+			}
+			// this will be executed on: input -> var -> output scenario
+			publishedData := pkg.Data
+			if varFlow.UseValue {
+				publishedData = varFlow.Value
+			}
+			if varFlow.UseFunction && varFlow.Function != nil {
+				publishedData = varFlow.Function(publishedData)
+			}
+			log.Printf("[INFO: flow.%s] Set `%s` into: `%#v`", flowName, varName, publishedData)
+			lock.Lock()
+			vars.Set(varName, publishedData)
+			lock.Unlock()
+			lock.RLock()
+			publishFlowVar(flowName, broker, ID, flows, outputVarNames, []string{varName}, vars)
+			lock.RUnlock()
+		}
+		lock.RLock()
+		completed := vars.HasAll(outputVarNames)
+		lock.RUnlock()
+		if completed {
+			outputCompleted <- true
+		}
+	}
+}
+
+func createFlowConsumerErrorHandler(flowName string, outputCompleted chan bool) func(error) {
+	return func(err error) { // consume error
+		log.Printf("[ERROR: flow.%s] Error: %s", flowName, err)
+		outputCompleted <- true
+	}
+}
+
+func getKeys(m map[string]interface{}) []string {
+	keys := make([]string, len(m))
+	i := 0
+	for key := range m {
+		keys[i] = key
+		i++
+	}
+	return keys
 }
 
 func createOutputs(outputVarNames []string, vars Dictionary) Dictionary {
@@ -213,13 +261,6 @@ func getFlowRawInputEvents(flows FlowEvents, inputVarNames []string) []string {
 	rawInputEvents := []string{}
 	for _, candidate := range candidates {
 		candidatePass := true
-		varNames := flows.GetVarNamesByInputEvent(candidate)
-		for _, varName := range varNames {
-			if IsStringInArray(varName, inputVarNames) {
-				candidatePass = false
-				break
-			}
-		}
 		if candidatePass {
 			rawInputEvents = append(rawInputEvents, candidate)
 		}
@@ -227,7 +268,7 @@ func getFlowRawInputEvents(flows FlowEvents, inputVarNames []string) []string {
 	return rawInputEvents
 }
 
-func getFlowDefaultVars(flows FlowEvents, vars Dictionary) map[string]interface{} {
+func getFlowDefaultVars(flows FlowEvents) map[string]interface{} {
 	defaultVars := make(map[string]interface{})
 	// determine candidates from flows
 	candidates := flows.GetVarNamesByInputEvent("")
@@ -254,34 +295,32 @@ func getFlowDefaultVars(flows FlowEvents, vars Dictionary) map[string]interface{
 			defaultVars[candidate] = value
 		}
 	}
-	// add another candidates from predefined vars
-	for varName, value := range vars {
-		defaultVars[varName] = value
-	}
 	return defaultVars
 }
 
-func publishFlowVar(flowName string, broker msgbroker.CommonBroker, ID string, flows FlowEvents, outputVarNames []string, currentVarName string, vars Dictionary) {
-	// if var is part of outputVarNames, ignore it. CommonBroker will do the job
-	if IsStringInArray(currentVarName, outputVarNames) {
-		return
-	}
-	// varNames contains currentVarName and all it's sub variable's names
-	varNames := []string{currentVarName}
-	for _, flow := range flows {
-		varName := flow.VarName
-		if varName != currentVarName && isSubVarOf(currentVarName, varName) {
-			varNames = append(varNames, varName)
+func publishFlowVar(flowName string, broker msgbroker.CommonBroker, ID string, flows FlowEvents, exceptions, publishedVarNames []string, vars Dictionary) {
+	for _, publishedVarName := range publishedVarNames {
+		// if var is part of exceptions, ignore it. CommonBroker will do the job
+		if IsStringInArray(publishedVarName, exceptions) {
+			continue
 		}
-	}
-	// for every varNames, get it's outputEvent and publish
-	for _, varName := range varNames {
-		for _, rawOutputEvent := range flows.GetOutputEventByVarNames(varName) {
-			varValue := vars.Get(varName)
-			pkg := servicedata.Package{ID: ID, Data: varValue}
-			outputEvent := fmt.Sprintf("%s.%s", ID, rawOutputEvent)
-			log.Printf("[INFO: flow.%s] Publish into `%s`: `%#v`", flowName, outputEvent, pkg)
-			broker.Publish(outputEvent, pkg)
+		// varNames contains publishedVarName and all it's sub variable's names
+		varNames := []string{publishedVarName}
+		for _, flow := range flows {
+			varName := flow.VarName
+			if varName != publishedVarName && isSubVarOf(publishedVarName, varName) {
+				varNames = append(varNames, varName)
+			}
+		}
+		// for every varNames, get it's outputEvent and publish
+		for _, varName := range varNames {
+			for _, rawOutputEvent := range flows.GetOutputEventByVarNames(varName) {
+				varValue := vars.Get(varName)
+				pkg := servicedata.Package{ID: ID, Data: varValue}
+				outputEvent := fmt.Sprintf("%s.%s", ID, rawOutputEvent)
+				log.Printf("[INFO: flow.%s] Publish into `%s`: `%#v`", flowName, outputEvent, pkg)
+				broker.Publish(outputEvent, pkg)
+			}
 		}
 	}
 }
@@ -289,10 +328,4 @@ func publishFlowVar(flowName string, broker msgbroker.CommonBroker, ID string, f
 // isSubVarOf determine whether subVarName is sub variable of varName or not
 func isSubVarOf(varName, subVarName string) bool {
 	return strings.Index(subVarName, varName+".") == 0
-}
-
-func notifyIfOutputCompleted(vars Dictionary, outputVarNames []string, outputCompleted chan bool) {
-	if vars.HasAll(outputVarNames) {
-		outputCompleted <- true
-	}
 }
