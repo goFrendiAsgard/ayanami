@@ -17,15 +17,15 @@ func init() {
 
     flow.AddEventVal(
         "trig.request.get.out.req",  // whenever get `request.get.out.req`
-        "trig.response.get.in.code", // prepare reply to `respose.get.in.code`
-        "code",                      // the variable name is `code`
+        "trig.response.get.in.code", // publish to `respose.get.in.code`
+        "code",                      // the published variable name is `code`
         200,                         // and it's value is 200
     )
 
     flow.AddEventFunc(
         "trig.request.get.out.req",     // whenever get `request.get.out.req`
-        "trig.response.get.in.content", // prepare reply to `response.get.in.content`
-        "content",                      // the variable name is `content`, and we get it's value by running a function
+        "trig.response.get.in.content", // publish to `response.get.in.content`
+        "content",                      // the published variable name is `content`, and we get it's value by running a function
         "html",                         // function's package is `html`
         "CreateDefaultResponse",        // function's name is `CreateDefaultResponse`
         []string{},                     // and the function has no dependency to other source code

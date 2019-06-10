@@ -16,26 +16,28 @@ func init() {
     )
 
     flow.AddInputEvent(
-        "trig.request.get.banner.out.req",
-        "request",
+        "trig.request.get.banner.out.req", // whenever get `request.get.banner.out.req`
+        "request",                         // store it into a variable named `request`
     )
 
     flow.AddOutputEvent(
-        "srvc.cmd.figlet.in.input",
-        "request.form.text.0",
+        "srvc.cmd.figlet.in.input", // publish to `srvc.cmd.figlet.in.input`
+        "request.form.text.0",      // if `request.form.text.0` is set
     )
 
     flow.AddEvent(
-        "srvc.cmd.figlet.out.output",
-        "srvc.html.pre.in.input",
-        "figletOut",
+        "srvc.cmd.figlet.out.output", // whenever get `srvc.cmd.figlet.out.output`
+        "srvc.html.pre.in.input",     // publish to `srvc.html.pre.in.input`
+        "figletOut",                  // the published variable name `figletOut`
     )
 
     flow.AddEvent(
-        "srvc.html.pre.out.output",
-        "trig.response.get.banner.in.content",
-        "content",
+        "srvc.html.pre.out.output",            // whenever get `srvc.html.pre.out.output`
+        "trig.response.get.banner.in.content", // publish to `trig.response.get.banner.in.content`
+        "content",                             // the published variable name is `content`
     )
+
+    // the rest of this are error handlers
 
     flow.AddEventVal(
         "srvc.html.pre.out.output",

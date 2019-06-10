@@ -28,15 +28,15 @@ func main() {
         log.Println("START VALIDATING...")
         validated := Gen.Validate()
         if validated {
-            log.Println("VALIDATION SUCCESS !!!\n")
+            log.Printf("VALIDATION SUCCESS !!!\n")
         } else {
-            log.Println("VALIDATION FAILED\n")
+            log.Printf("VALIDATION FAILED\n")
         }
     case "build":
         log.Println("START BUILDING...")
         err = Gen.Build()
         if err == nil {
-            log.Println("BUILD SUCCESS !!!\n")
+            log.Printf("BUILD SUCCESS !!!\n")
         } else {
             log.Printf("BUILD FAILED: %s\n", err)
         }
@@ -44,7 +44,7 @@ func main() {
         log.Println("START SCAFFOLDING...")
         err = Gen.Scaffold()
         if err == nil {
-            log.Println("SCAFFOLD SUCCESS !!!\n")
+            log.Printf("SCAFFOLD SUCCESS !!!\n")
         } else {
             log.Printf("SCAFFOLD FAILED: %s\n", err)
         }

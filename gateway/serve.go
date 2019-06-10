@@ -128,15 +128,23 @@ func publish(broker msgbroker.CommonBroker, ID string, method string, route stri
 	r.ParseForm()
 	r.ParseMultipartForm(multipartFormLimit)
 	data := make(map[string]interface{})
+	data["method"] = r.Method
+	data["URL"] = r.URL
+	data["proto"] = r.Proto
+	data["protoMajor"] = r.ProtoMajor
+	data["protoMinor"] = r.ProtoMinor
 	data["header"] = r.Header
 	data["contentLength"] = r.ContentLength
+	data["transferEncoding"] = r.TransferEncoding
 	data["host"] = r.Host
 	data["form"] = r.Form
 	data["postForm"] = r.PostForm
 	data["multipartForm"] = r.MultipartForm
-	data["method"] = r.Method
-	data["requestURI"] = r.RequestURI
+	data["trailer"] = r.Trailer
 	data["remoteAddr"] = r.RemoteAddr
+	data["requestURI"] = r.RequestURI
+	data["cookies"] = r.Cookies()
+	data["userAgent"] = r.UserAgent()
 	// get json body
 	decoder := json.NewDecoder(r.Body)
 	JSONBody := make(map[string]interface{})
