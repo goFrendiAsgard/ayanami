@@ -42,11 +42,13 @@ func addMatchesToArray(arr []string, matches [][]string) []string {
 	return arr
 }
 
-func createCmdWrapper(serviceName, methodName string, cmd []string, inputVarNames, outputVarNames []string) WrappedFunction {
+func createCmdWrapper(serviceName, methodName string, templateCmd []string, inputVarNames, outputVarNames []string) WrappedFunction {
 	return func(inputs Dictionary) (Dictionary, error) {
 		outputs := make(Dictionary)
 		// preprocess cmd
-		for cmdIndex := range cmd {
+		cmd := make([]string, len(templateCmd))
+		for cmdIndex := range templateCmd {
+			cmd[cmdIndex] = templateCmd[cmdIndex]
 			for _, varName := range inputVarNames {
 				varValue := fmt.Sprintf("%s", inputs.Get(varName))
 				pattern1 := fmt.Sprintf("$%s", varName)
