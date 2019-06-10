@@ -116,6 +116,8 @@ func responseError(ID string, w http.ResponseWriter, code int, err error) {
 
 func response(ID string, w http.ResponseWriter, code int, content string) {
 	log.Printf("[INFO: Gateway] responding to %s: %d, %s", ID, code, content)
+	// TODO: User should be able to set their own content-types and other headers
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(code)
 	fmt.Fprintf(w, "%s", content)
 }
