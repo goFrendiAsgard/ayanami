@@ -98,7 +98,7 @@ func createCommonServiceBrokerTest(ID string, errorMessageCh chan string) (msgbr
 		return broker, err
 	}
 	// consume event
-	broker.Consume(fmt.Sprintf("%s.srvc.common.out.c", ID),
+	broker.Subscribe(fmt.Sprintf("%s.srvc.common.out.c", ID),
 		func(pkg servicedata.Package) {
 			c := pkg.Data.(int)
 			if c != 7 {
@@ -111,7 +111,7 @@ func createCommonServiceBrokerTest(ID string, errorMessageCh chan string) (msgbr
 		},
 	)
 	// consume error event
-	broker.Consume(fmt.Sprintf("%s.srvc.common.err", ID),
+	broker.Subscribe(fmt.Sprintf("%s.srvc.common.err", ID),
 		func(pkg servicedata.Package) {
 			errorMessageCh <- fmt.Sprintf("%s", pkg.Data)
 		},

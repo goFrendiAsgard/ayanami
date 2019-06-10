@@ -12,7 +12,7 @@ func CommonBrokerTest(broker CommonBroker, t *testing.T) {
 
 	// consume 1
 	stopped1 := make(chan bool, 1)
-	broker.Consume("*.test.request.get.first.in",
+	broker.Subscribe("*.test.request.get.first.in",
 		// success
 		func(pkg servicedata.Package) {
 			if pkg.ID != "001" || pkg.Data != "Hello world" {
@@ -28,7 +28,7 @@ func CommonBrokerTest(broker CommonBroker, t *testing.T) {
 	)
 	// consume 2
 	stopped2 := make(chan bool, 1)
-	broker.Consume("ID.test.request.get.second.in",
+	broker.Subscribe("ID.test.request.get.second.in",
 		// success
 		func(pkg servicedata.Package) {
 			if pkg.ID != "002" || pkg.Data != "Hi universe" {
@@ -57,4 +57,16 @@ func CommonBrokerTest(broker CommonBroker, t *testing.T) {
 	// wait
 	<-stopped1
 	<-stopped2
+	err = broker.Unsubscribe("*.test.request.get.first.in")
+	if err != nil {
+		t.Errorf("Get error %s", err)
+	}
+	err = broker.Unsubscribe("ID.test.request.get.second.in")
+	if err != nil {
+		t.Errorf("Get error %s", err)
+	}
+	err = broker.Unsubscribe("oraono.event")
+	if err == nil {
+		t.Errorf("Error expected but get nil")
+	}
 }

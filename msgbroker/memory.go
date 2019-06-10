@@ -14,11 +14,23 @@ type Memory struct {
 	handlers map[string]ConsumeSuccessFunc
 }
 
-// Consume consume from memory broker
-func (broker Memory) Consume(eventName string, successCallback ConsumeSuccessFunc, errorCallback ConsumeErrorFunc) {
+// Subscribe consume from memory broker
+func (broker Memory) Subscribe(eventName string, successCallback ConsumeSuccessFunc, errorCallback ConsumeErrorFunc) {
 	broker.lock.Lock()
 	broker.handlers[eventName] = successCallback
 	broker.lock.Unlock()
+}
+
+// Unsubscribe unsubscribe to an event
+func (broker Memory) Unsubscribe(eventName string) error {
+	broker.lock.Lock()
+	if _, exists := broker.handlers[eventName]; exists {
+		delete(broker.handlers, eventName)
+	} else {
+		return fmt.Errorf("Event `%s` doesn't exist", eventName)
+	}
+	broker.lock.Unlock()
+	return nil
 }
 
 // Publish publish to memory broker

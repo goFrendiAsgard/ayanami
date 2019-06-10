@@ -13,23 +13,9 @@ import (
 	"strings"
 )
 
-type routeSorter []string
-
-func (r routeSorter) Len() int {
-	return len(r)
-}
-
-func (r routeSorter) Swap(i, j int) {
-	r[i], r[j] = r[j], r[i]
-}
-
-func (r routeSorter) Less(i, j int) bool {
-	return len(r[i]) < len(r[j])
-}
-
 // Serve handle HTTP request
 func Serve(broker msgbroker.CommonBroker, port int64, multipartFormLimit int64, routes []string) {
-	sort.Sort(sort.Reverse(routeSorter(routes)))
+	sort.Sort(sort.Reverse(RouteSorter(routes)))
 	log.Printf("[INFO: Gateway] Routes `%#v`", routes)
 	for _, route := range routes {
 		handler := createRouteHandler(broker, multipartFormLimit, route)
@@ -41,13 +27,13 @@ func Serve(broker msgbroker.CommonBroker, port int64, multipartFormLimit int64, 
 
 func createRouteHandler(broker msgbroker.CommonBroker, multipartFormLimit int64, route string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		method := strings.ToLower(r.Method)
 		// create ID
 		ID, err := service.CreateID()
 		if err != nil {
-			responseError(ID, w, 500, err)
+			responseError(ID, broker, method, route, w, 500, err)
 			return
 		}
-		method := strings.ToLower(r.Method)
 		// prepare channels
 		codeChannel := make(chan int, 1)
 		contentChannel := make(chan string, 1)
@@ -55,7 +41,7 @@ func createRouteHandler(broker msgbroker.CommonBroker, multipartFormLimit int64,
 		// publish
 		err = publish(broker, ID, method, route, multipartFormLimit, r)
 		if err != nil {
-			responseError(ID, w, 500, err)
+			responseError(ID, broker, method, route, w, 500, err)
 			return
 		}
 		// wait for response
@@ -64,7 +50,8 @@ func createRouteHandler(broker msgbroker.CommonBroker, multipartFormLimit int64,
 		if code == 500 { // if there is a `500`, error, override the error message with this one
 			content = "Internal Server Error"
 		}
-		response(ID, w, code, content)
+		// response
+		response(ID, broker, method, route, w, code, content)
 	}
 }
 
@@ -72,8 +59,8 @@ func consume(broker msgbroker.CommonBroker, ID, method, route string, codeChanne
 	codeEventName := getResponseCodeEventName(ID, method, route)
 	contentEventName := getResponseContentEventName(ID, method, route)
 	// consume code
-	log.Printf("[INFO: Gateway] Consume `%s`", codeEventName)
-	broker.Consume(codeEventName,
+	log.Printf("[INFO: Gateway] Subscribe `%s`", codeEventName)
+	broker.Subscribe(codeEventName,
 		// success
 		func(pkg servicedata.Package) {
 			log.Printf("[INFO: Gateway] Getting message from `%s`: `%#v`", codeEventName, pkg.Data)
@@ -94,8 +81,8 @@ func consume(broker msgbroker.CommonBroker, ID, method, route string, codeChanne
 	)
 	// codeChannel <- 200
 	// consume event
-	log.Printf("[INFO: Gateway] Consume `%s`", contentEventName)
-	broker.Consume(contentEventName,
+	log.Printf("[INFO: Gateway] Subscribe `%s`", contentEventName)
+	broker.Subscribe(contentEventName,
 		// success
 		func(pkg servicedata.Package) {
 			log.Printf("[INFO: Gateway] Getting message from `%s`: `%#v`", contentEventName, pkg.Data)
@@ -109,12 +96,24 @@ func consume(broker msgbroker.CommonBroker, ID, method, route string, codeChanne
 	)
 }
 
-func responseError(ID string, w http.ResponseWriter, code int, err error) {
+func responseError(ID string, broker msgbroker.CommonBroker, method, route string, w http.ResponseWriter, code int, err error) {
 	content := fmt.Sprintf("%s", err)
-	response(ID, w, code, content)
+	response(ID, broker, method, route, w, code, content)
 }
 
-func response(ID string, w http.ResponseWriter, code int, content string) {
+func response(ID string, broker msgbroker.CommonBroker, method, route string, w http.ResponseWriter, code int, content string) {
+	codeEventName := getResponseCodeEventName(ID, method, route)
+	contentEventName := getResponseContentEventName(ID, method, route)
+	err := broker.Unsubscribe(codeEventName)
+	if err != nil {
+		code = 500
+		content = fmt.Sprintf("%s", err)
+	}
+	err = broker.Unsubscribe(contentEventName)
+	if err != nil {
+		code = 500
+		content = fmt.Sprintf("%s", err)
+	}
 	log.Printf("[INFO: Gateway] responding to %s: %d, %s", ID, code, content)
 	// TODO: User should be able to set their own content-types and other headers
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

@@ -175,7 +175,7 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 			broker.Publish(eventName, pkg)
 		}
 	}
-	broker.Consume("*.srvc.service.method.in.alpha",
+	broker.Subscribe("*.srvc.service.method.in.alpha",
 		func(pkg servicedata.Package) {
 			lock.Lock()
 			storage.Set("ID", pkg.ID)
@@ -185,7 +185,7 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 		},
 		errorCallback,
 	)
-	broker.Consume("*.srvc.service.method.in.beta",
+	broker.Subscribe("*.srvc.service.method.in.beta",
 		func(pkg servicedata.Package) {
 			lock.Lock()
 			storage.Set("ID", pkg.ID)
@@ -195,7 +195,7 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 		},
 		errorCallback,
 	)
-	broker.Consume("*.srvc.service.method.in.gamma",
+	broker.Subscribe("*.srvc.service.method.in.gamma",
 		func(pkg servicedata.Package) {
 			lock.Lock()
 			storage.Set("ID", pkg.ID)
@@ -205,7 +205,7 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 		},
 		errorCallback,
 	)
-	broker.Consume("*.publish.d",
+	broker.Subscribe("*.publish.d",
 		func(pkg servicedata.Package) {
 		},
 		errorCallback,

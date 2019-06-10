@@ -63,7 +63,7 @@ func TestNatsConsumeInvalid(t *testing.T) {
 	}
 	// consume
 	stopped := make(chan bool, 1)
-	broker.Consume("invalidConsume",
+	broker.Subscribe("invalidConsume",
 		// consume success (should never happen)
 		func(pkg servicedata.Package) {
 			t.Errorf("Error expected")

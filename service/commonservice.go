@@ -39,8 +39,8 @@ func consumeAndPublishSingle(broker msgbroker.CommonBroker, serviceName, methodN
 	for _, rawInputEventName := range rawInputEventNames {
 		inputEventName := fmt.Sprintf("*.%s", rawInputEventName)
 		varNames := inputIOList.GetEventVarNames(rawInputEventName)
-		log.Printf("[INFO: %s.%s] Consume from `%s`", serviceName, methodName, inputEventName)
-		broker.Consume(inputEventName,
+		log.Printf("[INFO: %s.%s] Subscribe from `%s`", serviceName, methodName, inputEventName)
+		broker.Subscribe(inputEventName,
 			// success callback
 			func(pkg servicedata.Package) {
 				// prepare allInputs

@@ -12,6 +12,7 @@ type ConsumeErrorFunc func(err error)
 
 // CommonBroker interface of every message broker
 type CommonBroker interface {
-	Consume(eventName string, successCallback ConsumeSuccessFunc, errorCallback ConsumeErrorFunc)
+	Subscribe(eventName string, successCallback ConsumeSuccessFunc, errorCallback ConsumeErrorFunc)
+	Unsubscribe(eventName string) error
 	Publish(eventName string, pkg servicedata.Package) error
 }

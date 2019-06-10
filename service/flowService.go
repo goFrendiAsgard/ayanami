@@ -149,7 +149,7 @@ func createFlowWrapper(flowName string, broker msgbroker.CommonBroker, flows Flo
 			successHandlers[rawInputEvent] = successHandler
 			errorHandler := createFlowConsumerErrorHandler(flowName, outputCompleted)
 			log.Printf("[INFO: flow.%s] Consuming from %s", flowName, inputEvent)
-			broker.Consume(inputEvent, successHandler, errorHandler)
+			broker.Subscribe(inputEvent, successHandler, errorHandler)
 			allConsumerDeclared.Done()
 		}
 		// set default vars (`var -> output` scenario)
@@ -175,6 +175,14 @@ func createFlowWrapper(flowName string, broker msgbroker.CommonBroker, flows Flo
 		outputs := createOutputs(outputVarNames, vars)
 		lock.RUnlock()
 		log.Printf("[INFO: flow.%s] Internal flow `%s` ended. Outputs are: `%#v`", flowName, ID, outputs)
+		// unsubscribe
+		for _, rawInputEvent := range rawInputEvents {
+			inputEvent := fmt.Sprintf("%s.%s", ID, rawInputEvent)
+			err := broker.Unsubscribe(inputEvent)
+			if err != nil {
+				return outputs, err
+			}
+		}
 		return outputs, err
 	}
 }

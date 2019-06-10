@@ -49,7 +49,7 @@ func TestServeWithNats(t *testing.T) {
 }
 
 func serveTest200(broker msgbroker.CommonBroker, port int, path string, t *testing.T) {
-	broker.Consume(fmt.Sprintf("*.trig.request.get.%s.out.req", RouteToSegments(path)),
+	broker.Subscribe(fmt.Sprintf("*.trig.request.get.%s.out.req", RouteToSegments(path)),
 		func(pkg servicedata.Package) {
 			ID := pkg.ID
 			// publish code
@@ -92,7 +92,7 @@ func serveTest200(broker msgbroker.CommonBroker, port int, path string, t *testi
 }
 
 func serveTest500(broker msgbroker.CommonBroker, port int, path string, t *testing.T) {
-	broker.Consume(fmt.Sprintf("*.trig.request.get.%s.out.req", RouteToSegments(path)),
+	broker.Subscribe(fmt.Sprintf("*.trig.request.get.%s.out.req", RouteToSegments(path)),
 		func(pkg servicedata.Package) {
 			ID := pkg.ID
 			// publish code
@@ -135,7 +135,7 @@ func serveTest500(broker msgbroker.CommonBroker, port int, path string, t *testi
 }
 
 func serveTestInvalidCode(broker msgbroker.CommonBroker, port int, path string, t *testing.T) {
-	broker.Consume(fmt.Sprintf("*.trig.request.get.%s.out.req", RouteToSegments(path)),
+	broker.Subscribe(fmt.Sprintf("*.trig.request.get.%s.out.req", RouteToSegments(path)),
 		func(pkg servicedata.Package) {
 			ID := pkg.ID
 			// publish code
