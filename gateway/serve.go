@@ -93,6 +93,28 @@ func sendResponse(ID string, broker msgbroker.CommonBroker, method, route string
 		response = createErrorResponse()
 	}
 	// get code
+	code := getCodeFromResponse(eventName, response)
+	// get content
+	content := ""
+	if code == 500 {
+		content = "Internal Server Error"
+	} else if contentInterface, exists := response["content"]; exists {
+		content = fmt.Sprintf("%s", contentInterface)
+	}
+	// get header
+	header := getHeaderFromResponse(eventName, response)
+	// set header, code, and content
+	for key, val := range header {
+		w.Header().Set(key, val)
+	}
+	w.WriteHeader(code)
+	_, err = fmt.Fprintf(w, "%s", content)
+	if err != nil {
+		log.Printf("[ERROR: Gateway] responding to %s: %s", ID, err)
+	}
+}
+
+func getCodeFromResponse(eventName string, response map[string]interface{}) int {
 	code := 200
 	if codeInterface, exists := response["code"]; exists {
 		var err error
@@ -102,33 +124,22 @@ func sendResponse(ID string, broker msgbroker.CommonBroker, method, route string
 			code = 500
 		}
 	}
-	// get content
-	content := ""
-	if code == 500 {
-		content = "Internal Server Error"
-	} else if contentInterface, exists := response["content"]; exists {
-		content = fmt.Sprintf("%s", contentInterface)
-	}
-	// get header
-	headers := map[string]string{
-		"Content-Type": "text/html; charset=utf-8",
-	}
+	return code
+}
+
+func getHeaderFromResponse(eventName string, response map[string]interface{}) map[string]string {
+	header := make(map[string]string)
 	if headerInterface, exists := response["header"]; exists {
 		var ok bool
-		headers, ok = headerInterface.(map[string]string)
+		header, ok = headerInterface.(map[string]string)
 		if !ok {
 			log.Printf("[ERROR: Gateway] Getting error while parsing header from `%s`: %#v", eventName, headerInterface)
 		}
 	}
-	// set header, code, and content
-	for key, val := range headers {
-		w.Header().Set(key, val)
+	if _, exists := header["Content-Type"]; !exists {
+		header["Content-Type"] = "text/html; charset=utf-8"
 	}
-	w.WriteHeader(code)
-	_, err = fmt.Fprintf(w, "%s", content)
-	if err != nil {
-		log.Printf("[ERROR: Gateway] responding to %s: %s", ID, err)
-	}
+	return header
 }
 
 func publishToRequestTrigger(broker msgbroker.CommonBroker, ID string, method string, route string, multipartFormLimit int64, r *http.Request) error {
