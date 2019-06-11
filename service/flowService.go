@@ -13,11 +13,11 @@ import (
 type FlowEvent struct {
 	InputEvent  string
 	OutputEvent string
-	VarName     string                        // read from inputEvent, put into var if value is not exists, publish into outputEvent
+	VarName     string                        // read from inputEvent, put into var if value is not exists, publishServiceOutput into outputEvent
 	UseValue    bool                          // if true, will use `Value` instead of `pkg.Data`
 	Value       interface{}                   // value to override `pkg.Data` if `UseValue` is true
-	UseFunction bool                          // if true, will use pass either `Value` or `pkg.Data` into `Function`, and publish the result
-	Function    func(interface{}) interface{} // preprocessor, accept `Value` or `pkg.Data` before publish
+	UseFunction bool                          // if true, will use pass either `Value` or `pkg.Data` into `Function`, and publishServiceOutput the result
+	Function    func(interface{}) interface{} // preprocessor, accept `Value` or `pkg.Data` before publishServiceOutput
 }
 
 // FlowService single flow config
@@ -145,7 +145,7 @@ func createFlowWrapper(flowName string, broker msgbroker.CommonBroker, flows Flo
 			rawInputEvent := rawInputEvents[rawInputEventIndex]
 			inputEvent := fmt.Sprintf("%s.%s", ID, rawInputEvent)
 			// create handlers & consume
-			successHandler := createFlowConsumeSuccessHandler(flowName, broker, ID, rawInputEvent, flows, outputVarNames, vars, &lock, &allConsumerDeclared, outputCompleted)
+			successHandler := createFlowConsumerSuccessHandler(flowName, broker, ID, rawInputEvent, flows, outputVarNames, vars, &lock, &allConsumerDeclared, outputCompleted)
 			successHandlers[rawInputEvent] = successHandler
 			errorHandler := createFlowConsumerErrorHandler(flowName, outputCompleted)
 			log.Printf("[INFO: flow.%s] Consuming from %s", flowName, inputEvent)
@@ -153,13 +153,13 @@ func createFlowWrapper(flowName string, broker msgbroker.CommonBroker, flows Flo
 			allConsumerDeclared.Done()
 		}
 		// set default vars (`var -> output` scenario)
-		setDefaultVars(flowName, flows, outputVarNames, vars, &lock, outputCompleted)
+		setFlowDefaultVars(flowName, flows, outputVarNames, vars, &lock, outputCompleted)
 		allConsumerDeclared.Wait()
-		// publish default vars
+		// publishServiceOutput default vars
 		lock.RLock()
-		publishFlowVar(flowName, broker, ID, flows, outputVarNames, getKeys(vars), vars)
+		publishFlowVar(flowName, broker, ID, flows, outputVarNames, getMapKeys(vars), vars)
 		lock.RUnlock()
-		// publish preset vars
+		// publishServiceOutput preset vars
 		executed := map[string]bool{}
 		for presetVarName, presetValue := range presetVars {
 			for _, rawInputEvent := range flows.GetInputEventByVarName(presetVarName) {
@@ -172,7 +172,7 @@ func createFlowWrapper(flowName string, broker msgbroker.CommonBroker, flows Flo
 		}
 		<-outputCompleted
 		lock.RLock()
-		outputs := createOutputs(flowName, outputVarNames, vars)
+		outputs := createFlowOutputs(flowName, outputVarNames, vars)
 		lock.RUnlock()
 		log.Printf("[INFO: flow.%s] Internal flow `%s` ended. Outputs are: `%#v`", flowName, ID, outputs)
 		// unsubscribe
@@ -187,7 +187,7 @@ func createFlowWrapper(flowName string, broker msgbroker.CommonBroker, flows Flo
 	}
 }
 
-func setDefaultVars(flowName string, flows FlowEvents, outputVarNames []string, vars Dictionary, lock *sync.RWMutex, outputCompleted chan bool) {
+func setFlowDefaultVars(flowName string, flows FlowEvents, outputVarNames []string, vars Dictionary, lock *sync.RWMutex, outputCompleted chan bool) {
 	defaultVars := getFlowDefaultVars(flows)
 	for varName, value := range defaultVars {
 		log.Printf("[INFO: flow.%s] Internally set `%s` into: `%#v`", flowName, varName, value)
@@ -204,7 +204,7 @@ func setDefaultVars(flowName string, flows FlowEvents, outputVarNames []string, 
 	}
 }
 
-func createFlowConsumeSuccessHandler(flowName string, broker msgbroker.CommonBroker, ID, rawInputEvent string, flows FlowEvents, outputVarNames []string, vars Dictionary, lock *sync.RWMutex, allConsumerDeclared *sync.WaitGroup, outputCompleted chan bool) func(servicedata.Package) {
+func createFlowConsumerSuccessHandler(flowName string, broker msgbroker.CommonBroker, ID, rawInputEvent string, flows FlowEvents, outputVarNames []string, vars Dictionary, lock *sync.RWMutex, allConsumerDeclared *sync.WaitGroup, outputCompleted chan bool) func(servicedata.Package) {
 	return func(pkg servicedata.Package) { // consume success
 		inputEvent := fmt.Sprintf("%s.%s", ID, rawInputEvent)
 		log.Printf("[INFO: flow.%s] Getting message from %s: %#v", flowName, inputEvent, pkg.Data)
@@ -252,7 +252,7 @@ func createFlowConsumerErrorHandler(flowName string, outputCompleted chan bool) 
 	}
 }
 
-func getKeys(m map[string]interface{}) []string {
+func getMapKeys(m map[string]interface{}) []string {
 	keys := make([]string, len(m))
 	i := 0
 	for key := range m {
@@ -262,7 +262,7 @@ func getKeys(m map[string]interface{}) []string {
 	return keys
 }
 
-func createOutputs(flowName string, outputVarNames []string, vars Dictionary) Dictionary {
+func createFlowOutputs(flowName string, outputVarNames []string, vars Dictionary) Dictionary {
 	outputs := make(Dictionary)
 	for _, outputName := range outputVarNames {
 		err := outputs.Set(outputName, vars.Get(outputName))
@@ -326,7 +326,7 @@ func publishFlowVar(flowName string, broker msgbroker.CommonBroker, ID string, f
 				varNames = append(varNames, varName)
 			}
 		}
-		// for every varNames, get it's outputEvent and publish
+		// for every varNames, get it's outputEvent and publishServiceOutput
 		for _, varName := range varNames {
 			for _, rawOutputEvent := range flows.GetOutputEventByVarNames(varName) {
 				varValue := vars.Get(varName)
@@ -334,7 +334,7 @@ func publishFlowVar(flowName string, broker msgbroker.CommonBroker, ID string, f
 				outputEvent := fmt.Sprintf("%s.%s", ID, rawOutputEvent)
 				log.Printf("[INFO: flow.%s] Publish into `%s`: `%#v`", flowName, outputEvent, pkg)
 				err := broker.Publish(outputEvent, pkg)
-				log.Printf("[INFO: flow.%s] Error while publish`%s`: %s", flowName, outputEvent, err)
+				log.Printf("[INFO: flow.%s] Error while publishServiceOutput`%s`: %s", flowName, outputEvent, err)
 			}
 		}
 	}

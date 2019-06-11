@@ -10,13 +10,13 @@ import (
 
 // NewCmd create new cmd
 func NewCmd(serviceName string, methodName string, command []string) CommonService {
-	inputs := getInputFromCommand(command)
+	inputs := getCmdInputs(command)
 	outputs := []string{"output"}
 	wrappedFunction := createCmdWrapper(serviceName, methodName, command, inputs, outputs)
 	return NewService(serviceName, methodName, inputs, outputs, wrappedFunction)
 }
 
-func getInputFromCommand(command []string) []string {
+func getCmdInputs(command []string) []string {
 	var inputs []string
 	re1, err := regexp.Compile(`\$([a-zA-Z0-9]+)`)
 	if err != nil {
@@ -29,17 +29,17 @@ func getInputFromCommand(command []string) []string {
 	for _, part := range command {
 		matches1 := re1.FindAllStringSubmatch(part, -1)
 		matches2 := re2.FindAllStringSubmatch(part, -1)
-		inputs = addMatchesToArray(inputs, matches1)
-		inputs = addMatchesToArray(inputs, matches2)
+		inputs = addMatchesToCmdInputs(inputs, matches1)
+		inputs = addMatchesToCmdInputs(inputs, matches2)
 	}
 	return inputs
 }
 
-func addMatchesToArray(arr []string, matches [][]string) []string {
+func addMatchesToCmdInputs(inputs []string, matches [][]string) []string {
 	for _, match := range matches {
-		arr = AppendUniqueString(match[1], arr)
+		inputs = AppendUniqueString(match[1], inputs)
 	}
-	return arr
+	return inputs
 }
 
 func createCmdWrapper(serviceName, methodName string, templateCmd []string, inputVarNames, outputVarNames []string) WrappedFunction {
@@ -55,7 +55,7 @@ func createCmdWrapper(serviceName, methodName string, templateCmd []string, inpu
 				pattern2 := fmt.Sprintf("${%s}", varName)
 				// if varValue doesn't started and ended with double quote, add double quote to it. Otherwise, let it be
 				if cmd[cmdIndex] != pattern1 && cmd[cmdIndex] != pattern2 {
-					varValue = getEscapedValueQuote(varValue)
+					varValue = escapeQuoteCmdParam(varValue)
 				}
 				cmd[cmdIndex] = strings.Replace(cmd[cmdIndex], pattern1, varValue, -1)
 				cmd[cmdIndex] = strings.Replace(cmd[cmdIndex], pattern2, varValue, -1)
@@ -81,7 +81,7 @@ func createCmdWrapper(serviceName, methodName string, templateCmd []string, inpu
 	}
 }
 
-func getEscapedValueQuote(str string) string {
+func escapeQuoteCmdParam(str string) string {
 	if len(str) == 0 {
 		return str
 	}

@@ -36,7 +36,7 @@ func TestConsumeAndPublish(t *testing.T) {
 		},
 	}
 	services.ConsumeAndPublish(broker, "flow")
-	// publish a & b
+	// publishServiceOutput a & b
 	err = broker.Publish("normal.srvc.common.in.a", servicedata.Package{
 		ID:   "normal",
 		Data: 3,
@@ -82,7 +82,7 @@ func TestConsumeAndPublishFunctionError(t *testing.T) {
 		},
 	}
 	services.ConsumeAndPublish(broker, "flow")
-	// publish a & b
+	// publishServiceOutput a & b
 	err = broker.Publish("funcErr.srvc.common.in.a", servicedata.Package{
 		ID:   "funcErr",
 		Data: 3,

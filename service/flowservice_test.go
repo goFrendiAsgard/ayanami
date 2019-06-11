@@ -50,11 +50,11 @@ func TestNewFlowService(t *testing.T) {
 	// test outputs
 	expectedOutputs := IOList{
 		IO{EventName: "flow.test.out.d", VarName: "d"},
-		IO{EventName: "publish.d", VarName: "d"},
+		IO{EventName: "publishServiceOutput.d", VarName: "d"},
 		IO{EventName: "flow.test.out.ok", VarName: "ok"},
-		IO{EventName: "publish.ok", VarName: "ok"},
+		IO{EventName: "publishServiceOutput.ok", VarName: "ok"},
 		IO{EventName: "flow.test.out.isGreaterThan100", VarName: "isGreaterThan100"},
-		IO{EventName: "publish.isGreaterThan100", VarName: "isGreaterThan100"},
+		IO{EventName: "publishServiceOutput.isGreaterThan100", VarName: "isGreaterThan100"},
 	}
 	Outputs := service.Output
 	if !reflect.DeepEqual(Outputs, expectedOutputs) {
@@ -103,19 +103,19 @@ func createFlowEventsTest() FlowEvents {
 		FlowEvent{
 			InputEvent:  "srvc.service.method.out.delta",
 			VarName:     "d",
-			OutputEvent: "publish.d",
+			OutputEvent: "publishServiceOutput.d",
 		},
 		FlowEvent{
 			InputEvent:  "srvc.service.method.out.delta",
 			VarName:     "ok",
-			OutputEvent: "publish.ok",
+			OutputEvent: "publishServiceOutput.ok",
 			UseValue:    true,
 			Value:       true,
 		},
 		FlowEvent{
 			InputEvent:  "srvc.service.method.out.delta",
 			VarName:     "isGreaterThan100",
-			OutputEvent: "publish.isGreaterThan100",
+			OutputEvent: "publishServiceOutput.isGreaterThan100",
 			UseFunction: true,
 			Function: func(val interface{}) interface{} {
 				d := val.(int)
@@ -235,7 +235,7 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 		},
 		errorCallback,
 	)
-	broker.Subscribe("*.publish.d",
+	broker.Subscribe("*.publishServiceOutput.d",
 		func(pkg servicedata.Package) {
 		},
 		errorCallback,

@@ -9,8 +9,8 @@ func createTestIOList() IOList {
 	var ioList IOList
 	ioList = append(ioList, IO{VarName: "a", EventName: "consume.a"})
 	ioList = append(ioList, IO{VarName: "alpha", EventName: "consume.a"})
-	ioList = append(ioList, IO{VarName: "b", EventName: "publish.b"})
-	ioList = append(ioList, IO{VarName: "b", EventName: "publish.any"})
+	ioList = append(ioList, IO{VarName: "b", EventName: "publishServiceOutput.b"})
+	ioList = append(ioList, IO{VarName: "b", EventName: "publishServiceOutput.any"})
 	return ioList
 }
 
@@ -26,7 +26,7 @@ func TestIoGetUniqueVarNames(t *testing.T) {
 func TestIoGetUniqueEventNames(t *testing.T) {
 	ioList := createTestIOList()
 	actual := ioList.GetUniqueEventNames()
-	expected := []string{"consume.a", "publish.b", "publish.any"}
+	expected := []string{"consume.a", "publishServiceOutput.b", "publishServiceOutput.any"}
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("expected %#v, get %#v", expected, actual)
 	}
@@ -48,7 +48,7 @@ func TestIoGetVarEventNames(t *testing.T) {
 	}
 
 	actual = ioList.GetVarEventNames("b")
-	expected = []string{"publish.b", "publish.any"}
+	expected = []string{"publishServiceOutput.b", "publishServiceOutput.any"}
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("expected %#v, get %#v", expected, actual)
 	}
@@ -71,13 +71,13 @@ func TestIoGetEventVarNames(t *testing.T) {
 		t.Errorf("expected %#v, get %#v", expected, actual)
 	}
 
-	actual = ioList.GetEventVarNames("publish.b")
+	actual = ioList.GetEventVarNames("publishServiceOutput.b")
 	expected = []string{"b"}
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("expected %#v, get %#v", expected, actual)
 	}
 
-	actual = ioList.GetEventVarNames("publish.any")
+	actual = ioList.GetEventVarNames("publishServiceOutput.any")
 	expected = []string{"b"}
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("expected %#v, get %#v", expected, actual)
