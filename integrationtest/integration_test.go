@@ -10,7 +10,7 @@ import (
 )
 
 func TestAll(t *testing.T) {
-	expectedBanner := fmt.Sprintf("%s%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
+	expectedBannerWithText := fmt.Sprintf("%s%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
 		"<pre>",
 		` _____________________________________________________________________________ `,
 		`/  _   _      _ _         _   _                       ___    _______   _   _  \`,
@@ -21,6 +21,18 @@ func TestAll(t *testing.T) {
 		`|                                                |/                           |`,
 		`\                                                                             /`,
 		` ----------------------------------------------------------------------------- `,
+		`        \   ^__^`,
+		`         \  (oo)\_______`,
+		`            (__)\       )\/\`,
+		`                ||----w |`,
+		`                ||     ||`,
+		"</pre>",
+	)
+	expectedBannerWithNoText := fmt.Sprintf("%s%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
+		"<pre>",
+		` __ `,
+		`<  >`,
+		` -- `,
 		`        \   ^__^`,
 		`         \  (oo)\_______`,
 		`            (__)\       )\/\`,
@@ -61,23 +73,43 @@ func TestAll(t *testing.T) {
 	}
 
 	// emulate banner request
-	responseBanner, err := http.Get(fmt.Sprintf("http://localhost:8080/banner?text=%s", url.QueryEscape("Hello there, I <3 U")))
+	responseBannerWithText, err := http.Get(fmt.Sprintf("http://localhost:8080/banner/?text=%s", url.QueryEscape("Hello there, I <3 U")))
 	if err != nil {
 		t.Errorf("Get error %s", err)
 	}
 	defer func() {
-		err := responseBanner.Body.Close()
+		err := responseBannerWithText.Body.Close()
 		if err != nil {
 			t.Errorf("Get error %s", err)
 		}
 	}()
-	bodyBanner, err := ioutil.ReadAll(responseBanner.Body)
+	bodyBannerWithText, err := ioutil.ReadAll(responseBannerWithText.Body)
 	if err != nil {
 		t.Errorf("Get error %s", err)
 	}
-	actualBanner := string(bodyBanner)
-	if actualBanner != expectedBanner {
-		t.Errorf("expected :\n%s, get :\n%s", expectedBanner, actualBanner)
+	actualBannerWithText := string(bodyBannerWithText)
+	if actualBannerWithText != expectedBannerWithText {
+		t.Errorf("expected :\n%s, get :\n%s", expectedBannerWithText, actualBannerWithText)
+	}
+
+	// emulate banner request
+	responseBannerWithNoText, err := http.Get(fmt.Sprintf("http://localhost:8080/banner/?text=%s", ""))
+	if err != nil {
+		t.Errorf("Get error %s", err)
+	}
+	defer func() {
+		err := responseBannerWithNoText.Body.Close()
+		if err != nil {
+			t.Errorf("Get error %s", err)
+		}
+	}()
+	bodyBannerWithNoText, err := ioutil.ReadAll(responseBannerWithNoText.Body)
+	if err != nil {
+		t.Errorf("Get error %s", err)
+	}
+	actualBannerWithNoText := string(bodyBannerWithNoText)
+	if actualBannerWithNoText != expectedBannerWithNoText {
+		t.Errorf("expected :\n%s, get :\n%s", expectedBannerWithNoText, actualBannerWithNoText)
 	}
 
 }

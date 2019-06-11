@@ -11,7 +11,7 @@ import (
 func MainGateway() {
 	routes := []string{ // define your routes here
 		"/",
-		"/banner",
+		"/banner/",
 	}
 	broker, err := msgbroker.NewNats(config.GetNatsURL())
 	if err != nil {
