@@ -41,6 +41,39 @@ composition + template              --> [scaffold] --> sourceCode
 composition + sourceCode + template --> [build]    --> deployable
 ```
 
+# Terminologies
+
+* `Composition`: Data flow and architecture of your program. Composition contains `flows`, `services`.
+* `Flow`: Your business logic. Basically, flow should receive `package` from input `trigger`, send the message to other `flows` or `services`, and finally send package to output `trigger`.
+* `Trigger`: Trigger might send/receive a `package`. It is how you communicate with the outside world (e.g: HTTP request trigger, HTTP response trigger, scheduler, etc)
+* `Service`: Container of `functions`. If your functions are depending on each others or belong to the same domain, you should consider to put them into single service
+* `Function`: The most atomic process component. Several `functions` might belong into a single `service`.
+* `Package`: The message sent/received from `service`, `flow`, or `trigger`.
+* `Template`: The template to generate `deployable` based on your `source code` and `composition`.
+* `Deployable`: The generated source code of your program, final output of ayanami. Generated during `build` process.
+* `Source Code`: The source code you write, typically implementation of `functions`. Generated during `scaffold` process.
+* `Scaffold`: The process to create `source code` prototype based on `composition` and `template`.
+* `Build`: The process to create `deployable` based on `composition`, `source code` and `template`.
+* `Event Name`: Event names use by message broker see the convention section.
+
+## Event Name Convention
+
+Event Name should comply one of these formats
+
+```
+<ID>.<trig|srvc|flow>.<serviceName>.<segments...>.<out|in>.<varName>
+<ID>.<trig|srvc|flow>.<serviceName>.<segments...>.err.message
+```
+
+* `<ID>` is 32 characters of `UUID v4 with no hyphens`.
+* `<trig|srvc|flow>` is service type, either `trig` (trigger), `srvc` (service), or `flow`.
+* `<serviceName>` is either serviceName or flowname. Should only contains alphanumeric.
+* `<segments...>` is description of the event. Should only contains alphanumeric or `.`, but should not started, ended, or has two consecutive `.`.
+* `<out|in>` is either `out` or `in`. Typically services consume `in` event and omit `out` event.
+* `<varName>` is variable name.
+
+__NOTE:__ We strip `hyphens` from UUID because Nats documentation said it only accept alpha numeric and dots as event name.
+
 # Getting started
 
 ## Prerequisite
@@ -529,39 +562,6 @@ Hello there !!!%
 
 Finally, you can give your browser a shoot:
 ![browser-output](images/hello-there-i-love-u.png)
-
-# Terminologies
-
-* `Composition`: Data flow and architecture of your program. Composition contains `flows`, `services`.
-* `Flow`: Your business logic. Basically, flow should receive `package` from input `trigger`, send the message to other `flows` or `services`, and finally send package to output `trigger`.
-* `Trigger`: Trigger might send/receive a `package`. It is how you communicate with the outside world (e.g: HTTP request trigger, HTTP response trigger, scheduler, etc)
-* `Service`: Container of `functions`. If your functions are depending on each others or belong to the same domain, you should consider to put them into single service
-* `Function`: The most atomic process component. Several `functions` might belong into a single `service`.
-* `Package`: The message sent/received from `service`, `flow`, or `trigger`.
-* `Template`: The template to generate `deployable` based on your `source code` and `composition`.
-* `Deployable`: The generated source code of your program, final output of ayanami. Generated during `build` process.
-* `Source Code`: The source code you write, typically implementation of `functions`. Generated during `scaffold` process.
-* `Scaffold`: The process to create `source code` prototype based on `composition` and `template`.
-* `Build`: The process to create `deployable` based on `composition`, `source code` and `template`.
-* `Event Name`: Event names use by message broker see the convention section.
-
-## Event Name Convention
-
-Event Name should comply one of these formats
-
-```
-<ID>.<trig|srvc|flow>.<serviceName>.<segments...>.<out|in>.<varName>
-<ID>.<trig|srvc|flow>.<serviceName>.<segments...>.err.message
-```
-
-* `<ID>` is 32 characters of `UUID v4 with no hyphens`.
-* `<trig|srvc|flow>` is service type, either `trig` (trigger), `srvc` (service), or `flow`.
-* `<serviceName>` is either serviceName or flowname. Should only contains alphanumeric.
-* `<segments...>` is description of the event. Should only contains alphanumeric or `.`, but should not started, ended, or has two consecutive `.`.
-* `<out|in>` is either `out` or `in`. Typically services consume `in` event and omit `out` event.
-* `<varName>` is variable name.
-
-__NOTE:__ We strip `hyphens` from UUID because Nats documentation said it only accept alpha numeric and dots as event name.
 
 # For Developer
 

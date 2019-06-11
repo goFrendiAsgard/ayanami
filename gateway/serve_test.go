@@ -51,18 +51,11 @@ func TestServeWithNats(t *testing.T) {
 func serveTest200(broker msgbroker.CommonBroker, port int, path string, t *testing.T) {
 	broker.Subscribe(fmt.Sprintf("*.trig.request.get.%s.out", RouteToSegments(path)),
 		func(pkg servicedata.Package) {
+			// publish response
 			ID := pkg.ID
-			// publishToRequestTrigger code
-			codePkg := servicedata.Package{ID: ID, Data: 200}
-			codeEvent := fmt.Sprintf("%s.trig.response.get.%s.in.code", ID, RouteToSegments(path))
-			err := broker.Publish(codeEvent, codePkg)
-			if err != nil {
-				t.Errorf("Get error %s", err)
-			}
-			// publishToRequestTrigger content
-			contentPkg := servicedata.Package{ID: ID, Data: "hi"}
-			contentEvent := fmt.Sprintf("%s.trig.response.get.%s.in.content", ID, RouteToSegments(path))
-			err = broker.Publish(contentEvent, contentPkg)
+			responsePkg := servicedata.Package{ID: ID, Data: map[string]interface{}{"code": 200, "content": "hi"}}
+			eventName := fmt.Sprintf("%s.trig.response.get.%s.in", ID, RouteToSegments(path))
+			err := broker.Publish(eventName, responsePkg)
 			if err != nil {
 				t.Errorf("Get error %s", err)
 			}
@@ -92,7 +85,7 @@ func serveTest200(broker msgbroker.CommonBroker, port int, path string, t *testi
 	actualMessage := string(body)
 	expectedMessage := "hi"
 	if actualMessage != expectedMessage {
-		t.Errorf("expectedMessage :\n%s, get :\n%s", expectedMessage, actualMessage)
+		t.Errorf("expectedMessage :%s, get :%s", expectedMessage, actualMessage)
 	}
 	// check code
 	actualCode := response.StatusCode
@@ -105,18 +98,11 @@ func serveTest200(broker msgbroker.CommonBroker, port int, path string, t *testi
 func serveTest500(broker msgbroker.CommonBroker, port int, path string, t *testing.T) {
 	broker.Subscribe(fmt.Sprintf("*.trig.request.get.%s.out", RouteToSegments(path)),
 		func(pkg servicedata.Package) {
+			// publish response
 			ID := pkg.ID
-			// publishToRequestTrigger code
-			codePkg := servicedata.Package{ID: ID, Data: 500}
-			codeEvent := fmt.Sprintf("%s.trig.response.get.%s.in.code", ID, RouteToSegments(path))
-			err := broker.Publish(codeEvent, codePkg)
-			if err != nil {
-				t.Errorf("Get error %s", err)
-			}
-			// publishToRequestTrigger content
-			contentPkg := servicedata.Package{ID: ID, Data: "hi"}
-			contentEvent := fmt.Sprintf("%s.trig.response.get.%s.in.content", ID, RouteToSegments(path))
-			err = broker.Publish(contentEvent, contentPkg)
+			responsePkg := servicedata.Package{ID: ID, Data: map[string]interface{}{"code": 500, "content": "hi"}}
+			eventName := fmt.Sprintf("%s.trig.response.get.%s.in", ID, RouteToSegments(path))
+			err := broker.Publish(eventName, responsePkg)
 			if err != nil {
 				t.Errorf("Get error %s", err)
 			}
@@ -146,7 +132,7 @@ func serveTest500(broker msgbroker.CommonBroker, port int, path string, t *testi
 	actualMessage := string(body)
 	expectedMessage := "Internal Server Error"
 	if actualMessage != expectedMessage {
-		t.Errorf("expectedMessage :\n%s, get :\n%s", expectedMessage, actualMessage)
+		t.Errorf("expectedMessage :%s, get :%s", expectedMessage, actualMessage)
 	}
 	// check code
 	actualCode := response.StatusCode
@@ -159,18 +145,11 @@ func serveTest500(broker msgbroker.CommonBroker, port int, path string, t *testi
 func serveTestInvalidCode(broker msgbroker.CommonBroker, port int, path string, t *testing.T) {
 	broker.Subscribe(fmt.Sprintf("*.trig.request.get.%s.out", RouteToSegments(path)),
 		func(pkg servicedata.Package) {
-			ID := pkg.ID
 			// publishToRequestTrigger code
-			codePkg := servicedata.Package{ID: ID, Data: "Not a valid code"}
-			codeEvent := fmt.Sprintf("%s.trig.response.get.%s.in.code", ID, RouteToSegments(path))
-			err := broker.Publish(codeEvent, codePkg)
-			if err != nil {
-				t.Errorf("Get error %s", err)
-			}
-			// publishToRequestTrigger content
-			contentPkg := servicedata.Package{ID: ID, Data: "hi"}
-			contentEvent := fmt.Sprintf("%s.trig.response.get.%s.in.content", ID, RouteToSegments(path))
-			err = broker.Publish(contentEvent, contentPkg)
+			ID := pkg.ID
+			responsePkg := servicedata.Package{ID: ID, Data: map[string]interface{}{"code": "Not a valid code", "content": "hi"}}
+			eventName := fmt.Sprintf("%s.trig.response.get.%s.in", ID, RouteToSegments(path))
+			err := broker.Publish(eventName, responsePkg)
 			if err != nil {
 				t.Errorf("Get error %s", err)
 			}
@@ -200,7 +179,7 @@ func serveTestInvalidCode(broker msgbroker.CommonBroker, port int, path string, 
 	actualMessage := string(body)
 	expectedMessage := "Internal Server Error"
 	if actualMessage != expectedMessage {
-		t.Errorf("expectedMessage :\n%s, get :\n%s", expectedMessage, actualMessage)
+		t.Errorf("expectedMessage :%s, get :%s", expectedMessage, actualMessage)
 	}
 	// check code
 	actualCode := response.StatusCode

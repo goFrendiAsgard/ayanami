@@ -31,92 +31,99 @@ func createRouteHandler(broker msgbroker.CommonBroker, multipartFormLimit int64,
 		// create ID
 		ID, err := service.CreateID()
 		if err != nil {
-			responseError(ID, broker, method, route, w, 500, err)
+			sendErrorResponse(ID, broker, method, route, w)
 			return
 		}
 		// prepare channels
-		codeChannel := make(chan int, 1)
-		contentChannel := make(chan string, 1)
-		consumeFromResponseTrigger(broker, ID, method, route, codeChannel, contentChannel)
+		responseChannel := make(chan map[string]interface{})
+		consumeFromResponseTrigger(broker, ID, method, route, responseChannel)
 		// publishToRequestTrigger
 		err = publishToRequestTrigger(broker, ID, method, route, multipartFormLimit, r)
 		if err != nil {
-			responseError(ID, broker, method, route, w, 500, err)
+			sendErrorResponse(ID, broker, method, route, w)
 			return
 		}
 		// wait for response
-		code := <-codeChannel
-		content := <-contentChannel
-		if code == 500 { // if there is a `500`, error, override the error message with this one
-			content = "Internal Server Error"
-		}
+		response := <-responseChannel
 		// response
-		response(ID, broker, method, route, w, code, content)
+		sendResponse(ID, broker, method, route, w, response)
 	}
 }
 
-func consumeFromResponseTrigger(broker msgbroker.CommonBroker, ID, method, route string, codeChannel chan int, contentChannel chan string) {
-	codeEventName := getResponseCodeEventName(ID, method, route)
-	contentEventName := getResponseContentEventName(ID, method, route)
-	// consumeFromResponseTrigger code
-	log.Printf("[INFO: Gateway] Subscribe `%s`", codeEventName)
-	broker.Subscribe(codeEventName,
+func createErrorResponse() map[string]interface{} {
+	return map[string]interface{}{
+		"code":    500,
+		"content": "Internal Server Error",
+		"header":  make(map[string]string),
+	}
+}
+
+func consumeFromResponseTrigger(broker msgbroker.CommonBroker, ID, method, route string, responseChannel chan (map[string]interface{})) {
+	eventName := getResponseEventName(ID, method, route)
+	log.Printf("[INFO: Gateway] Subscribe `%s`", eventName)
+	broker.Subscribe(eventName,
 		// success
 		func(pkg servicedata.Package) {
-			log.Printf("[INFO: Gateway] Getting message from `%s`: `%#v`", codeEventName, pkg.Data)
-			val, err := strconv.Atoi(fmt.Sprintf("%v", pkg.Data))
-			if err == nil {
-				codeChannel <- val
-			} else {
-				log.Printf("[ERROR: Gateway] %s", err)
-				codeChannel <- 500
-				contentChannel <- "Internal Server Error"
+			log.Printf("[INFO: Gateway] Getting message from `%s`: `%#v`", eventName, pkg.Data)
+			val, ok := pkg.Data.(map[string]interface{})
+			if !ok {
+				log.Printf("[ERROR: Gateway] Getting error while parsing data from `%s`", eventName)
+				val = createErrorResponse()
 			}
+			responseChannel <- val
 		},
 		// error
 		func(err error) {
-			codeChannel <- 500
-			contentChannel <- "Internal Server Error"
-		},
-	)
-	// codeChannel <- 200
-	// consumeFromResponseTrigger event
-	log.Printf("[INFO: Gateway] Subscribe `%s`", contentEventName)
-	broker.Subscribe(contentEventName,
-		// success
-		func(pkg servicedata.Package) {
-			log.Printf("[INFO: Gateway] Getting message from `%s`: `%#v`", contentEventName, pkg.Data)
-			contentChannel <- fmt.Sprintf("%s", pkg.Data)
-		},
-		// error
-		func(err error) {
-			codeChannel <- 500
-			contentChannel <- "Internal Server Error"
+			log.Printf("[ERROR: Gateway] Getting error while parsing `%s`: %s", eventName, err)
+			responseChannel <- createErrorResponse()
 		},
 	)
 }
 
-func responseError(ID string, broker msgbroker.CommonBroker, method, route string, w http.ResponseWriter, code int, err error) {
-	content := fmt.Sprintf("%s", err)
-	response(ID, broker, method, route, w, code, content)
+func sendErrorResponse(ID string, broker msgbroker.CommonBroker, method, route string, w http.ResponseWriter) {
+	response := createErrorResponse()
+	sendResponse(ID, broker, method, route, w, response)
 }
 
-func response(ID string, broker msgbroker.CommonBroker, method, route string, w http.ResponseWriter, code int, content string) {
-	codeEventName := getResponseCodeEventName(ID, method, route)
-	contentEventName := getResponseContentEventName(ID, method, route)
-	err := broker.Unsubscribe(codeEventName)
+func sendResponse(ID string, broker msgbroker.CommonBroker, method, route string, w http.ResponseWriter, response map[string]interface{}) {
+	eventName := getResponseEventName(ID, method, route)
+	err := broker.Unsubscribe(eventName)
 	if err != nil {
-		code = 500
-		content = fmt.Sprintf("%s", err)
+		log.Printf("[ERROR: Gateway] Getting error while unsubscribe from `%s`: %s", eventName, err)
+		response = createErrorResponse()
 	}
-	err = broker.Unsubscribe(contentEventName)
-	if err != nil {
-		code = 500
-		content = fmt.Sprintf("%s", err)
+	// get code
+	code := 200
+	if codeInterface, exists := response["code"]; exists {
+		var err error
+		code, err = strconv.Atoi(fmt.Sprintf("%v", codeInterface))
+		if err != nil {
+			log.Printf("[ERROR: Gateway] Getting error while parsing code from `%s`: %s", eventName, err)
+			code = 500
+		}
 	}
-	log.Printf("[INFO: Gateway] responding to %s: %d, %s", ID, code, content)
-	// TODO: User should be able to set their own content-types and other headers
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	// get content
+	content := ""
+	if code == 500 {
+		content = "Internal Server Error"
+	} else if contentInterface, exists := response["content"]; exists {
+		content = fmt.Sprintf("%s", contentInterface)
+	}
+	// get header
+	headers := map[string]string{
+		"Content-Type": "text/html; charset=utf-8",
+	}
+	if headerInterface, exists := response["header"]; exists {
+		var ok bool
+		headers, ok = headerInterface.(map[string]string)
+		if !ok {
+			log.Printf("[ERROR: Gateway] Getting error while parsing header from `%s`: %#v", eventName, headerInterface)
+		}
+	}
+	// set header, code, and content
+	for key, val := range headers {
+		w.Header().Set(key, val)
+	}
 	w.WriteHeader(code)
 	_, err = fmt.Fprintf(w, "%s", content)
 	if err != nil {
@@ -169,14 +176,8 @@ func getDataForPublish(ID string, multipartFormLimit int64, r *http.Request) map
 	return data
 }
 
-func getResponseCodeEventName(ID, method, route string) string {
-	baseEventName := getBaseEventName(ID, "response", method, route, "in")
-	return fmt.Sprintf("%s.%s", baseEventName, "code")
-}
-
-func getResponseContentEventName(ID, method, route string) string {
-	baseEventName := getBaseEventName(ID, "response", method, route, "in")
-	return fmt.Sprintf("%s.%s", baseEventName, "content")
+func getResponseEventName(ID, method, route string) string {
+	return getBaseEventName(ID, "response", method, route, "in")
 }
 
 func getRequestEventName(ID, method, route string) string {
