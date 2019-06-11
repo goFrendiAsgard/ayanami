@@ -82,6 +82,9 @@ func createCmdWrapper(serviceName, methodName string, templateCmd []string, inpu
 }
 
 func getEscapedValueQuote(str string) string {
+	if len(str) == 0 {
+		return str
+	}
 	runic := []rune(str)
 	if string(runic[0]) != `"` || string(runic[len(str)-1]) != `"` {
 		escapedStr := strings.Replace(str, `"`, `\"`, -1)
