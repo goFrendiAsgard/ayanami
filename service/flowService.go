@@ -33,7 +33,7 @@ type FlowEvents []FlowEvent
 
 // GetInputEvents get unique input events
 func (flows FlowEvents) GetInputEvents() []string {
-	inputEvents := []string{}
+	var inputEvents []string
 	for _, flow := range flows {
 		if flow.InputEvent != "" {
 			inputEvents = AppendUniqueString(flow.InputEvent, inputEvents)
@@ -44,7 +44,7 @@ func (flows FlowEvents) GetInputEvents() []string {
 
 // GetInputEventByVarName get unique input events by var
 func (flows FlowEvents) GetInputEventByVarName(varName string) []string {
-	inputEvents := []string{}
+	var inputEvents []string
 	for _, flow := range flows {
 		if flow.InputEvent != "" && flow.VarName == varName {
 			inputEvents = AppendUniqueString(flow.InputEvent, inputEvents)
@@ -66,7 +66,7 @@ func (flows FlowEvents) GetVarFlowByInputEvent(inputEvent string) map[string]Flo
 
 // GetVarNamesByInputEvent get unique vars by inputEvent
 func (flows FlowEvents) GetVarNamesByInputEvent(inputEvent string) []string {
-	varNames := []string{}
+	var varNames []string
 	for _, flow := range flows {
 		if flow.InputEvent == inputEvent {
 			varNames = AppendUniqueString(flow.VarName, varNames)
@@ -77,7 +77,7 @@ func (flows FlowEvents) GetVarNamesByInputEvent(inputEvent string) []string {
 
 // GetOutputEventByVarNames get unique outputEvent by varNames
 func (flows FlowEvents) GetOutputEventByVarNames(varName string) []string {
-	outputEvents := []string{}
+	var outputEvents []string
 	for _, flow := range flows {
 		if flow.VarName == varName {
 			if flow.OutputEvent != "" {
@@ -275,7 +275,7 @@ func createOutputs(flowName string, outputVarNames []string, vars Dictionary) Di
 
 func getFlowRawInputEvents(flows FlowEvents, inputVarNames []string) []string {
 	candidates := flows.GetInputEvents()
-	rawInputEvents := []string{}
+	var rawInputEvents []string
 	for _, candidate := range candidates {
 		rawInputEvents = append(rawInputEvents, candidate)
 	}

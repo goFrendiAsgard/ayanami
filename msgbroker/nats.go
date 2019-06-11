@@ -3,7 +3,7 @@ package msgbroker
 import (
 	"encoding/json"
 	"fmt"
-	nats "github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go"
 	"github.com/state-alchemists/ayanami/servicedata"
 	"log"
 	"sync"

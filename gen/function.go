@@ -40,8 +40,8 @@ func (f *Function) GetFileName() string {
 func (f *Function) ToExposed() ExposedFunction {
 	// get declaration
 	inputDeclaration := fmt.Sprintf("%s interface{}", strings.Join(f.Inputs, ", "))
-	outputTypes := []string{}
-	functionReturns := []string{}
+	var outputTypes []string
+	var functionReturns []string
 	for range f.Outputs {
 		outputTypes = append(outputTypes, "interface{}")
 		functionReturns = append(functionReturns, "nil")

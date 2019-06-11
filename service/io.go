@@ -20,7 +20,7 @@ func (ioList IOList) GetUniqueVarNames() []string {
 
 // GetVarEventNames get eventNames from IO list with specified varName
 func (ioList IOList) GetVarEventNames(varName string) []string {
-	result := []string{}
+	var result []string
 	for _, io := range ioList {
 		if io.VarName == varName {
 			result = AppendUniqueString(io.EventName, result)
@@ -40,7 +40,7 @@ func (ioList IOList) GetUniqueEventNames() []string {
 
 // GetEventVarNames get varNames from IO list with specified eventName
 func (ioList IOList) GetEventVarNames(eventName string) []string {
-	result := []string{}
+	var result []string
 	for _, io := range ioList {
 		if io.EventName == eventName {
 			result = AppendUniqueString(io.VarName, result)

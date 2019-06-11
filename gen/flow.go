@@ -221,7 +221,7 @@ func (c *FlowConfig) toExposed(repoName, mainFunctionName string) ExposedFlowCon
 }
 
 func (c *FlowConfig) getEventsForExposed() []map[string]string {
-	events := []map[string]string{}
+	var events []map[string]string
 	for _, event := range c.Events {
 		events = append(events, event.ToIndentedMap())
 	}
@@ -229,7 +229,7 @@ func (c *FlowConfig) getEventsForExposed() []map[string]string {
 }
 
 func (c *FlowConfig) getPackagesForExposed() []string {
-	packages := []string{}
+	var packages []string
 	for _, event := range c.Events {
 		if !event.UseFunction {
 			continue

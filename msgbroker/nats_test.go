@@ -1,7 +1,7 @@
 package msgbroker
 
 import (
-	nats "github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go"
 	"github.com/state-alchemists/ayanami/config"
 	"github.com/state-alchemists/ayanami/servicedata"
 	"log"

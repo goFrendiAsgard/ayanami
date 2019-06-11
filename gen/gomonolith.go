@@ -34,7 +34,7 @@ func (p GoMonolithProc) Scaffold(configs generator.Configs) error {
 func (p GoMonolithProc) Build(configs generator.Configs) error {
 	log.Printf("[INFO] BUILDING MONOLITH: %s", p.DirName)
 	depPath := p.DirName
-	mainFunctionList := []string{}
+	var mainFunctionList []string
 	for _, config := range configs {
 		switch config.(type) {
 		case CmdConfig:

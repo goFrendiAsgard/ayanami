@@ -142,7 +142,7 @@ func (c *GoServiceConfig) Set(method string, function Function) {
 
 func (c *GoServiceConfig) toExposed(repoName, mainFunctionName string) ExposedGoServiceConfig {
 	exposedFunctions := make(map[string]ExposedFunction)
-	packages := []string{}
+	var packages []string
 	for methodName, function := range c.Functions {
 		exposedFunction := function.ToExposed()
 		exposedFunctions[methodName] = exposedFunction

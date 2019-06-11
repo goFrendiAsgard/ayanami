@@ -1,7 +1,7 @@
 package config
 
 import (
-	nats "github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go"
 	"os"
 )
 

@@ -53,8 +53,9 @@ func TestIoGetVarEventNames(t *testing.T) {
 		t.Errorf("expected %#v, get %#v", expected, actual)
 	}
 
+	var emptyList []string
 	actual = ioList.GetVarEventNames("invalid")
-	expected = []string{}
+	expected = emptyList
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("expected %#v, get %#v", expected, actual)
 	}
@@ -82,8 +83,9 @@ func TestIoGetEventVarNames(t *testing.T) {
 		t.Errorf("expected %#v, get %#v", expected, actual)
 	}
 
+	var emptyList []string
 	actual = ioList.GetEventVarNames("invalid")
-	expected = []string{}
+	expected = emptyList
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("expected %#v, get %#v", expected, actual)
 	}

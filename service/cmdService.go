@@ -17,7 +17,7 @@ func NewCmd(serviceName string, methodName string, command []string) CommonServi
 }
 
 func getInputFromCommand(command []string) []string {
-	inputs := []string{}
+	var inputs []string
 	re1, err := regexp.Compile(`\$([a-zA-Z0-9]+)`)
 	if err != nil {
 		return inputs

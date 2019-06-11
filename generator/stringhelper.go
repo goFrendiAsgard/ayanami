@@ -27,7 +27,7 @@ func (s StringHelper) QuoteMap(data map[string]string) map[string]string {
 
 // QuoteArray quote array's elements
 func (s StringHelper) QuoteArray(arr []string) []string {
-	newArr := []string{}
+	var newArr []string
 	for _, str := range arr {
 		newArr = append(newArr, s.Quote(str))
 	}

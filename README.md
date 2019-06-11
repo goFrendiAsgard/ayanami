@@ -685,9 +685,9 @@ func Pre(text string) string {
 // WrappedPre implemented by user
 func WrappedPre(inputs service.Dictionary) (service.Dictionary, error) {
     outputs := make(service.Dictionary)
-    inputText := inputs["input"].(string)
+    inputText := inputs.Get("inputs").(string)
     outputText := Pre(inputText)
-    outputs["output"] = outputText
+    outputs.Set("output", outputText)
     return outputs, nil
 }
 ```
@@ -767,31 +767,31 @@ func MainFlow() {
             // outputs
             []string{"content", "code"},
             []service.FlowEvent{
-                service.FlowEvent{
+                {
                     InputEvent: "trig.request.get.out",
                     VarName:    "request",
                 },
-                service.FlowEvent{
+                {
                     VarName:     "request.form.text.0",
                     OutputEvent: "srvc.cmd.figlet.in.input",
                 },
-                service.FlowEvent{
+                {
                     InputEvent:  "srvc.cmd.figlet.out.output",
                     VarName:     "figletOutput",
                     OutputEvent: "srvc.cmd.cowsay.in.input",
                 },
-                service.FlowEvent{
+                {
                     InputEvent:  "srvc.cmd.cowsay.out.output",
                     VarName:     "cowsayOutput",
                     OutputEvent: "srvc.html.pre.in.input",
                 },
                 // normal response
-                service.FlowEvent{
+                {
                     InputEvent:  "srvc.html.pre.out.output",
                     VarName:     "content",
                     OutputEvent: "trig.response.get.in.content",
                 },
-                service.FlowEvent{
+                {
                     InputEvent:  "srvc.html.pre.out.output",
                     VarName:     "code",
                     UseValue:    true,
@@ -799,35 +799,35 @@ func MainFlow() {
                     OutputEvent: "trig.response.get.in.code",
                 },
                 // error response from figlet
-                service.FlowEvent{
+                {
                     InputEvent: "srvc.cmd.figlet.err.message",
                     VarName:    "code",
                     UseValue:   true,
                     Value:      500,
                 },
-                service.FlowEvent{
+                {
                     InputEvent: "srvc.cmd.figlet.err.message",
                     VarName:    "content",
                 },
                 // error response from cowsay
-                service.FlowEvent{
+                {
                     InputEvent: "srvc.cmd.cowsay.err.message",
                     VarName:    "code",
                     UseValue:   true,
                     Value:      500,
                 },
-                service.FlowEvent{
+                {
                     InputEvent: "srvc.cmd.cowsay.err.message",
                     VarName:    "content",
                 },
                 // error response from pre
-                service.FlowEvent{
+                {
                     InputEvent: "srvc.html.pre.err.message",
                     VarName:    "code",
                     UseValue:   true,
                     Value:      500,
                 },
-                service.FlowEvent{
+                {
                     InputEvent: "srvc.html.pre.err.message",
                     VarName:    "content",
                 },
