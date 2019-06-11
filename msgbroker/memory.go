@@ -3,7 +3,7 @@ package msgbroker
 import (
 	"fmt"
 	"github.com/state-alchemists/ayanami/servicedata"
-	"log"
+	"regexp"
 	"strings"
 	"sync"
 )
@@ -37,18 +37,20 @@ func (broker Memory) Unsubscribe(eventName string) error {
 func (broker Memory) Publish(eventName string, pkg servicedata.Package) error {
 	broker.lock.RLock()
 	defer broker.lock.RUnlock()
-	// log.Printf("[MEMORY PUBLISH]\n  Event  : %s\n  Content: %#v", eventName, pkg)
-	if handler, exists := broker.handlers[eventName]; exists {
-		log.Printf("[MEMORY CONSUME]\n  Event  : %s\n  Content: %#v", eventName, pkg)
-		go handler(pkg)
-		return nil
-	}
-	eventParts := strings.Split(eventName, ".")
-	wildCardEventName := fmt.Sprintf("*.%s", strings.Join(eventParts[1:], "."))
-	handler, exists := broker.handlers[wildCardEventName]
-	if exists {
-		// log.Printf("[MEMORY CONSUME]\n  Event  : %s\n  Content: %#v", wildCardEventName, pkg)
-		go handler(pkg)
+	// look for matched event
+	for key, handler := range broker.handlers {
+		// change eventName into regex
+		eventPattern := fmt.Sprintf("^%s$", key)
+		eventPattern = strings.Replace(eventPattern, ".", `\.`, -1)
+		eventPattern = strings.Replace(eventPattern, "*", `[0-9a-zA-Z\*]+`, -1)
+		eventPattern = strings.Replace(eventPattern, ">", ".*", -1)
+		re, err := regexp.Compile(eventPattern)
+		if err != nil {
+			return err
+		}
+		if re.Match([]byte(eventName)) {
+			go handler(pkg)
+		}
 	}
 	return nil
 }
