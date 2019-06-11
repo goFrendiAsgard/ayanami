@@ -111,12 +111,10 @@ func publishServiceOutput(broker msgbroker.CommonBroker, serviceName, methodName
 			continue
 		}
 		data := outputs.Get(outputVarName)
-		pkg := servicedata.Package{ID: ID, Data: data}
 		rawOutputEventNames := outputIOList.GetVarEventNames(outputVarName)
 		for _, rawOutputEventName := range rawOutputEventNames {
 			eventName := fmt.Sprintf("%s.%s", ID, rawOutputEventName)
-			log.Printf("[INFO: %s.%s] Publish into `%s`: `%#v`", serviceName, methodName, eventName, pkg)
-			err := broker.Publish(eventName, pkg)
+			err := Publish(serviceName, methodName, broker, ID, eventName, data)
 			if err != nil {
 				log.Printf("[ERROR: %s.%s] Error while publishing into `%s`: `%s`", serviceName, methodName, eventName, err)
 				return publishServiceError(broker, serviceName, methodName, rawErrorEventName, ID, err)
@@ -127,8 +125,7 @@ func publishServiceOutput(broker msgbroker.CommonBroker, serviceName, methodName
 }
 
 func publishServiceError(broker msgbroker.CommonBroker, serviceName, methodName, rawErrorEventName, ID string, err error) error {
-	errorPkg := servicedata.Package{ID: ID, Data: fmt.Sprintf("%s", err)}
+	errorMessage := fmt.Sprintf("%s", err)
 	errorEventName := fmt.Sprintf("%s.%s", ID, rawErrorEventName)
-	log.Printf("[INFO: %s.%s] Publish error to `%s`: `%s`", serviceName, methodName, errorEventName, err)
-	return broker.Publish(errorEventName, errorPkg)
+	return Publish(serviceName, methodName, broker, ID, errorEventName, errorMessage)
 }

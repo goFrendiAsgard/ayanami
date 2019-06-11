@@ -127,24 +127,7 @@ func response(ID string, broker msgbroker.CommonBroker, method, route string, w 
 func publishToRequestTrigger(broker msgbroker.CommonBroker, ID string, method string, route string, multipartFormLimit int64, r *http.Request) error {
 	eventName := getRequestEventName(ID, method, route)
 	data := getDataForPublish(ID, multipartFormLimit, r)
-	// prepare pkg
-	pkgData := servicedata.Package{ID: ID, Data: data}
-	log.Printf("[INFO: Gateway] publishToRequestTrigger `%s`: %#v", eventName, pkgData)
-	err := broker.Publish(eventName, pkgData)
-	if err != nil {
-		return err
-	}
-	// also publishToRequestTrigger all sub packages
-	for dataKey, dataVal := range data {
-		subPkg := servicedata.Package{ID: ID, Data: dataVal}
-		subEventName := fmt.Sprintf("%s.%s", eventName, dataKey)
-		log.Printf("[INFO: Gateway] publishToRequestTrigger `%s`: %#v", subEventName, subPkg)
-		err := broker.Publish(subEventName, subPkg)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return service.Publish("Gateway", "", broker, ID, eventName, data)
 }
 
 func getDataForPublish(ID string, multipartFormLimit int64, r *http.Request) map[string]interface{} {

@@ -330,11 +330,9 @@ func publishFlowVar(flowName string, broker msgbroker.CommonBroker, ID string, f
 		for _, varName := range varNames {
 			for _, rawOutputEvent := range flows.GetOutputEventByVarNames(varName) {
 				varValue := vars.Get(varName)
-				pkg := servicedata.Package{ID: ID, Data: varValue}
 				outputEvent := fmt.Sprintf("%s.%s", ID, rawOutputEvent)
-				log.Printf("[INFO: flow.%s] Publish into `%s`: `%#v`", flowName, outputEvent, pkg)
-				err := broker.Publish(outputEvent, pkg)
-				log.Printf("[INFO: flow.%s] Error while publishServiceOutput`%s`: %s", flowName, outputEvent, err)
+				err := Publish("flow", flowName, broker, ID, outputEvent, varValue)
+				log.Printf("[INFO: flow.%s] Error while publish `%s`: %s", flowName, outputEvent, err)
 			}
 		}
 	}
