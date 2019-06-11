@@ -28,7 +28,12 @@ func TestProjectGenerator(t *testing.T) {
 	if err != nil {
 		t.Errorf("Get error: %s", err)
 	}
-	defer os.RemoveAll(projectParentDirPath)
+	defer func() {
+		err := os.RemoveAll(projectParentDirPath)
+		if err != nil {
+			t.Errorf("Get error: %s", err)
+		}
+	}()
 
 	// check deployable
 	dirPath := filepath.Join(projectParentDirPath, "evangelion", "deployable")

@@ -172,7 +172,7 @@ func createFlowWrapper(flowName string, broker msgbroker.CommonBroker, flows Flo
 		}
 		<-outputCompleted
 		lock.RLock()
-		outputs := createOutputs(outputVarNames, vars)
+		outputs := createOutputs(flowName, outputVarNames, vars)
 		lock.RUnlock()
 		log.Printf("[INFO: flow.%s] Internal flow `%s` ended. Outputs are: `%#v`", flowName, ID, outputs)
 		// unsubscribe
@@ -191,7 +191,10 @@ func setDefaultVars(flowName string, flows FlowEvents, outputVarNames []string, 
 	defaultVars := getFlowDefaultVars(flows)
 	for varName, value := range defaultVars {
 		log.Printf("[INFO: flow.%s] Internally set `%s` into: `%#v`", flowName, varName, value)
-		vars.Set(varName, value)
+		err := vars.Set(varName, value)
+		if err != nil {
+			log.Printf("[ERROR: flow.%s] Error setting `%s`: %s", flowName, varName, err)
+		}
 	}
 	lock.RLock()
 	completed := vars.HasAll(outputVarNames)
@@ -224,7 +227,10 @@ func createFlowConsumeSuccessHandler(flowName string, broker msgbroker.CommonBro
 			}
 			log.Printf("[INFO: flow.%s] Set `%s` into: `%#v`", flowName, varName, publishedData)
 			lock.Lock()
-			vars.Set(varName, publishedData)
+			err := vars.Set(varName, publishedData)
+			if err != nil {
+				log.Printf("[ERROR: flow.%s] Error setting `%s`: %s", flowName, varName, err)
+			}
 			lock.Unlock()
 			lock.RLock()
 			publishFlowVar(flowName, broker, ID, flows, outputVarNames, []string{varName}, vars)
@@ -256,10 +262,13 @@ func getKeys(m map[string]interface{}) []string {
 	return keys
 }
 
-func createOutputs(outputVarNames []string, vars Dictionary) Dictionary {
+func createOutputs(flowName string, outputVarNames []string, vars Dictionary) Dictionary {
 	outputs := make(Dictionary)
 	for _, outputName := range outputVarNames {
-		outputs.Set(outputName, vars.Get(outputName))
+		err := outputs.Set(outputName, vars.Get(outputName))
+		if err != nil {
+			log.Printf("[ERROR: flow.%s] Error creating output: %s", flowName, err)
+		}
 	}
 	return outputs
 }
@@ -268,10 +277,7 @@ func getFlowRawInputEvents(flows FlowEvents, inputVarNames []string) []string {
 	candidates := flows.GetInputEvents()
 	rawInputEvents := []string{}
 	for _, candidate := range candidates {
-		candidatePass := true
-		if candidatePass {
-			rawInputEvents = append(rawInputEvents, candidate)
-		}
+		rawInputEvents = append(rawInputEvents, candidate)
 	}
 	return rawInputEvents
 }
@@ -297,7 +303,7 @@ func getFlowDefaultVars(flows FlowEvents) map[string]interface{} {
 			}
 		}
 		if candidatePass {
-			if useFunction {
+			if useFunction && function != nil {
 				value = function(value)
 			}
 			defaultVars[candidate] = value
@@ -327,7 +333,8 @@ func publishFlowVar(flowName string, broker msgbroker.CommonBroker, ID string, f
 				pkg := servicedata.Package{ID: ID, Data: varValue}
 				outputEvent := fmt.Sprintf("%s.%s", ID, rawOutputEvent)
 				log.Printf("[INFO: flow.%s] Publish into `%s`: `%#v`", flowName, outputEvent, pkg)
-				broker.Publish(outputEvent, pkg)
+				err := broker.Publish(outputEvent, pkg)
+				log.Printf("[INFO: flow.%s] Error while publish`%s`: %s", flowName, outputEvent, err)
 			}
 		}
 	}

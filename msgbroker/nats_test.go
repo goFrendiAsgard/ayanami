@@ -78,12 +78,15 @@ func TestNatsConsumeInvalid(t *testing.T) {
 		},
 	)
 	// if consume doesn't respond for too long, end it
-	nc.Subscribe("invalidConsume", func(m *nats.Msg) {
+	_, err = nc.Subscribe("invalidConsume", func(m *nats.Msg) {
 		log.Printf("Get invalid consume package: %s", string(m.Data))
 		time.Sleep(5 * time.Second)
 		t.Errorf("Subscriber doesn't response for too long")
 		stopped <- true
 	})
+	if err != nil {
+		t.Errorf("Get error: %s", err)
+	}
 	time.Sleep(100 * time.Millisecond) // make sure consumer is ready before publish
 	// publish
 	err = nc.Publish("invalidConsume", []byte("Hello world"))

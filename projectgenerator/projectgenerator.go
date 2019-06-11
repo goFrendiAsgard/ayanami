@@ -144,7 +144,12 @@ func (pg ProjectGenerator) WriteFile(dstPath, content string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			log.Printf("[ERROR] Cannot close `%s`: %s", dstPath, err)
+		}
+	}()
 	_, err = f.WriteString(content)
 	return nil
 }

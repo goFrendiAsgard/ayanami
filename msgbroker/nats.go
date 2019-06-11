@@ -53,7 +53,7 @@ func (broker Nats) Unsubscribe(eventName string) error {
 		}
 		delete(broker.subscriptions, eventName)
 	} else {
-		return fmt.Errorf("Event `%s` doesn't exist", eventName)
+		return fmt.Errorf("event `%s` doesn't exist", eventName)
 	}
 	broker.lock.Unlock()
 	return nil

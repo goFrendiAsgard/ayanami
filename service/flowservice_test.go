@@ -150,12 +150,21 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 	var lock sync.RWMutex
 	storage := make(Dictionary)
 	errorCallback := func(err error) {
-		lock.Lock()
-		storage.Set("a", 0)
-		storage.Set("b", 0)
-		storage.Set("c", 0)
-		lock.Unlock()
 		t.Errorf("Get error %s", err)
+		lock.Lock()
+		err = storage.Set("a", 0)
+		if err != nil {
+			t.Errorf("Get error %s", err)
+		}
+		err = storage.Set("b", 0)
+		if err != nil {
+			t.Errorf("Get error %s", err)
+		}
+		err = storage.Set("c", 0)
+		if err != nil {
+			t.Errorf("Get error %s", err)
+		}
+		lock.Unlock()
 	}
 	calculateAndPublish := func() {
 		lock.RLock()
@@ -172,14 +181,23 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 			pkg := servicedata.Package{ID: ID, Data: d}
 			log.Printf("pkg: %#v\n", pkg)
 			eventName := fmt.Sprintf("%s.srvc.service.method.out.delta", ID)
-			broker.Publish(eventName, pkg)
+			err := broker.Publish(eventName, pkg)
+			if err != nil {
+				t.Errorf("Get error %s", err)
+			}
 		}
 	}
 	broker.Subscribe("*.srvc.service.method.in.alpha",
 		func(pkg servicedata.Package) {
 			lock.Lock()
-			storage.Set("ID", pkg.ID)
-			storage.Set("a", pkg.Data.(int))
+			err = storage.Set("ID", pkg.ID)
+			if err != nil {
+				t.Errorf("Get error: %s", err)
+			}
+			err = storage.Set("a", pkg.Data.(int))
+			if err != nil {
+				t.Errorf("Get error: %s", err)
+			}
 			lock.Unlock()
 			calculateAndPublish()
 		},
@@ -188,8 +206,14 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 	broker.Subscribe("*.srvc.service.method.in.beta",
 		func(pkg servicedata.Package) {
 			lock.Lock()
-			storage.Set("ID", pkg.ID)
-			storage.Set("b", pkg.Data.(int))
+			err = storage.Set("ID", pkg.ID)
+			if err != nil {
+				t.Errorf("Get error: %s", err)
+			}
+			err = storage.Set("b", pkg.Data.(int))
+			if err != nil {
+				t.Errorf("Get error: %s", err)
+			}
 			lock.Unlock()
 			calculateAndPublish()
 		},
@@ -198,8 +222,14 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 	broker.Subscribe("*.srvc.service.method.in.gamma",
 		func(pkg servicedata.Package) {
 			lock.Lock()
-			storage.Set("ID", pkg.ID)
-			storage.Set("c", pkg.Data.(int))
+			err = storage.Set("ID", pkg.ID)
+			if err != nil {
+				t.Errorf("Get error: %s", err)
+			}
+			err = storage.Set("c", pkg.Data.(int))
+			if err != nil {
+				t.Errorf("Get error: %s", err)
+			}
 			lock.Unlock()
 			calculateAndPublish()
 		},

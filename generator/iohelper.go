@@ -3,6 +3,7 @@ package generator
 import (
 	"bytes"
 	cp "github.com/otiai10/copy"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -117,7 +118,12 @@ func (io *IOHelper) WriteFile(filePath string, content string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			log.Printf("[ERROR] Failed to close file `%s`: %s", filePath, err)
+		}
+	}()
 	_, err = f.WriteString(content)
 	return err
 }

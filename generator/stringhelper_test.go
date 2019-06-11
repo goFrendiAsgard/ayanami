@@ -32,47 +32,39 @@ func TestString(t *testing.T) {
 		t.Errorf("expected %#v, get %#v", expectedQuoteMapResult, actualQuoteMapResult)
 	}
 	// IsMatch
-	expectedMatch := true
 	actualMatch := s.IsMatch("abc", "^a.+$")
-	if expectedMatch != actualMatch {
-		t.Errorf("expected `%t`, get `%t`", expectedMatch, actualMatch)
+	if true != actualMatch {
+		t.Errorf("expected `%t`, get `%t`", true, actualMatch)
 	}
-	expectedMatch = false
 	actualMatch = s.IsMatch("xabc", "^a.+$")
-	if expectedMatch != actualMatch {
-		t.Errorf("expected `%t`, get `%t`", expectedMatch, actualMatch)
+	if false != actualMatch {
+		t.Errorf("expected `%t`, get `%t`", false, actualMatch)
 	}
 	// IsAlpha
-	expectedMatch = true
 	actualMatch = s.IsAlpha("abc")
-	if expectedMatch != actualMatch {
-		t.Errorf("expected `%t`, get `%t`", expectedMatch, actualMatch)
+	if true != actualMatch {
+		t.Errorf("expected `%t`, get `%t`", true, actualMatch)
 	}
-	expectedMatch = false
 	actualMatch = s.IsAlpha("123abc")
-	if expectedMatch != actualMatch {
-		t.Errorf("expected `%t`, get `%t`", expectedMatch, actualMatch)
+	if false != actualMatch {
+		t.Errorf("expected `%t`, get `%t`", false, actualMatch)
 	}
 	// IsNumeric
-	expectedMatch = true
 	actualMatch = s.IsNumeric("123")
-	if expectedMatch != actualMatch {
-		t.Errorf("expected `%t`, get `%t`", expectedMatch, actualMatch)
+	if true != actualMatch {
+		t.Errorf("expected `%t`, get `%t`", true, actualMatch)
 	}
-	expectedMatch = false
 	actualMatch = s.IsNumeric("123abc")
-	if expectedMatch != actualMatch {
-		t.Errorf("expected `%t`, get `%t`", expectedMatch, actualMatch)
+	if false != actualMatch {
+		t.Errorf("expected `%t`, get `%t`", false, actualMatch)
 	}
 	// IsAlphaNumeric
-	expectedMatch = true
 	actualMatch = s.IsAlphaNumeric("123abc")
-	if expectedMatch != actualMatch {
-		t.Errorf("expected `%t`, get `%t`", expectedMatch, actualMatch)
+	if true != actualMatch {
+		t.Errorf("expected `%t`, get `%t`", true, actualMatch)
 	}
-	expectedMatch = false
 	actualMatch = s.IsAlphaNumeric("123abc!")
-	if expectedMatch != actualMatch {
-		t.Errorf("expected `%t`, get `%t`", expectedMatch, actualMatch)
+	if false != actualMatch {
+		t.Errorf("expected `%t`, get `%t`", false, actualMatch)
 	}
 }

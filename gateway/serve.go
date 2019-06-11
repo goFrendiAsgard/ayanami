@@ -37,9 +37,9 @@ func createRouteHandler(broker msgbroker.CommonBroker, multipartFormLimit int64,
 		// prepare channels
 		codeChannel := make(chan int, 1)
 		contentChannel := make(chan string, 1)
-		consume(broker, ID, method, route, codeChannel, contentChannel)
-		// publish
-		err = publish(broker, ID, method, route, multipartFormLimit, r)
+		consumeFromResponseTrigger(broker, ID, method, route, codeChannel, contentChannel)
+		// publishToRequestTrigger
+		err = publishToRequestTrigger(broker, ID, method, route, multipartFormLimit, r)
 		if err != nil {
 			responseError(ID, broker, method, route, w, 500, err)
 			return
@@ -55,10 +55,10 @@ func createRouteHandler(broker msgbroker.CommonBroker, multipartFormLimit int64,
 	}
 }
 
-func consume(broker msgbroker.CommonBroker, ID, method, route string, codeChannel chan int, contentChannel chan string) {
+func consumeFromResponseTrigger(broker msgbroker.CommonBroker, ID, method, route string, codeChannel chan int, contentChannel chan string) {
 	codeEventName := getResponseCodeEventName(ID, method, route)
 	contentEventName := getResponseContentEventName(ID, method, route)
-	// consume code
+	// consumeFromResponseTrigger code
 	log.Printf("[INFO: Gateway] Subscribe `%s`", codeEventName)
 	broker.Subscribe(codeEventName,
 		// success
@@ -80,7 +80,7 @@ func consume(broker msgbroker.CommonBroker, ID, method, route string, codeChanne
 		},
 	)
 	// codeChannel <- 200
-	// consume event
+	// consumeFromResponseTrigger event
 	log.Printf("[INFO: Gateway] Subscribe `%s`", contentEventName)
 	broker.Subscribe(contentEventName,
 		// success
@@ -118,24 +118,27 @@ func response(ID string, broker msgbroker.CommonBroker, method, route string, w 
 	// TODO: User should be able to set their own content-types and other headers
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(code)
-	fmt.Fprintf(w, "%s", content)
+	_, err = fmt.Fprintf(w, "%s", content)
+	if err != nil {
+		log.Printf("[ERROR: Gateway] responding to %s: %s", ID, err)
+	}
 }
 
-func publish(broker msgbroker.CommonBroker, ID string, method string, route string, multipartFormLimit int64, r *http.Request) error {
+func publishToRequestTrigger(broker msgbroker.CommonBroker, ID string, method string, route string, multipartFormLimit int64, r *http.Request) error {
 	eventName := getRequestEventName(ID, method, route)
 	data := getDataForPublish(ID, multipartFormLimit, r)
 	// prepare pkg
 	pkgData := servicedata.Package{ID: ID, Data: data}
-	log.Printf("[INFO: Gateway] publish `%s`: %#v", eventName, pkgData)
+	log.Printf("[INFO: Gateway] publishToRequestTrigger `%s`: %#v", eventName, pkgData)
 	err := broker.Publish(eventName, pkgData)
 	if err != nil {
 		return err
 	}
-	// also publish all sub packages
+	// also publishToRequestTrigger all sub packages
 	for dataKey, dataVal := range data {
 		subPkg := servicedata.Package{ID: ID, Data: dataVal}
 		subEventName := fmt.Sprintf("%s.%s", eventName, dataKey)
-		log.Printf("[INFO: Gateway] publish `%s`: %#v", subEventName, subPkg)
+		log.Printf("[INFO: Gateway] publishToRequestTrigger `%s`: %#v", subEventName, subPkg)
 		err := broker.Publish(subEventName, subPkg)
 		if err != nil {
 			return err
@@ -146,8 +149,14 @@ func publish(broker msgbroker.CommonBroker, ID string, method string, route stri
 
 func getDataForPublish(ID string, multipartFormLimit int64, r *http.Request) map[string]interface{} {
 	// parse form & multipart form
-	r.ParseForm()
-	r.ParseMultipartForm(multipartFormLimit)
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("[ERROR: Gateway] Processing `%s`: %s", ID, err)
+	}
+	err = r.ParseMultipartForm(multipartFormLimit)
+	if err != nil {
+		log.Printf("[ERROR: Gateway] Processing `%s`: %s", ID, err)
+	}
 	data := make(map[string]interface{})
 	data["method"] = r.Method
 	data["URL"] = r.URL
@@ -169,7 +178,7 @@ func getDataForPublish(ID string, multipartFormLimit int64, r *http.Request) map
 	// get json body
 	decoder := json.NewDecoder(r.Body)
 	JSONBody := make(map[string]interface{})
-	err := decoder.Decode(&JSONBody)
+	err = decoder.Decode(&JSONBody)
 	if err != nil {
 		log.Printf("[INFO: Gateway] Processing `%s`, request.body is not a valid JSON", ID)
 	}

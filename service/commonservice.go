@@ -69,17 +69,26 @@ func consumeAndPublishSingle(broker msgbroker.CommonBroker, serviceName, methodN
 					// defer allInputs.Delete(ID)
 					if err != nil {
 						log.Printf("[ERROR: %s.%s] Error while consuming from %s: %s", serviceName, methodName, inputEventName, err)
-						publishError(broker, serviceName, methodName, rawErrorEventName, ID, err)
+						err = publishError(broker, serviceName, methodName, rawErrorEventName, ID, err)
+						if err != nil {
+							log.Printf("[ERROR: %s.%s] Error while publishing error: %s", serviceName, methodName, err)
+						}
 						return
 					}
 					log.Printf("[INFO: %s.%s] Outputs of %s are: %#v", serviceName, methodName, ID, outputs)
-					publish(broker, serviceName, methodName, rawErrorEventName, ID, outputIOList, outputs)
+					err = publish(broker, serviceName, methodName, rawErrorEventName, ID, outputIOList, outputs)
+					if err != nil {
+						log.Printf("[ERROR: %s.%s] Error while publishing error: %s", serviceName, methodName, err)
+					}
 				}
 			},
 			// error callback
 			func(err error) {
 				log.Printf("[ERROR: %s.%s] Error while consuming from %s: %s", serviceName, methodName, inputEventName, err)
-				publishError(broker, serviceName, methodName, rawErrorEventName, "No-ID", err)
+				err = publishError(broker, serviceName, methodName, rawErrorEventName, "No-ID", err)
+				if err != nil {
+					log.Printf("[ERROR: %s.%s] Error while publishing error: %s", serviceName, methodName, err)
+				}
 			},
 		)
 	}

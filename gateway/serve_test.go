@@ -52,14 +52,20 @@ func serveTest200(broker msgbroker.CommonBroker, port int, path string, t *testi
 	broker.Subscribe(fmt.Sprintf("*.trig.request.get.%s.out", RouteToSegments(path)),
 		func(pkg servicedata.Package) {
 			ID := pkg.ID
-			// publish code
+			// publishToRequestTrigger code
 			codePkg := servicedata.Package{ID: ID, Data: 200}
 			codeEvent := fmt.Sprintf("%s.trig.response.get.%s.in.code", ID, RouteToSegments(path))
-			broker.Publish(codeEvent, codePkg)
-			// publish content
+			err := broker.Publish(codeEvent, codePkg)
+			if err != nil {
+				t.Errorf("Get error %s", err)
+			}
+			// publishToRequestTrigger content
 			contentPkg := servicedata.Package{ID: ID, Data: "hi"}
 			contentEvent := fmt.Sprintf("%s.trig.response.get.%s.in.content", ID, RouteToSegments(path))
-			broker.Publish(contentEvent, contentPkg)
+			err = broker.Publish(contentEvent, contentPkg)
+			if err != nil {
+				t.Errorf("Get error %s", err)
+			}
 		},
 		func(err error) {
 			t.Errorf("Get error %s", err)
@@ -73,7 +79,12 @@ func serveTest200(broker msgbroker.CommonBroker, port int, path string, t *testi
 		t.Errorf("Get error %s", err)
 	}
 	// check body
-	defer response.Body.Close()
+	defer func() {
+		err := response.Body.Close()
+		if err != nil {
+			t.Errorf("Get error %s", err)
+		}
+	}()
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		t.Errorf("Get error %s", err)
@@ -95,14 +106,20 @@ func serveTest500(broker msgbroker.CommonBroker, port int, path string, t *testi
 	broker.Subscribe(fmt.Sprintf("*.trig.request.get.%s.out", RouteToSegments(path)),
 		func(pkg servicedata.Package) {
 			ID := pkg.ID
-			// publish code
+			// publishToRequestTrigger code
 			codePkg := servicedata.Package{ID: ID, Data: 500}
 			codeEvent := fmt.Sprintf("%s.trig.response.get.%s.in.code", ID, RouteToSegments(path))
-			broker.Publish(codeEvent, codePkg)
-			// publish content
+			err := broker.Publish(codeEvent, codePkg)
+			if err != nil {
+				t.Errorf("Get error %s", err)
+			}
+			// publishToRequestTrigger content
 			contentPkg := servicedata.Package{ID: ID, Data: "hi"}
 			contentEvent := fmt.Sprintf("%s.trig.response.get.%s.in.content", ID, RouteToSegments(path))
-			broker.Publish(contentEvent, contentPkg)
+			err = broker.Publish(contentEvent, contentPkg)
+			if err != nil {
+				t.Errorf("Get error %s", err)
+			}
 		},
 		func(err error) {
 			t.Errorf("Get error %s", err)
@@ -116,7 +133,12 @@ func serveTest500(broker msgbroker.CommonBroker, port int, path string, t *testi
 		t.Errorf("Get error %s", err)
 	}
 	// check body
-	defer response.Body.Close()
+	defer func() {
+		err := response.Body.Close()
+		if err != nil {
+			t.Errorf("Get error %s", err)
+		}
+	}()
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		t.Errorf("Get error %s", err)
@@ -138,14 +160,20 @@ func serveTestInvalidCode(broker msgbroker.CommonBroker, port int, path string, 
 	broker.Subscribe(fmt.Sprintf("*.trig.request.get.%s.out", RouteToSegments(path)),
 		func(pkg servicedata.Package) {
 			ID := pkg.ID
-			// publish code
+			// publishToRequestTrigger code
 			codePkg := servicedata.Package{ID: ID, Data: "Not a valid code"}
 			codeEvent := fmt.Sprintf("%s.trig.response.get.%s.in.code", ID, RouteToSegments(path))
-			broker.Publish(codeEvent, codePkg)
-			// publish content
+			err := broker.Publish(codeEvent, codePkg)
+			if err != nil {
+				t.Errorf("Get error %s", err)
+			}
+			// publishToRequestTrigger content
 			contentPkg := servicedata.Package{ID: ID, Data: "hi"}
 			contentEvent := fmt.Sprintf("%s.trig.response.get.%s.in.content", ID, RouteToSegments(path))
-			broker.Publish(contentEvent, contentPkg)
+			err = broker.Publish(contentEvent, contentPkg)
+			if err != nil {
+				t.Errorf("Get error %s", err)
+			}
 		},
 		func(err error) {
 			t.Errorf("Get error %s", err)
@@ -159,7 +187,12 @@ func serveTestInvalidCode(broker msgbroker.CommonBroker, port int, path string, 
 		t.Errorf("Get error %s", err)
 	}
 	// check body
-	defer response.Body.Close()
+	defer func() {
+		err := response.Body.Close()
+		if err != nil {
+			t.Errorf("Get error %s", err)
+		}
+	}()
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		t.Errorf("Get error %s", err)

@@ -6,16 +6,14 @@ import (
 )
 
 func TestIsStringInArray(t *testing.T) {
-	expected := true
 	actual := IsStringInArray("shinji", []string{"rei", "shinji", "asuka"})
-	if expected != actual {
-		t.Errorf("Expected `%t`, get `%t`", expected, actual)
+	if true != actual {
+		t.Errorf("Expected `%t`, get `%t`", true, actual)
 	}
 
-	expected = false
 	actual = IsStringInArray("gandalf", []string{"rei", "shinji", "asuka"})
-	if expected != actual {
-		t.Errorf("Expected `%t`, get `%t`", expected, actual)
+	if false != actual {
+		t.Errorf("Expected `%t`, get `%t`", false, actual)
 	}
 }
 

@@ -57,7 +57,10 @@ func askProjectIfNotExists() {
 	if projectName == "" {
 		defaultProjectName := getRandomProject()
 		fmt.Printf("Enter your project name (default: %s): ", defaultProjectName)
-		fmt.Scanln(&projectName)
+		_, err := fmt.Scanln(&projectName)
+		if err != nil {
+			fmt.Printf("Failed to read input: %s", err)
+		}
 		if projectName == "" {
 			projectName = defaultProjectName
 		}
@@ -69,7 +72,10 @@ func askRepoIfNotExists() {
 		defaultUserName := getRandomUser()
 		defaultRepoName := fmt.Sprintf("github.com/%s/%s", defaultUserName, projectName)
 		fmt.Printf("Enter your repo name (default: %s): ", defaultRepoName)
-		fmt.Scanln(&repoName)
+		_, err := fmt.Scanln(&repoName)
+		if err != nil {
+			fmt.Printf("Failed to read input: %s", err)
+		}
 		if repoName == "" {
 			repoName = defaultRepoName
 		}

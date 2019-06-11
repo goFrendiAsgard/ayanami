@@ -44,7 +44,12 @@ func TestAll(t *testing.T) {
 	if err != nil {
 		t.Errorf("Get error %s", err)
 	}
-	defer responseRoot.Body.Close()
+	defer func() {
+		err := responseRoot.Body.Close()
+		if err != nil {
+			t.Errorf("Get error %s", err)
+		}
+	}()
 	bodyRoot, err := ioutil.ReadAll(responseRoot.Body)
 	if err != nil {
 		t.Errorf("Get error %s", err)
@@ -60,7 +65,12 @@ func TestAll(t *testing.T) {
 	if err != nil {
 		t.Errorf("Get error %s", err)
 	}
-	defer responseBanner.Body.Close()
+	defer func() {
+		err := responseBanner.Body.Close()
+		if err != nil {
+			t.Errorf("Get error %s", err)
+		}
+	}()
 	bodyBanner, err := ioutil.ReadAll(responseBanner.Body)
 	if err != nil {
 		t.Errorf("Get error %s", err)

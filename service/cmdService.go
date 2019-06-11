@@ -22,7 +22,7 @@ func getInputFromCommand(command []string) []string {
 	if err != nil {
 		return inputs
 	}
-	re2, err := regexp.Compile(`\$\{([a-zA-Z0-9]+)\}`)
+	re2, err := regexp.Compile(`\${([a-zA-Z0-9]+)}`)
 	if err != nil {
 		return inputs
 	}
@@ -71,7 +71,11 @@ func createCmdWrapper(serviceName, methodName string, templateCmd []string, inpu
 		// assemble outputs
 		outputVal := string(outByte)
 		for _, outputVarName := range outputVarNames {
-			outputs.Set(outputVarName, outputVal)
+			err := outputs.Set(outputVarName, outputVal)
+			if err != nil {
+				log.Printf("[ERROR: %s.%s] Error while assigning output `%s`: %s", serviceName, methodName, outputVarName, err)
+				return outputs, err
+			}
 		}
 		return outputs, err
 	}

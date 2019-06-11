@@ -55,7 +55,7 @@ func (g *Generator) Validate() bool {
 func (g *Generator) Build() error {
 	// validate configs & procedures
 	if !g.Validate() {
-		return errors.New("Invalid config/procedure")
+		return errors.New("invalid config/procedure")
 	}
 	// build configs
 	log.Println("BUILDING CONFIGS")
@@ -76,7 +76,7 @@ func (g *Generator) Build() error {
 func (g *Generator) Scaffold() error {
 	// validate configs & procedures
 	if !g.Validate() {
-		return errors.New("Invalid config/procedure")
+		return errors.New("invalid config/procedure")
 	}
 	// scaffold configs
 	log.Println("SCAFFOLDING CONFIGS")

@@ -39,27 +39,23 @@ func TestIO(t *testing.T) {
 	}
 
 	// check existance
-	expectedExistance := true
 	actualExistance := io.IsSourceExists("exists.py")
-	if expectedExistance != actualExistance {
-		t.Errorf("expected `%t`, get `%t`", expectedExistance, actualExistance)
+	if true != actualExistance {
+		t.Errorf("expected `%t`, get `%t`", true, actualExistance)
 	}
-	expectedExistance = true
 	actualExistance = io.IsDepExists("exists.py")
-	if expectedExistance != actualExistance {
-		t.Errorf("expected `%t`, get `%t`", expectedExistance, actualExistance)
+	if true != actualExistance {
+		t.Errorf("expected `%t`, get `%t`", true, actualExistance)
 	}
 
 	// check non-existance
-	expectedExistance = false
 	actualExistance = io.IsSourceExists("not-exists.py")
-	if expectedExistance != actualExistance {
-		t.Errorf("expected `%t`, get `%t`", expectedExistance, actualExistance)
+	if false != actualExistance {
+		t.Errorf("expected `%t`, get `%t`", false, actualExistance)
 	}
-	expectedExistance = false
 	actualExistance = io.IsDepExists("not-exists.py")
-	if expectedExistance != actualExistance {
-		t.Errorf("expected `%t`, get `%t`", expectedExistance, actualExistance)
+	if false != actualExistance {
+		t.Errorf("expected `%t`, get `%t`", false, actualExistance)
 	}
 
 	// writeSource (scaffold)
@@ -69,7 +65,12 @@ func TestIO(t *testing.T) {
 	}
 	// check content of sourcecode/hello.py
 	expectedSourceHelloPyPath := filepath.Join(dummyProjectPath, "sourcecode", "hello.py")
-	defer os.RemoveAll(expectedSourceHelloPyPath)
+	defer func() {
+		err := os.RemoveAll(expectedSourceHelloPyPath)
+		if err != nil {
+			t.Errorf("Get error: %s", err)
+		}
+	}()
 	sourceHelloPyByte, err := ioutil.ReadFile(expectedSourceHelloPyPath)
 	if err != nil {
 		t.Errorf("Get error: %s", err)
@@ -87,7 +88,12 @@ func TestIO(t *testing.T) {
 	}
 	// check content of deployable/hello.py
 	expectedDeployedHelloPyPath := filepath.Join(dummyProjectPath, "deployable", "hello.py")
-	defer os.RemoveAll(expectedDeployedHelloPyPath)
+	defer func() {
+		err := os.RemoveAll(expectedDeployedHelloPyPath)
+		if err != nil {
+			t.Errorf("Get error: %s", err)
+		}
+	}()
 	deployedHelloPyByte, err := ioutil.ReadFile(expectedDeployedHelloPyPath)
 	if err != nil {
 		t.Errorf("Get error: %s", err)
@@ -99,10 +105,18 @@ func TestIO(t *testing.T) {
 	}
 
 	// writeDep (build)
-	io.WriteDep("fruit.py", "fruit.py", []string{"orange", "grape", "strawberry"})
+	err = io.WriteDep("fruit.py", "fruit.py", []string{"orange", "grape", "strawberry"})
+	if err != nil {
+		t.Errorf("Get error: %s", err)
+	}
 	// check content of deployable/fruit.py
 	expectedDeployedFruitPyPath := filepath.Join(dummyProjectPath, "deployable", "fruit.py")
-	defer os.RemoveAll(expectedDeployedFruitPyPath)
+	defer func() {
+		err := os.RemoveAll(expectedDeployedFruitPyPath)
+		if err != nil {
+			t.Errorf("Get error: %s", err)
+		}
+	}()
 	deployedFruitPyByte, err := ioutil.ReadFile(expectedDeployedFruitPyPath)
 	if err != nil {
 		t.Errorf("Get error: %s", err)

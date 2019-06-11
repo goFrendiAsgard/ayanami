@@ -37,14 +37,20 @@ func TestConsumeAndPublish(t *testing.T) {
 	}
 	services.ConsumeAndPublish(broker, "flow")
 	// publish a & b
-	broker.Publish("normal.srvc.common.in.a", servicedata.Package{
+	err = broker.Publish("normal.srvc.common.in.a", servicedata.Package{
 		ID:   "normal",
 		Data: 3,
 	})
-	broker.Publish("normal.srvc.common.in.b", servicedata.Package{
+	if err != nil {
+		t.Errorf("Getting error %s", err)
+	}
+	err = broker.Publish("normal.srvc.common.in.b", servicedata.Package{
 		ID:   "normal",
 		Data: 4,
 	})
+	if err != nil {
+		t.Errorf("Getting error %s", err)
+	}
 	errorMessage := <-errorMessageCh
 	if errorMessage != "" {
 		t.Errorf("Getting error: %s", errorMessage)
@@ -77,14 +83,20 @@ func TestConsumeAndPublishFunctionError(t *testing.T) {
 	}
 	services.ConsumeAndPublish(broker, "flow")
 	// publish a & b
-	broker.Publish("funcErr.srvc.common.in.a", servicedata.Package{
+	err = broker.Publish("funcErr.srvc.common.in.a", servicedata.Package{
 		ID:   "funcErr",
 		Data: 3,
 	})
-	broker.Publish("funcErr.srvc.common.in.b", servicedata.Package{
+	if err != nil {
+		t.Errorf("Getting error %s", err)
+	}
+	err = broker.Publish("funcErr.srvc.common.in.b", servicedata.Package{
 		ID:   "funcErr",
 		Data: 4,
 	})
+	if err != nil {
+		t.Errorf("Getting error %s", err)
+	}
 	errorMessage := <-errorMessageCh
 	if errorMessage != "ErrorThrown" {
 		t.Errorf("Expecting error message `ErrorThrown` getting `%s`", errorMessage)
