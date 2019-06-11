@@ -104,21 +104,15 @@ func createServiceConsumerErrorHandler(broker msgbroker.CommonBroker, serviceNam
 }
 
 func publishServiceOutput(broker msgbroker.CommonBroker, serviceName, methodName, rawErrorEventName, ID string, outputIOList IOList, outputs Dictionary) error {
-	outputVarNames := outputIOList.GetUniqueVarNames()
-	for _, outputVarName := range outputVarNames {
-		// if wrapped function doesn't produce current outputVarName, ignore it
-		if !outputs.Has(outputVarName) {
-			continue
-		}
-		data := outputs.Get(outputVarName)
-		rawOutputEventNames := outputIOList.GetVarEventNames(outputVarName)
-		for _, rawOutputEventName := range rawOutputEventNames {
-			eventName := fmt.Sprintf("%s.%s", ID, rawOutputEventName)
-			err := Publish(serviceName, methodName, broker, ID, eventName, data)
-			if err != nil {
-				log.Printf("[ERROR: %s.%s] Error while publishing into `%s`: `%s`", serviceName, methodName, eventName, err)
-				return publishServiceError(broker, serviceName, methodName, rawErrorEventName, ID, err)
-			}
+	topLevelValues := outputIOList.GetTopLevelValues(outputs)
+	topLevelEventNames := outputIOList.GetTopLevelEventNames()
+	for _, rawEventName := range topLevelEventNames {
+		eventName := fmt.Sprintf("%s.%s", ID, rawEventName)
+		data := topLevelValues.Get(rawEventName)
+		err := Publish(serviceName, methodName, broker, ID, eventName, data)
+		if err != nil {
+			log.Printf("[ERROR: %s.%s] Error while publishing into `%s`: `%s`", serviceName, methodName, eventName, err)
+			return publishServiceError(broker, serviceName, methodName, rawErrorEventName, ID, err)
 		}
 	}
 	return nil

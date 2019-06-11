@@ -332,13 +332,15 @@ func publishFlowVar(flowName string, broker msgbroker.CommonBroker, ID string, f
 				varValue := vars.Get(varName)
 				outputEvent := fmt.Sprintf("%s.%s", ID, rawOutputEvent)
 				err := Publish("flow", flowName, broker, ID, outputEvent, varValue)
-				log.Printf("[INFO: flow.%s] Error while publish `%s`: %s", flowName, outputEvent, err)
+				if err != nil {
+					log.Printf("[INFO: flow.%s] Error while publishing into `%s`: %s", flowName, outputEvent, err)
+				}
 			}
 		}
 	}
 }
 
-// isSubVarOf determine whether subVarName is sub variable of varName or not
-func isSubVarOf(varName, subVarName string) bool {
-	return strings.Index(subVarName, varName+".") == 0
+// isSubVarOf is current sub of candidate
+func isSubVarOf(candidate, current string) bool {
+	return strings.Index(current, fmt.Sprintf("%s.", candidate)) == 0
 }

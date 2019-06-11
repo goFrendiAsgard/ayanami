@@ -1,5 +1,9 @@
 package service
 
+import (
+	"strings"
+)
+
 // IO single IO configuration
 type IO struct {
 	VarName   string
@@ -14,6 +18,36 @@ func (ioList IOList) GetUniqueVarNames() []string {
 	var result []string
 	for _, io := range ioList {
 		result = AppendUniqueString(io.VarName, result)
+	}
+	return result
+}
+
+// GetTopLevelValues get dictionary with topLevelEventNames as key and it's values
+func (ioList IOList) GetTopLevelValues(vars Dictionary) Dictionary {
+	result := make(Dictionary)
+	for _, io := range ioList {
+		if !vars.Has(io.VarName) {
+			continue
+		}
+		result.Set(io.EventName, vars.Get(io.VarName))
+	}
+	return result
+}
+
+// GetTopLevelEventNames getting top level event names
+func (ioList IOList) GetTopLevelEventNames() []string {
+	var result []string
+	for _, io := range ioList {
+		eventParts := strings.Split(io.EventName, ".")
+		var parentParts []string
+		for index, part := range eventParts {
+			parentParts = append(parentParts, part)
+			if index > 2 && (part == "out" || part == "in" || part == "err") {
+				break
+			}
+		}
+		parentName := strings.Join(parentParts, ".")
+		result = AppendUniqueString(parentName, result)
 	}
 	return result
 }
