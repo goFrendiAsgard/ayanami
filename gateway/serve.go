@@ -123,6 +123,28 @@ func response(ID string, broker msgbroker.CommonBroker, method, route string, w 
 
 func publish(broker msgbroker.CommonBroker, ID string, method string, route string, multipartFormLimit int64, r *http.Request) error {
 	eventName := getRequestEventName(ID, method, route)
+	data := getDataForPublish(ID, multipartFormLimit, r)
+	// prepare pkg
+	pkgData := servicedata.Package{ID: ID, Data: data}
+	log.Printf("[INFO: Gateway] publish `%s`: %#v", eventName, pkgData)
+	err := broker.Publish(eventName, pkgData)
+	if err != nil {
+		return err
+	}
+	// also publish all sub packages
+	for dataKey, dataVal := range data {
+		subPkg := servicedata.Package{ID: ID, Data: dataVal}
+		subEventName := fmt.Sprintf("%s.%s", eventName, dataKey)
+		log.Printf("[INFO: Gateway] publish `%s`: %#v", subEventName, subPkg)
+		err := broker.Publish(subEventName, subPkg)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func getDataForPublish(ID string, multipartFormLimit int64, r *http.Request) map[string]interface{} {
 	// parse form & multipart form
 	r.ParseForm()
 	r.ParseMultipartForm(multipartFormLimit)
@@ -152,28 +174,27 @@ func publish(broker msgbroker.CommonBroker, ID string, method string, route stri
 		log.Printf("[INFO: Gateway] Processing `%s`, request.body is not a valid JSON", ID)
 	}
 	data["JSONBody"] = JSONBody
-	// prepare pkg
-	pkg := servicedata.Package{ID: ID, Data: data}
-	log.Printf("[INFO: Gateway] publish `%s`: %#v", eventName, pkg)
-	return broker.Publish(eventName, pkg)
+	return data
 }
 
 func getResponseCodeEventName(ID, method, route string) string {
-	return getEventName(ID, "response", method, route, "in", "code")
+	baseEventName := getBaseEventName(ID, "response", method, route, "in")
+	return fmt.Sprintf("%s.%s", baseEventName, "code")
 }
 
 func getResponseContentEventName(ID, method, route string) string {
-	return getEventName(ID, "response", method, route, "in", "content")
+	baseEventName := getBaseEventName(ID, "response", method, route, "in")
+	return fmt.Sprintf("%s.%s", baseEventName, "content")
 }
 
 func getRequestEventName(ID, method, route string) string {
-	return getEventName(ID, "request", method, route, "out", "req")
+	return getBaseEventName(ID, "request", method, route, "out")
 }
 
-func getEventName(ID, trigger, method, route, direction, varName string) string {
+func getBaseEventName(ID, trigger, method, route, direction string) string {
 	segment := RouteToSegments(route)
 	if segment == "" {
-		return fmt.Sprintf("%s.trig.%s.%s.%s.%s", ID, trigger, method, direction, varName)
+		return fmt.Sprintf("%s.trig.%s.%s.%s", ID, trigger, method, direction)
 	}
-	return fmt.Sprintf("%s.trig.%s.%s.%s.%s.%s", ID, trigger, method, segment, direction, varName)
+	return fmt.Sprintf("%s.trig.%s.%s.%s.%s", ID, trigger, method, segment, direction)
 }

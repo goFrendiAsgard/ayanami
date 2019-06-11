@@ -224,7 +224,7 @@ Flow defines how your services and gateway are interacting to each other through
 
 You can find root flow definition in `generator/flowroot.go`. This flow is pretty simple. 
 
-Basically, whenever we receive `get /`, the gateway will send `trig.request.get.out.req` to the message broker.
+Basically, whenever we receive `get /`, the gateway will send `trig.request.get.out` to the message broker.
 
 Once we got the message, we will set `code` to `200`, and we will pass `request` to `html.CreateDefaultREsponse` function. The return value of the function will be stored as `content`.
 
@@ -250,14 +250,14 @@ func init() {
     )
 
     flow.AddEventVal(
-        "trig.request.get.out.req",  // whenever get `request.get.out.req`
+        "trig.request.get.out",      // whenever get `request.get.out`
         "trig.response.get.in.code", // publish to `respose.get.in.code`
         "code",                      // the published variable name is `code`
         200,                         // and it's value is 200
     )
 
     flow.AddEventFunc(
-        "trig.request.get.out.req",     // whenever get `request.get.out.req`
+        "trig.request.get.out",         // whenever get `request.get.out`
         "trig.response.get.in.content", // publish to `response.get.in.content`
         "content",                      // the published variable name is `content`, and we get it's value by running a function
         "html",                         // function's package is `html`
@@ -297,8 +297,8 @@ func init() {
     )
 
     flow.AddInputEvent(
-        "trig.request.get.banner.out.req", // whenever get `request.get.banner.out.req`
-        "request",                         // store it into a variable named `request`
+        "trig.request.get.banner.out", // whenever get `request.get.banner.out`
+        "request",                     // store it into a variable named `request`
     )
 
     flow.AddOutputEvent(
@@ -502,10 +502,10 @@ You can also choose to run your microservices as a single monolithic application
 -> % cd ../deployable/megazord
 -> % go build && ./megazord
 2019/06/10 17:29:05 [INFO: flow.root] Consume from `*.flow.root.in.content`
-2019/06/10 17:29:05 [INFO: flow.root] Consume from `*.trig.request.get.out.req`
+2019/06/10 17:29:05 [INFO: flow.root] Consume from `*.trig.request.get.out`
 2019/06/10 17:29:05 [INFO: flow.root] Consume from `*.flow.root.in.code`
 2019/06/10 17:29:05 [INFO: flow.banner] Consume from `*.flow.banner.in.request`
-2019/06/10 17:29:05 [INFO: flow.banner] Consume from `*.trig.request.get.banner.out.req`
+2019/06/10 17:29:05 [INFO: flow.banner] Consume from `*.trig.request.get.banner.out`
 2019/06/10 17:29:05 [INFO: Gateway] Routes `[]string{"/banner", "/"}`
 2019/06/10 17:29:05 [INFO: cmd.figlet] Consume from `*.srvc.cmd.figlet.in.input`
 2019/06/10 17:29:05 Listening on 8080
@@ -582,7 +582,7 @@ To distribute `Ayanami`, you should copy at least one of our executable, along w
 
 # Gateway (Tech Spec)
 
-Whenever gateway receive HTTP request from the client, it will send `package` to `<ID>.trig.request.out.req` containing:
+Whenever gateway receive HTTP request from the client, it will send `package` to `<ID>.trig.request.out` containing:
 
 * method
 * URL
@@ -772,7 +772,7 @@ func MainFlow() {
             []string{"content", "code"},
             []service.FlowEvent{
                 service.FlowEvent{
-                    InputEvent: "trig.request.get.out.req",
+                    InputEvent: "trig.request.get.out",
                     VarName:    "request",
                 },
                 service.FlowEvent{

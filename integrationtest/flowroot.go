@@ -27,14 +27,14 @@ func MainFlowRoot() {
 			[]string{"content", "code"},
 			[]service.FlowEvent{
 				service.FlowEvent{
-					InputEvent:  "trig.request.get.out.req",
+					InputEvent:  "trig.request.get.out",
 					OutputEvent: "trig.response.get.in.code",
 					VarName:     "code",
 					UseValue:    true,
 					Value:       200,
 				},
 				service.FlowEvent{
-					InputEvent:  "trig.request.get.out.req",
+					InputEvent:  "trig.request.get.out",
 					OutputEvent: "trig.response.get.in.content",
 					VarName:     "content",
 					UseFunction: true,

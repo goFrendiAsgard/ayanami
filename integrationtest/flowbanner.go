@@ -23,7 +23,7 @@ func MainFlowBanner() {
 			[]string{"content", "code"},
 			[]service.FlowEvent{
 				service.FlowEvent{
-					InputEvent: "trig.request.get.banner.out.req",
+					InputEvent: "trig.request.get.banner.out",
 					VarName:    "request",
 				},
 				service.FlowEvent{

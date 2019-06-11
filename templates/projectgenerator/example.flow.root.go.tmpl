@@ -16,14 +16,14 @@ func init() {
     )
 
     flow.AddEventVal(
-        "trig.request.get.out.req",  // whenever get `request.get.out.req`
+        "trig.request.get.out",      // whenever get `request.get.out.req`
         "trig.response.get.in.code", // publish to `respose.get.in.code`
         "code",                      // the published variable name is `code`
         200,                         // and it's value is 200
     )
 
     flow.AddEventFunc(
-        "trig.request.get.out.req",     // whenever get `request.get.out.req`
+        "trig.request.get.out",         // whenever get `request.get.out.req`
         "trig.response.get.in.content", // publish to `response.get.in.content`
         "content",                      // the published variable name is `content`, and we get it's value by running a function
         "html",                         // function's package is `html`
