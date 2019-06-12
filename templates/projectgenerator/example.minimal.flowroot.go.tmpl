@@ -15,19 +15,23 @@ func init() {
 		[]string{"content", "code"}, // outputs
 	)
 
-	flow.AddEventVal(
-		"trig.request.get.out",      // whenever get `request.get.out.req`
-		"trig.response.get.in.code", // publish to `respose.get.in.code`
-		"code",                      // the published variable name is `code`
-		200,                         // and it's value is 200
-	)
+	// get http request from "/" and send 200 as http response's code
+	flow.AppendEvent(gen.Event{
+		InputEventName:  "trig.request.get.out",
+		UseValue:        true,
+		Value:           200,
+		VarName:         "code",
+		OutputEventName: "trig.response.get.in.code",
+	})
 
-	flow.AddEventVal(
-		"trig.request.get.out",         // whenever get `request.get.out.req`
-		"trig.response.get.in.content", // publish to `response.get.in.content`
-		"content",                      // the published variable name is `content`
-		"hello there",                  // and it's value is `hello there`
-	)
+	// get http request from "/" and send "Hello there" as http response's content
+	flow.AppendEvent(gen.Event{
+		InputEventName:  "trig.request.get.out",
+		UseValue:        true,
+		Value:           "Hello there",
+		VarName:         "content",
+		OutputEventName: "trig.response.get.in.content",
+	})
 
 	// register flow
 	Gen.AddConfig(flow)

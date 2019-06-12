@@ -1,0 +1,20 @@
+{{define "example.minimal.megazord.go" }}
+package main
+
+import (
+	"{{.RepoName}}/gen"
+)
+
+func init() {
+
+	// define procedure
+	procedure := gen.NewGoMonolith(&Gen,
+		"megazord",                 // app directory
+		"github.com/nerv/megazord", // repo name
+	)
+
+	// register procedure
+	Gen.AddProcedure(procedure)
+
+}
+{{end}}

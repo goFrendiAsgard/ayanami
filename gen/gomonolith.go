@@ -78,11 +78,16 @@ func (p GoMonolithProc) Build(configs generator.Configs) error {
 	if err != nil {
 		return err
 	}
-	// write go.mod
-	log.Println("[INFO] Create go.mod")
-	goModPath := filepath.Join(depPath, "go.mod")
-	err = p.WriteDep(goModPath, "go.mod", p)
-	return err
+	// write common things
+	for _, templateName := range []string{"go.mod", "Makefile", ".gitignore"} {
+		log.Printf("[INFO] Create %s", templateName)
+		goModPath := filepath.Join(depPath, templateName)
+		err := p.WriteDep(goModPath, templateName, p)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // NewGoMonolith make monolithic app

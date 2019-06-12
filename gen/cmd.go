@@ -65,11 +65,16 @@ func (c CmdConfig) Build() error {
 	if err != nil {
 		return err
 	}
-	// write go.mod
-	log.Println("[INFO] Create go.mod")
-	goModPath := filepath.Join(depPath, "go.mod")
-	err = c.WriteDep(goModPath, "go.mod", c)
-	return err
+	// write common things
+	for _, templateName := range []string{"go.mod", "Makefile", ".gitignore"} {
+		log.Printf("[INFO] Create %s", templateName)
+		goModPath := filepath.Join(depPath, templateName)
+		err := c.WriteDep(goModPath, templateName, c)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // CreateProgram create main.go and others
