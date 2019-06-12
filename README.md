@@ -264,7 +264,7 @@ func init() {
 
 Next, we have to define `servicecmd` as follow:
 
-````go
+```go
 package main
 
 import (
