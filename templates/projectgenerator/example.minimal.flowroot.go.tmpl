@@ -1,4 +1,4 @@
-{{define "example.flow.root.go" }}
+{{define "example.minimal.flowroot.go" }}
 package main
 
 import (
@@ -22,13 +22,11 @@ func init() {
         200,                         // and it's value is 200
     )
 
-    flow.AddEventFunc(
+    flow.AddEventVal(
         "trig.request.get.out",         // whenever get `request.get.out.req`
         "trig.response.get.in.content", // publish to `response.get.in.content`
-        "content",                      // the published variable name is `content`, and we get it's value by running a function
-        "html",                         // function's package is `html`
-        "CreateDefaultResponse",        // function's name is `CreateDefaultResponse`
-        []string{},                     // and the function has no dependency to other source code
+        "content",                      // the published variable name is `content`
+        "hello there",                  // and it's value is `hello there`
     )
 
     // register flow

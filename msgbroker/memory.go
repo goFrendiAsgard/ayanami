@@ -21,24 +21,36 @@ func (broker Memory) Subscribe(eventName string, successCallback ConsumeSuccessF
 	broker.lock.Unlock()
 }
 
-// Unsubscribe unsubscribe to an event
+// Unsubscribe unsubscribe from an event
 func (broker Memory) Unsubscribe(eventName string) error {
-	broker.lock.Lock()
-	if _, exists := broker.handlers[eventName]; exists {
+	// check handler's existance
+	broker.lock.RLock()
+	_, exists := broker.handlers[eventName]
+	broker.lock.RUnlock()
+	// if handler is exist, remove it. Otherwise return error
+	if exists {
+		broker.lock.Lock()
 		delete(broker.handlers, eventName)
+		broker.lock.Unlock()
 	} else {
 		return fmt.Errorf("event `%s` doesn't exist", eventName)
 	}
-	broker.lock.Unlock()
 	return nil
 }
 
 // Publish publish to memory broker
 func (broker Memory) Publish(eventName string, pkg servicedata.Package) error {
+	// get all keys of handler
 	broker.lock.RLock()
-	defer broker.lock.RUnlock()
+	i := 0
+	keys := make([]string, len(broker.handlers))
+	for k := range broker.handlers {
+		keys[i] = k
+		i++
+	}
+	broker.lock.RUnlock()
 	// look for matched event
-	for key, handler := range broker.handlers {
+	for _, key := range keys {
 		// change eventName into regex
 		eventPattern := fmt.Sprintf("^%s$", key)
 		eventPattern = strings.Replace(eventPattern, ".", `\.`, -1)
@@ -49,7 +61,10 @@ func (broker Memory) Publish(eventName string, pkg servicedata.Package) error {
 			return err
 		}
 		if re.Match([]byte(eventName)) {
+			broker.lock.RLock()
+			handler := broker.handlers[key]
 			go handler(pkg)
+			broker.lock.RUnlock()
 		}
 	}
 	return nil

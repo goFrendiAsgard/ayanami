@@ -18,7 +18,7 @@ func TestProjectGenerator(t *testing.T) {
 	templatePath := filepath.Join(ayanamiDirPath, "templates")
 	genPath := filepath.Join(ayanamiDirPath, "gen")
 	// create generator
-	generator, err := NewProjectGenerator(projectParentDirPath, "evangelion", "github.com/nerv/evangelion", templatePath, genPath)
+	generator, err := NewProjectGenerator(projectParentDirPath, "evangelion", "github.com/nerv/evangelion", templatePath, genPath, "full")
 	if err != nil {
 		t.Errorf("Get error: %s", err)
 	}
@@ -46,6 +46,16 @@ func TestProjectGenerator(t *testing.T) {
 		t.Errorf("%s is not exists", dirPath)
 	}
 
+	// check generator/templates existance
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "templates")); err != nil {
+		t.Errorf("Get error: %s", err)
+	}
+
+	// check generator/gen existance
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "gen")); err != nil {
+		t.Errorf("Get error: %s", err)
+	}
+
 	// check generator/go.mod content
 	gomodFile := filepath.Join(projectParentDirPath, "evangelion", "generator", "go.mod")
 	gomodByte, err := ioutil.ReadFile(gomodFile)
@@ -63,13 +73,13 @@ func TestProjectGenerator(t *testing.T) {
 		t.Errorf("Get error: %s", err)
 	}
 
-	// check generator/templates existance
-	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "templates")); err != nil {
+	// check generator/compile.sh existance
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "compile.sh")); err != nil {
 		t.Errorf("Get error: %s", err)
 	}
 
-	// check generator/gen existance
-	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "gen")); err != nil {
+	// check generator/Makefile existance
+	if _, err := os.Stat(filepath.Join(projectParentDirPath, "evangelion", "generator", "Makefile")); err != nil {
 		t.Errorf("Get error: %s", err)
 	}
 

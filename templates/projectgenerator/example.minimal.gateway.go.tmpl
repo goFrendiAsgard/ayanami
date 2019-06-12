@@ -1,0 +1,23 @@
+{{define "example.full.gateway.go" }}
+package main
+
+import (
+	"{{.RepoName}}/gen"
+)
+
+func init() {
+
+    // define gateway
+	gateway := gen.NewEmptyGateway(&Gen,
+        "gateway",                 // service name
+        "github.com/nerv/gateway", // repo name
+    )
+
+    // add routes to gateway
+    gateway.AddRoute("/")
+
+    // register gateway
+	Gen.AddConfig(gateway)
+
+}
+{{end}}

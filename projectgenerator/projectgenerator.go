@@ -2,6 +2,7 @@ package projectgenerator
 
 import (
 	"bytes"
+	"fmt"
 	cp "github.com/otiai10/copy"
 	"log"
 	"os"
@@ -19,6 +20,7 @@ type ProjectGenerator struct {
 	SourceCodePath           string
 	DeployablePath           string
 	GeneratorPath            string
+	ExampleType              string
 	ProjectGeneratorTemplate *template.Template
 }
 
@@ -26,95 +28,60 @@ type ProjectGenerator struct {
 func (pg ProjectGenerator) Generate() error {
 	log.Println("[INFO] Generate...")
 	// create deployable directory
+	log.Printf("[INFO] Create %s", pg.DeployablePath)
 	err := os.MkdirAll(pg.DeployablePath, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Create %s", pg.DeployablePath)
-	// create generator directory
-	err = os.MkdirAll(pg.GeneratorPath, os.ModePerm)
-	if err != nil {
-		return err
-	}
-	log.Printf("[INFO] Create %s", pg.GeneratorPath)
 	// create sourcode directory
+	log.Printf("[INFO] Create %s", pg.SourceCodePath)
 	err = os.MkdirAll(pg.SourceCodePath, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Create %s", pg.SourceCodePath)
-	// create `generator/main.go`
-	mainDstPath := filepath.Join(pg.GeneratorPath, "main.go")
-	err = pg.Write(mainDstPath, "main.go", pg)
+	// create generator directory
+	log.Printf("[INFO] Create %s", pg.GeneratorPath)
+	err = os.MkdirAll(pg.GeneratorPath, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Create %s", mainDstPath)
-	// create `generator/go.mod`
-	modDstPath := filepath.Join(pg.GeneratorPath, "go.mod")
-	err = pg.Write(modDstPath, "go.mod", pg)
-	if err != nil {
-		return err
-	}
-	log.Printf("[INFO] Create %s", modDstPath)
 	// create `generator/templates`
 	templateDstPath := filepath.Join(pg.GeneratorPath, "templates")
 	templateSrcPath := pg.ProjectSrcTemplatePath
+	log.Printf("[INFO] Create %s", templateDstPath)
 	err = cp.Copy(templateSrcPath, templateDstPath)
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Create %s", templateDstPath)
-	// create `generator/templates`
+	// create `generator/gen`
 	genDstPath := filepath.Join(pg.GeneratorPath, "gen")
 	genSrcPath := pg.ProjectSrcGenPath
+	log.Printf("[INFO] Create %s", genDstPath)
 	err = cp.Copy(genSrcPath, genDstPath)
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Create %s", genDstPath)
-	// create `generator/gateway.go`
-	gatewayDstPath := filepath.Join(pg.GeneratorPath, "gateway.go")
-	err = pg.Write(gatewayDstPath, "example.gateway.go", pg)
-	if err != nil {
-		return err
+	// create `generator/<whatever>` from non exampleType
+	for _, templateName := range pg.getExampleNonTypeTemplates() {
+		dstFileName := templateName
+		dstPath := filepath.Join(pg.GeneratorPath, dstFileName)
+		log.Printf("[INFO] Create %s", dstPath)
+		err = pg.Write(dstPath, templateName, pg)
+		if err != nil {
+			return err
+		}
 	}
-	log.Printf("[INFO] Create %s", gatewayDstPath)
-	// create `generator/gomonolith.go`
-	gomonolithDstPath := filepath.Join(pg.GeneratorPath, "megazord.go")
-	err = pg.Write(gomonolithDstPath, "example.gomonolith.go", pg)
-	if err != nil {
-		return err
+	// create `generator/<whatever>` from exampleType
+	for _, templateName := range pg.getExampleTypeTemplates() {
+		templateParts := strings.Split(templateName, ".")
+		dstFileName := strings.Join(templateParts[2:], ".")
+		dstPath := filepath.Join(pg.GeneratorPath, dstFileName)
+		log.Printf("[INFO] Create %s", dstPath)
+		err = pg.Write(dstPath, templateName, pg)
+		if err != nil {
+			return err
+		}
 	}
-	log.Printf("[INFO] Create %s", gomonolithDstPath)
-	// create `generator/cmdservice.go`
-	cmdServiceDstPath := filepath.Join(pg.GeneratorPath, "servicecmd.go")
-	err = pg.Write(cmdServiceDstPath, "example.cmd.go", pg)
-	if err != nil {
-		return err
-	}
-	log.Printf("[INFO] Create %s", cmdServiceDstPath)
-	// create `generator/htmlservice.go`
-	htmlServiceDstPath := filepath.Join(pg.GeneratorPath, "servicehtml.go")
-	err = pg.Write(htmlServiceDstPath, "example.gosrvc.go", pg)
-	if err != nil {
-		return err
-	}
-	log.Printf("[INFO] Create %s", htmlServiceDstPath)
-	// create `generator/flowbanner.go`
-	flowBannerServiceDstPath := filepath.Join(pg.GeneratorPath, "flowbanner.go")
-	err = pg.Write(flowBannerServiceDstPath, "example.flow.banner.go", pg)
-	if err != nil {
-		return err
-	}
-	log.Printf("[INFO] Create %s", flowBannerServiceDstPath)
-	// create `generator/flowroot.go`
-	flowRootServiceDstPath := filepath.Join(pg.GeneratorPath, "flowroot.go")
-	err = pg.Write(flowRootServiceDstPath, "example.flow.root.go", pg)
-	if err != nil {
-		return err
-	}
-	log.Printf("[INFO] Create %s", flowRootServiceDstPath)
 	return nil
 }
 
@@ -154,8 +121,44 @@ func (pg ProjectGenerator) WriteFile(dstPath, content string) error {
 	return nil
 }
 
+func (pg ProjectGenerator) getExampleNonTypeTemplates() []string {
+	definedTemplateString := pg.ProjectGeneratorTemplate.DefinedTemplates()
+	definedTemplateString = definedTemplateString[len("; defined templates are: "):]
+	definedTemplates := strings.Split(definedTemplateString, ", ")
+	var exampleTemplates []string
+	for index := range definedTemplates {
+		templateName := strings.Trim(definedTemplates[index], " ")
+		templateName = strings.Trim(definedTemplates[index], `"`)
+		if templateName[len(templateName)-5:] == ".tmpl" {
+			continue
+		}
+		if strings.Index(templateName, "example.") != 0 {
+			exampleTemplates = append(exampleTemplates, templateName)
+		}
+	}
+	return exampleTemplates
+}
+
+func (pg ProjectGenerator) getExampleTypeTemplates() []string {
+	definedTemplateString := pg.ProjectGeneratorTemplate.DefinedTemplates()
+	definedTemplateString = definedTemplateString[len("; defined templates are: "):]
+	definedTemplates := strings.Split(definedTemplateString, ", ")
+	var exampleTemplates []string
+	for index := range definedTemplates {
+		templateName := strings.Trim(definedTemplates[index], " ")
+		templateName = strings.Trim(definedTemplates[index], `"`)
+		if templateName[len(templateName)-5:] == ".tmpl" {
+			continue
+		}
+		if strings.Index(templateName, fmt.Sprintf("example.%s.", pg.ExampleType)) == 0 {
+			exampleTemplates = append(exampleTemplates, templateName)
+		}
+	}
+	return exampleTemplates
+}
+
 // NewProjectGenerator create new project generator
-func NewProjectGenerator(dirName, projectName, repoName, templatePath, genPath string) (ProjectGenerator, error) {
+func NewProjectGenerator(dirName, projectName, repoName, templatePath, genPath string, exampleType string) (ProjectGenerator, error) {
 	projectGenerator := ProjectGenerator{}
 	// get absolute dirPath of dirName
 	absDirPath, err := filepath.Abs(dirName)
@@ -184,6 +187,7 @@ func NewProjectGenerator(dirName, projectName, repoName, templatePath, genPath s
 		DeployablePath:           deployablePath,
 		GeneratorPath:            generatorPath,
 		ProjectGeneratorTemplate: projectGeneratorTemplate,
+		ExampleType:              exampleType,
 	}
 	return projectGenerator, err
 }

@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var dirPath, templatePath, genPath, projectName, repoName string
+var dirPath, templatePath, genPath, projectName, repoName, exampleType string
 
 func init() {
 	cwd, err := os.Getwd()
@@ -27,6 +27,7 @@ func init() {
 	templatePath = filepath.Join(execDir, "templates")
 	genPath = filepath.Join(execDir, "gen")
 	// define flags
+	initCmd.Flags().StringVarP(&exampleType, "example", "e", "", "Example type")
 	initCmd.Flags().StringVarP(&genPath, "gen", "g", genPath, "Gen directory")
 	initCmd.Flags().StringVarP(&templatePath, "template", "t", templatePath, "project generator's template directory")
 	initCmd.Flags().StringVarP(&dirPath, "dir", "d", cwd, "project's parent directory")
@@ -82,6 +83,20 @@ func askRepoIfNotExists() {
 	}
 }
 
+func askExampleTypeIfNotExists() {
+	if exampleType == "" {
+		defaultExampleType := "minimal"
+		fmt.Printf("Choose your example type (default: %s): ", defaultExampleType)
+		_, err := fmt.Scanln(&exampleType)
+		if err != nil {
+			fmt.Printf("Failed to read input: %s", err)
+		}
+		if exampleType == "" {
+			exampleType = defaultExampleType
+		}
+	}
+}
+
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Create a project",
@@ -89,12 +104,14 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		askProjectIfNotExists()
 		askRepoIfNotExists()
+		askExampleTypeIfNotExists()
 		log.Printf("[INFO] Gen directory                  : %s", genPath)
 		log.Printf("[INFO] Generator's template directory : %s", templatePath)
 		log.Printf("[INFO] Project's parent directory     : %s", dirPath)
 		log.Printf("[INFO] Project name                   : %s", projectName)
 		log.Printf("[INFO] Project repository             : %s", repoName)
-		generator, err := projectgenerator.NewProjectGenerator(dirPath, projectName, repoName, templatePath, genPath)
+		log.Printf("[INFO] Example type                   : %s", exampleType)
+		generator, err := projectgenerator.NewProjectGenerator(dirPath, projectName, repoName, templatePath, genPath, exampleType)
 		if err != nil {
 			log.Printf("[ERROR] Cannot init generator : %s", err)
 			return

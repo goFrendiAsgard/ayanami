@@ -573,8 +573,8 @@ A makefile is available to help you while developing `Ayanami`. The possible com
 * `make testv`: Same as `make test`, but verbose.
 * `make coverage`: Get code coverage as HTML.
 * `make build`: Build ayanami for mac, windows, and linux. For each platform, there will be 2 executables (for i386 and amd64)
-* `make deletemegazord`: Clear `.test-gen/whatever/` but let `.test-gen/whatever/sourcecode/` intact.
-* `make runmegazord`: Emulate `init`, `scaffold`, and `build`. Since there is no easy way to test generated project, it is strongly recommend to check out the content of `.test-gen`. This command just make sure that at least our `templates` and `gen` doesn't yield runtime error and run `megazord`
+* `make cleantestgen`: Clear `.test-gen/whatever/` but let `.test-gen/whatever/sourcecode/` intact.
+* `make testgen`: Emulate `init`, `scaffold`, and `build`. Since there is no easy way to test generated project, it is strongly recommend to check out the content of `.test-gen`. This command just make sure that at least our `templates` and `gen` doesn't yield runtime error and run `megazord`
 
 ## Distribution
 
