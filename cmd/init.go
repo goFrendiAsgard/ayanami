@@ -59,8 +59,8 @@ func askProjectIfNotExists() {
 		defaultProjectName := getRandomProject()
 		fmt.Printf("Enter your project name (default: %s): ", defaultProjectName)
 		_, err := fmt.Scanln(&projectName)
-		if err != nil {
-			fmt.Printf("Failed to read input: %s", err)
+		if err != nil && err.Error() != "unexpected newline" {
+			fmt.Printf("Failed to read input: %s\n", err)
 		}
 		if projectName == "" {
 			projectName = defaultProjectName
@@ -74,8 +74,8 @@ func askRepoIfNotExists() {
 		defaultRepoName := fmt.Sprintf("github.com/%s/%s", defaultUserName, projectName)
 		fmt.Printf("Enter your repo name (default: %s): ", defaultRepoName)
 		_, err := fmt.Scanln(&repoName)
-		if err != nil {
-			fmt.Printf("Failed to read input: %s", err)
+		if err != nil && err.Error() != "unexpected newline" {
+			fmt.Printf("Failed to read input: %s\n", err)
 		}
 		if repoName == "" {
 			repoName = defaultRepoName
@@ -88,8 +88,8 @@ func askExampleTypeIfNotExists() {
 		defaultExampleType := "minimal"
 		fmt.Printf("Choose your example type (default: %s): ", defaultExampleType)
 		_, err := fmt.Scanln(&exampleType)
-		if err != nil {
-			fmt.Printf("Failed to read input: %s", err)
+		if err != nil && err.Error() != "unexpected newline" {
+			fmt.Printf("Failed to read input: %s\n", err)
 		}
 		if exampleType == "" {
 			exampleType = defaultExampleType
