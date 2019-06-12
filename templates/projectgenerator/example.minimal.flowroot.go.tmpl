@@ -7,30 +7,30 @@ import (
 
 func init() {
 
-    // define flow
+	// define flow
 	flow := gen.NewEmptyFlow(&Gen,
-        "github.com/nerv/flowroot",  // repo name
-        "root",                      // flow name
-        []string{"content", "code"}, // inputs
-        []string{"content", "code"}, // outputs
-    )
+		"github.com/nerv/flowroot",  // repo name
+		"root",                      // flow name
+		[]string{"content", "code"}, // inputs
+		[]string{"content", "code"}, // outputs
+	)
 
-    flow.AddEventVal(
-        "trig.request.get.out",      // whenever get `request.get.out.req`
-        "trig.response.get.in.code", // publish to `respose.get.in.code`
-        "code",                      // the published variable name is `code`
-        200,                         // and it's value is 200
-    )
+	flow.AddEventVal(
+		"trig.request.get.out",      // whenever get `request.get.out.req`
+		"trig.response.get.in.code", // publish to `respose.get.in.code`
+		"code",                      // the published variable name is `code`
+		200,                         // and it's value is 200
+	)
 
-    flow.AddEventVal(
-        "trig.request.get.out",         // whenever get `request.get.out.req`
-        "trig.response.get.in.content", // publish to `response.get.in.content`
-        "content",                      // the published variable name is `content`
-        "hello there",                  // and it's value is `hello there`
-    )
+	flow.AddEventVal(
+		"trig.request.get.out",         // whenever get `request.get.out.req`
+		"trig.response.get.in.content", // publish to `response.get.in.content`
+		"content",                      // the published variable name is `content`
+		"hello there",                  // and it's value is `hello there`
+	)
 
-    // register flow
+	// register flow
 	Gen.AddConfig(flow)
-    
+	
 }
 {{end}}

@@ -11,7 +11,7 @@ import (
 // {{.MainFunctionName}} declaration
 func {{.MainFunctionName}}() {
 	routes := []string{ // define your routes here{{range .Routes}}
-        "{{.}}",{{end}}
+		"{{.}}",{{end}}
 	}
 	broker, err := msgbroker.NewNats(config.GetNatsURL())
 	if err != nil {

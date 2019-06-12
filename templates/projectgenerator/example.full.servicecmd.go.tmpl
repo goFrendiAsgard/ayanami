@@ -7,16 +7,16 @@ import (
 
 func init() {
 
-    // define service
+	// define service
 	service := gen.NewEmptyCmd(&Gen,
-        "cmd",                        // service name
-        "github.com/nerv/servicecmd", // repo name
-    )
+		"cmd",                        // service name
+		"github.com/nerv/servicecmd", // repo name
+	)
 
-    // add command
-    service.Set("figlet", "figlet $input")
+	// add command
+	service.Set("figlet", "figlet $input")
 
-    // register service
+	// register service
 	Gen.AddConfig(service)
 
 }

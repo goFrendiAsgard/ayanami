@@ -3,10 +3,10 @@ package main
 
 import(
 	"github.com/state-alchemists/ayanami/generator"
-    "log"
-    "os"
-    "path/filepath"
-    "runtime"
+	"log"
+	"os"
+	"path/filepath"
+	"runtime"
 )
 
 var _, currentDirPath, _, ok = runtime.Caller(0)
@@ -16,40 +16,40 @@ var projectPath = filepath.Dir(filepath.Dir(currentDirPath))
 var Gen, err = generator.NewProjectGenerator(projectPath)
 
 func main() {
-    if err != nil {
-        log.Printf("[ERROR] %v", err)
-    }
-    param := "build"
+	if err != nil {
+		log.Printf("[ERROR] %v", err)
+	}
+	param := "build"
 	if len(os.Args) > 1 {
 		param = os.Args[1]
 	}
-    switch param {
-    case "validate":
-        log.Println("START VALIDATING...")
-        validated := Gen.Validate()
-        if validated {
-            log.Printf("VALIDATION SUCCESS !!!\n")
-        } else {
-            log.Printf("VALIDATION FAILED\n")
-        }
-    case "build":
-        log.Println("START BUILDING...")
-        err = Gen.Build()
-        if err == nil {
-            log.Printf("BUILD SUCCESS !!!\n")
-        } else {
-            log.Printf("BUILD FAILED: %s\n", err)
-        }
-    case "scaffold":
-        log.Println("START SCAFFOLDING...")
-        err = Gen.Scaffold()
-        if err == nil {
-            log.Printf("SCAFFOLD SUCCESS !!!\n")
-        } else {
-            log.Printf("SCAFFOLD FAILED: %s\n", err)
-        }
-    default:
-        log.Println("[ERROR] Unrecognized command. Only support `validate`, `build` and `scaffold`")
-    }
+	switch param {
+	case "validate":
+		log.Println("START VALIDATING...")
+		validated := Gen.Validate()
+		if validated {
+			log.Printf("VALIDATION SUCCESS !!!\n")
+		} else {
+			log.Printf("VALIDATION FAILED\n")
+		}
+	case "build":
+		log.Println("START BUILDING...")
+		err = Gen.Build()
+		if err == nil {
+			log.Printf("BUILD SUCCESS !!!\n")
+		} else {
+			log.Printf("BUILD FAILED: %s\n", err)
+		}
+	case "scaffold":
+		log.Println("START SCAFFOLDING...")
+		err = Gen.Scaffold()
+		if err == nil {
+			log.Printf("SCAFFOLD SUCCESS !!!\n")
+		} else {
+			log.Printf("SCAFFOLD FAILED: %s\n", err)
+		}
+	default:
+		log.Println("[ERROR] Unrecognized command. Only support `validate`, `build` and `scaffold`")
+	}
 }
 {{end}}

@@ -7,7 +7,7 @@ import (
 	"github.com/state-alchemists/ayanami/msgbroker"
 	"github.com/state-alchemists/ayanami/service"
 	"log"{{ range .Packages }}
-    "{{$repoName}}/{{.}}"{{ end }}
+	"{{$repoName}}/{{.}}"{{ end }}
 )
 
 // {{.MainFunctionName}} declaration
@@ -20,7 +20,7 @@ func {{.MainFunctionName}}() {
 	}
 	// define services
 	services := service.Services{ {{ range $methodName, $function := .Functions }}
-        service.NewService(serviceName, "{{$methodName}}",
+		service.NewService(serviceName, "{{$methodName}}",
 			[]string{ {{$function.JoinedInputs}} },
 			[]string{ {{$function.JoinedOutputs}} },
 			{{$function.FunctionPackage}}.Wrapped{{$function.FunctionName}},

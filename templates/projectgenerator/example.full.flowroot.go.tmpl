@@ -7,32 +7,32 @@ import (
 
 func init() {
 
-    // define flow
+	// define flow
 	flow := gen.NewEmptyFlow(&Gen,
-        "github.com/nerv/flowroot",  // repo name
-        "root",                      // flow name
-        []string{"content", "code"}, // inputs
-        []string{"content", "code"}, // outputs
-    )
+		"github.com/nerv/flowroot",  // repo name
+		"root",                      // flow name
+		[]string{"content", "code"}, // inputs
+		[]string{"content", "code"}, // outputs
+	)
 
-    flow.AddEventVal(
-        "trig.request.get.out",      // whenever get `request.get.out.req`
-        "trig.response.get.in.code", // publish to `respose.get.in.code`
-        "code",                      // the published variable name is `code`
-        200,                         // and it's value is 200
-    )
+	flow.AddEventVal(
+		"trig.request.get.out",	     // whenever get `request.get.out.req`
+		"trig.response.get.in.code", // publish to `respose.get.in.code`
+		"code",                      // the published variable name is `code`
+		200,                         // and it's value is 200
+	)
 
-    flow.AddEventFunc(
-        "trig.request.get.out",         // whenever get `request.get.out.req`
-        "trig.response.get.in.content", // publish to `response.get.in.content`
-        "content",                      // the published variable name is `content`, and we get it's value by running a function
-        "html",                         // function's package is `html`
-        "CreateDefaultResponse",        // function's name is `CreateDefaultResponse`
-        []string{},                     // and the function has no dependency to other source code
-    )
+	flow.AddEventFunc(
+		"trig.request.get.out",         // whenever get `request.get.out.req`
+		"trig.response.get.in.content", // publish to `response.get.in.content`
+		"content",                      // the published variable name is `content`, and we get it's value by running a function
+		"html",                         // function's package is `html`
+		"CreateDefaultResponse",        // function's name is `CreateDefaultResponse`
+		[]string{},                     // and the function has no dependency to other source code
+	)
 
-    // register flow
+	// register flow
 	Gen.AddConfig(flow)
-    
+	
 }
 {{end}}

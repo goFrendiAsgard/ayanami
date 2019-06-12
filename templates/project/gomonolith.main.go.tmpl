@@ -2,8 +2,8 @@
 package main
 
 func main() {
-    forever := make(chan bool){{ range .Functions }}
-    go {{.}}(){{ end }}
+	forever := make(chan bool){{ range .Functions }}
+	go {{.}}(){{ end }}
 	<-forever
 }
 {{end}}

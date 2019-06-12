@@ -7,72 +7,72 @@ import (
 
 func init() {
 
-    // define flow
+	// define flow
 	flow := gen.NewEmptyFlow(&Gen,
-        "github.com/nerv/flowbanner", // repo name
-        "banner",                     // flow name
-        []string{"request"},          // inputs
-        []string{"content", "code"},  // outputs
-    )
+		"github.com/nerv/flowbanner", // repo name
+		"banner",					 // flow name
+		[]string{"request"},		  // inputs
+		[]string{"content", "code"},  // outputs
+	)
 
-    flow.AddInputEvent(
-        "trig.request.get.banner.out", // whenever get `request.get.banner.out.req`
-        "request",                     // store it into a variable named `request`
-    )
+	flow.AddInputEvent(
+		"trig.request.get.banner.out", // whenever get `request.get.banner.out.req`
+		"request",					 // store it into a variable named `request`
+	)
 
-    flow.AddOutputEvent(
-        "srvc.cmd.figlet.in.input", // publish to `srvc.cmd.figlet.in.input`
-        "request.form.text.0",      // if `request.form.text.0` is set
-    )
+	flow.AddOutputEvent(
+		"srvc.cmd.figlet.in.input", // publish to `srvc.cmd.figlet.in.input`
+		"request.form.text.0",	  // if `request.form.text.0` is set
+	)
 
-    flow.AddEvent(
-        "srvc.cmd.figlet.out.output", // whenever get `srvc.cmd.figlet.out.output`
-        "srvc.html.pre.in.input",     // publish to `srvc.html.pre.in.input`
-        "figletOut",                  // the published variable name `figletOut`
-    )
+	flow.AddEvent(
+		"srvc.cmd.figlet.out.output", // whenever get `srvc.cmd.figlet.out.output`
+		"srvc.html.pre.in.input",	 // publish to `srvc.html.pre.in.input`
+		"figletOut",				  // the published variable name `figletOut`
+	)
 
-    flow.AddEvent(
-        "srvc.html.pre.out.output",            // whenever get `srvc.html.pre.out.output`
-        "trig.response.get.banner.in.content", // publish to `trig.response.get.banner.in.content`
-        "content",                             // the published variable name is `content`
-    )
+	flow.AddEvent(
+		"srvc.html.pre.out.output",			// whenever get `srvc.html.pre.out.output`
+		"trig.response.get.banner.in.content", // publish to `trig.response.get.banner.in.content`
+		"content",							 // the published variable name is `content`
+	)
 
-    // the rest of this are error handlers
+	// the rest of this are error handlers
 
-    flow.AddEventVal(
-        "srvc.html.pre.out.output",
-        "trig.response.get.banner.in.code",
-        "code",
-        200,
-    )
+	flow.AddEventVal(
+		"srvc.html.pre.out.output",
+		"trig.response.get.banner.in.code",
+		"code",
+		200,
+	)
 
-    flow.AddEvent(
-        "srvc.cmd.figlet.err.message",
-        "trig.response.get.banner.in.content",
-        "content",
-    )
+	flow.AddEvent(
+		"srvc.cmd.figlet.err.message",
+		"trig.response.get.banner.in.content",
+		"content",
+	)
 
-    flow.AddEventVal(
-        "srvc.cmd.figlet.err.message",
-        "trig.response.get.banner.in.code",
-        "code",
-        500,
-    )
+	flow.AddEventVal(
+		"srvc.cmd.figlet.err.message",
+		"trig.response.get.banner.in.code",
+		"code",
+		500,
+	)
 
-    flow.AddEvent(
-        "srvc.html.pre.err.message",
-        "trig.response.get.banner.in.content",
-        "content",
-    )
+	flow.AddEvent(
+		"srvc.html.pre.err.message",
+		"trig.response.get.banner.in.content",
+		"content",
+	)
 
-    flow.AddEventVal(
-        "srvc.html.pre.err.message",
-        "trig.response.get.banner.in.code",
-        "code",
-        500,
-    )
+	flow.AddEventVal(
+		"srvc.html.pre.err.message",
+		"trig.response.get.banner.in.code",
+		"code",
+		500,
+	)
 
-    // register flow
+	// register flow
 	Gen.AddConfig(flow)
 }
 {{end}}

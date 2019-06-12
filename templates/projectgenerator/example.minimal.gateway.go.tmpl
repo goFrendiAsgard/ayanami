@@ -7,16 +7,16 @@ import (
 
 func init() {
 
-    // define gateway
+	// define gateway
 	gateway := gen.NewEmptyGateway(&Gen,
-        "gateway",                 // service name
-        "github.com/nerv/gateway", // repo name
-    )
+		"gateway",                 // service name
+		"github.com/nerv/gateway", // repo name
+	)
 
-    // add routes to gateway
-    gateway.AddRoute("/")
+	// add routes to gateway
+	gateway.AddRoute("/")
 
-    // register gateway
+	// register gateway
 	Gen.AddConfig(gateway)
 
 }
