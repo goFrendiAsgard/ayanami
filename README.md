@@ -1,6 +1,6 @@
 # Ayanami
 
-A FaaS-like framework for your own infrastructure.
+Your genertor's generator. A FaaS-like framework to build your micro-srvices and monolithic.
 
 The name is inspired from `Evangelion-Unit-00's pilot`: `Ayanami Rei`. The name `Rei` itself has the same pronunciation as in Heraclitus's philosophy, `Panta Rhei` (lit: everything flows). We believe that the developer should focus more on data flows and transformations rather than managing infrastructures.
 
@@ -12,7 +12,7 @@ The name is inspired from `Evangelion-Unit-00's pilot`: `Ayanami Rei`. The name 
 * Any FaaS providers are prone to vendor lock-in
 * Having your own infrastructure (e.g: kubernetes) while developing/deploying in FaaS manner is a good solution
 * At some point, developers need to run the entire infrastructure in their local machine. In this case, installing kubernetes/minikube could be overkill
-* Copy pasting several logics from single domain to another domain is probably inevitable, but prone to mistakes.
+* Copy pasting several logics from single domain to another domain is probably inevitable, but it prone to mistakes.
 
 # Goal
 
@@ -31,18 +31,18 @@ Providing an environment with minimum dependencies in order to:
 
 ![Workflow](images/ayanami-workflow.png)
 
-1. User creating a project by invoking `ayanami init`.
-2. User write `composition` inside project's generator.
-3. Once the composition has been defined, user invoke `make scaffold` to generate `source code`.
-4. User completing the generated `source code`.
-5. User deploying the application by invoking `make build`
-6. Whenever the `composition` has to be modified, user need to to re-`scaffold` and re-`build`. Please note that the generator will never overwrite the `source code`.
+1. User creates a project by invoking `ayanami init`.
+2. User writes `composition` inside project's generator.
+3. Once the composition has been defined, user invokes `make scaffold` to generate `source code`.
+4. User completes the generated `source code`.
+5. User deploys the application by invoking `make build`
+6. Whenever the `composition` has to be modified, user need to to re-`scaffold` and re-`build` (Please note that the generator should never overwrite the `source code`).
 7. User can modify or write their his/her own `template` or `gen`.
 
 # Terminologies
 
 * `Composition`: Data flow and architecture of your program. Composition contains `flows`, `services`.
-* `Flow`: Your business logic. Basically, flow should receive `package` from input `trigger`, send the message to other `flows` or `services`, and finally send package to output `trigger`.
+* `Flow`: Data flow of your application. Basically, flow should receive `package` from input `trigger`, send the message to other `flows` or `services`, and finally send package to output `trigger`.
 * `Trigger`: Trigger might send/receive a `package`. It is how you communicate with the outside world (e.g: HTTP request trigger, HTTP response trigger, scheduler, etc)
 * `Service`: Container of `functions`. If your functions are depending on each others or belong to the same domain, you should consider to put them into single service
 * `Function`: The most atomic process component. Several `functions` might belong into a single `service`.
@@ -57,7 +57,7 @@ Providing an environment with minimum dependencies in order to:
 
 ## Event Name Convention
 
-Event Name should comply one of these formats
+Event Name should comply to one of these formats
 
 ```
 <ID>.<trig|srvc|flow>.<serviceName>.<segments...>.<out|in>.<varName>
@@ -77,7 +77,7 @@ __NOTE:__ We strip `hyphens` from UUID because Nats documentation said it only a
 
 ## Prerequisite
 
-To follow this tutorial you should have `git`, `go 1.12`, and `nats`. Using docker is recommended but not required.
+To follow this tutorial you should have `git`, `go 1.12`, `figlet`, and `nats`. Using docker is recommended but not required.
 
 ## Clone Ayanami
 
@@ -149,7 +149,7 @@ The event published by a gateway are: `<ID>.trig.request.<method><Dotted-URL>.ou
 * cookies
 * userAgent
 
-While publishing request out events, gateway will also listen to to `response in` event. This event has the following name: `<ID>.trig.response.<method><Dotted-URL>.in`.
+While publishing `request out` events, gateway will also listen to to `response in` event. This event has the following name: `<ID>.trig.response.<method><Dotted-URL>.in`.
 
 That's all you need to know about gateway. Now let's move to `flow`.
 
@@ -209,7 +209,7 @@ A flow should be started when it got all `inputs`, and it should be ended when a
 
 ## Create Custom Composition
 
-Aside from the existing gateway that always give us `200 Hello there` for every request, we want to add two serve some other endpoints.
+Aside from the existing gateway that always give us `200 Hello there` for every request, we want to serve two other endpoints.
 
 * `/hello/:name/`: We want this one to give response based on URL parameter. For example `/hello/shinji` should give us `200 Hello shinji`
 * `/banner/`: We want this one to give us a large ascii banner by utilizing [figlet](http://www.figlet.org/). For example, `/banner/hi` should give us:
@@ -262,7 +262,7 @@ func init() {
 
 ### Define ServiceCmd
 
-Next, we have to define `servicecmd` as follow:
+Next, we define `servicecmd` as follow:
 
 ```go
 package main
@@ -290,7 +290,7 @@ func init() {
 
 ### Define ServiceHtml
 
-For `servicehtml`, you can define it like this:
+For `servicehtml`, the definition is like this:
 
 ```go
 package main
@@ -376,7 +376,7 @@ func init() {
 
 ### Define flowBanner
 
-`flowBanner` is the most complicated flow in our project since it need to talk to `servicecmd` and `servicehtml`. Conceptually, the flow looks like this:
+`flowBanner` is the most complicated flow in our project since it needs to talk to `servicecmd` and `servicehtml`. Conceptually, the flow looks like this:
 
 ![flowbanner](images/megazord architecture-Flowbanner.png)
 
@@ -485,7 +485,7 @@ After having our composition defined, we can start to scaffold our source code. 
 
 ## Writing Source Code
 
-By performing `scaffolding`, we already have basic skeleton of our functions. Let's make it complete:
+By performing `scaffolding`, we already have basic skeleton of our functions. Let's complete it up:
 
 First we modify `sourcecode/html/pre.go`
 
@@ -564,7 +564,7 @@ To stop every services, you can press `ctrl+c` in each terminal.
 
 ### Run as monolithic
 
-Running your application as microservices might not be a good idea if you just want to check whether everything works as intended or not. By default, Ayanami also add a `procedure` named `gomonolithic`. Whenever you build your application, `gomonolithic` will look for every `service` and `flows`, and put it into a single monolithic application. To run your application as monolithic, simply invoke this command:
+Running your application as microservices without any automation tool is probably not a good idea. But don't worry, since our generator also has a `procedure` named `gomonolithic`. Whenever you build your application, `gomonolithic` will look for every `service` and `flows`, and compose a single monolithic application based on them. To run your application as monolithic, simply invoke this command:
 
 ```bash
 cd deployalbe/megazord && make run
