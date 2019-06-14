@@ -54,7 +54,7 @@ func (broker Memory) Publish(eventName string, pkg servicedata.Package) error {
 		// change eventName into regex
 		eventPattern := fmt.Sprintf("^%s$", key)
 		eventPattern = strings.Replace(eventPattern, ".", `\.`, -1)
-		eventPattern = strings.Replace(eventPattern, "*", `[0-9a-zA-Z\*]+`, -1)
+		eventPattern = strings.Replace(eventPattern, "*", `[^\.]+`, -1)
 		eventPattern = strings.Replace(eventPattern, ">", ".*", -1)
 		re, err := regexp.Compile(eventPattern)
 		if err != nil {
