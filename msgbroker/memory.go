@@ -1,6 +1,7 @@
 package msgbroker
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/state-alchemists/ayanami/servicedata"
 	"regexp"
@@ -40,6 +41,13 @@ func (broker Memory) Unsubscribe(eventName string) error {
 
 // Publish publish to memory broker
 func (broker Memory) Publish(eventName string, pkg servicedata.Package) error {
+	data, err := json.Marshal(pkg.Data)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(data, &pkg.Data); err != nil {
+		return err
+	}
 	// get all keys of handler
 	broker.lock.RLock()
 	i := 0

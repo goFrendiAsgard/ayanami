@@ -1,9 +1,21 @@
 {{define "gomonolith.main.go"}}
 package main
 
+import(
+    // "github.com/state-alchemists/ayanami/config"
+	"github.com/state-alchemists/ayanami/msgbroker"
+    "log"
+)
+
 func main() {
+	// define broker
+	// broker, err := msgbroker.NewNats(config.GetNatsURL())
+	broker, err := msgbroker.NewMemory()
+	if err != nil {
+		log.Fatal(err)
+	}
 	forever := make(chan bool){{ range .Functions }}
-	go {{.}}(){{ end }}
+	go {{.}}(broker){{ end }}
 	<-forever
 }
 {{end}}

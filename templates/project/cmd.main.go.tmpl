@@ -1,21 +1,21 @@
 {{ define "cmd.main.go" }}
 package main
 
-import (
-	"github.com/state-alchemists/ayanami/config"
+import ({{ if eq .MainFunctionName "main" }}
+	"github.com/state-alchemists/ayanami/config"{{ end }}
 	"github.com/state-alchemists/ayanami/msgbroker"
-	"github.com/state-alchemists/ayanami/service"
-	"log"
+	"github.com/state-alchemists/ayanami/service"{{ if eq .MainFunctionName "main" }}
+	"log"{{ end }}
 )
 
 // {{.MainFunctionName}} declaration
-func {{.MainFunctionName}}() {
-	serviceName := "{{.ServiceName}}"
+func {{.MainFunctionName}}({{ if ne .MainFunctionName "main" }}broker msgbroker.CommonBroker{{ end }}) {
+	serviceName := "{{.ServiceName}}"{{ if eq .MainFunctionName "main" }}
 	// define broker
 	broker, err := msgbroker.NewNats(config.GetNatsURL())
 	if err != nil {
 		log.Fatal(err)
-	}
+	}{{ end }}
 	// define services
 	services := service.Services{ {{ range $methodName, $command := .Commands }}
 		service.NewCmd(serviceName, "{{$methodName}}",

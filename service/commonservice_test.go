@@ -28,8 +28,8 @@ func TestConsumeAndPublish(t *testing.T) {
 			ErrorEventName: "srvc.common.err",
 			Function: func(inputs Dictionary) (Dictionary, error) {
 				outputs := make(Dictionary)
-				a := inputs["a"].(int)
-				b := inputs["b"].(int)
+				a := inputs["a"].(float64)
+				b := inputs["b"].(float64)
 				outputs["c"] = a + b
 				return outputs, nil
 			},
@@ -112,9 +112,9 @@ func createCommonServiceBrokerTest(ID string, errorMessageCh chan string) (msgbr
 	// consume event
 	broker.Subscribe(fmt.Sprintf("%s.srvc.common.out.c", ID),
 		func(pkg servicedata.Package) {
-			c := pkg.Data.(int)
+			c := pkg.Data.(float64)
 			if c != 7 {
-				errorMessageCh <- fmt.Sprintf("expected 7, get %d", c)
+				errorMessageCh <- fmt.Sprintf("expected 7, get %f", c)
 			}
 			errorMessageCh <- ""
 		},

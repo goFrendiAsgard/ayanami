@@ -66,7 +66,8 @@ func TestNewFlowService(t *testing.T) {
 		t.Errorf("expected %s, get %s", expectedErrorEventName, service.ErrorEventName)
 	}
 	// test wrappedFunction
-	expectedFunctionOutput := Dictionary{"d": 123, "ok": true, "isGreaterThan100": true}
+	var f123 float64 = 123
+	expectedFunctionOutput := Dictionary{"d": f123, "ok": true, "isGreaterThan100": true}
 	functionInput := make(Dictionary)
 	functionInput["container"] = Dictionary{"a": 20}
 	functionInput["b"] = 3
@@ -118,7 +119,7 @@ func createFlowEventsTest() FlowEvents {
 			OutputEvent: "publishServiceOutput.isGreaterThan100",
 			UseFunction: true,
 			Function: func(val interface{}) interface{} {
-				d := val.(int)
+				d := val.(float64)
 				if d > 100 {
 					return true
 				}
@@ -173,9 +174,9 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 		if inputCompleted {
 			lock.RLock()
 			ID := storage.Get("ID").(string)
-			a := storage.Get("a").(int)
-			b := storage.Get("b").(int)
-			c := storage.Get("c").(int)
+			a := storage.Get("a").(float64)
+			b := storage.Get("b").(float64)
+			c := storage.Get("c").(float64)
 			lock.RUnlock()
 			d := a + b + c
 			pkg := servicedata.Package{ID: ID, Data: d}
@@ -194,7 +195,7 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 			if err != nil {
 				t.Errorf("Get error: %s", err)
 			}
-			err = storage.Set("a", pkg.Data.(int))
+			err = storage.Set("a", pkg.Data.(float64))
 			if err != nil {
 				t.Errorf("Get error: %s", err)
 			}
@@ -210,7 +211,7 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 			if err != nil {
 				t.Errorf("Get error: %s", err)
 			}
-			err = storage.Set("b", pkg.Data.(int))
+			err = storage.Set("b", pkg.Data.(float64))
 			if err != nil {
 				t.Errorf("Get error: %s", err)
 			}
@@ -226,7 +227,7 @@ func createFlowTestBroker(t *testing.T) msgbroker.CommonBroker {
 			if err != nil {
 				t.Errorf("Get error: %s", err)
 			}
-			err = storage.Set("c", pkg.Data.(int))
+			err = storage.Set("c", pkg.Data.(float64))
 			if err != nil {
 				t.Errorf("Get error: %s", err)
 			}

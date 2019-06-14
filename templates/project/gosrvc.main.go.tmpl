@@ -2,22 +2,22 @@
 package main
 
 {{ $repoName := .RepoName }}
-import (
-	"github.com/state-alchemists/ayanami/config"
+import ({{ if eq .MainFunctionName "main" }}
+	"github.com/state-alchemists/ayanami/config"{{ end }}
 	"github.com/state-alchemists/ayanami/msgbroker"
-	"github.com/state-alchemists/ayanami/service"
-	"log"{{ range .Packages }}
+	"github.com/state-alchemists/ayanami/service"{{ if eq .MainFunctionName "main" }}
+	"log"{{ end }}{{ range .Packages }}
 	"{{$repoName}}/{{.}}"{{ end }}
 )
 
 // {{.MainFunctionName}} declaration
-func {{.MainFunctionName}}() {
-	serviceName := "{{.ServiceName}}"
+func {{.MainFunctionName}}({{ if ne .MainFunctionName "main" }}broker msgbroker.CommonBroker{{ end }}) {
+	serviceName := "{{.ServiceName}}"{{ if eq .MainFunctionName "main" }}
 	// define broker
 	broker, err := msgbroker.NewNats(config.GetNatsURL())
 	if err != nil {
 		log.Fatal(err)
-	}
+	}{{ end }}
 	// define services
 	services := service.Services{ {{ range $methodName, $function := .Functions }}
 		service.NewService(serviceName, "{{$methodName}}",
