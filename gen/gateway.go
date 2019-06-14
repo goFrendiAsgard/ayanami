@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/state-alchemists/ayanami/generator"
 	"log"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -60,6 +61,17 @@ func (c GatewayConfig) Build() error {
 		log.Printf("[INFO] Create %s", templateName)
 		goModPath := filepath.Join(depPath, templateName)
 		err := c.WriteDep(goModPath, templateName, c)
+		if err != nil {
+			return err
+		}
+	}
+	// git init
+	gitPath := filepath.Join(depPath, ".git")
+	if !c.IsDepExists(gitPath) {
+		log.Printf("[INFO] Init git")
+		shellCmd := exec.Command("git", "init")
+		shellCmd.Dir = filepath.Join(c.GetDepPath(), depPath)
+		err := shellCmd.Run()
 		if err != nil {
 			return err
 		}
