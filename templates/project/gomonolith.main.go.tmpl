@@ -2,14 +2,16 @@
 package main
 
 import(
+    // TODO: uncomment the following line to use Nats instead of memory
     // "github.com/state-alchemists/ayanami/config"
 	"github.com/state-alchemists/ayanami/msgbroker"
     "log"
 )
 
 func main() {
-	// define broker
+    // TODO: uncomment the following line to use Nats instead of memory
 	// broker, err := msgbroker.NewNats(config.GetNatsURL())
+    // TODO: comment the following line to use Nats instead of memory
 	broker, err := msgbroker.NewMemory()
 	if err != nil {
 		log.Fatal(err)
