@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/state-alchemists/ayanami/generator"
 	"log"
-	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -110,15 +109,16 @@ func (p GoMonolithProc) Build(configs generator.Configs) error {
 		}
 	}
 	// git init
-	gitPath := filepath.Join(depPath, ".git")
-	if !p.IsDepExists(gitPath) {
-		log.Printf("[INFO] Init git")
-		shellCmd := exec.Command("git", "init")
-		shellCmd.Dir = filepath.Join(p.GetDepPath(), depPath)
-		err := shellCmd.Run()
-		if err != nil {
-			return err
-		}
+	log.Printf("[INFO] Run git init")
+	err = GitInit(p.IOHelper, filepath.Join(p.GetDepPath(), depPath))
+	if err != nil {
+		return err
+	}
+	// GoFmt
+	log.Printf("[INFO] Run gofmt")
+	err = GoFmt(filepath.Join(p.GetDepPath(), depPath))
+	if err != nil {
+		return err
 	}
 	return nil
 }

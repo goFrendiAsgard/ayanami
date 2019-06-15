@@ -2,9 +2,9 @@
 package main
 
 import({{ if eq .Broker "nats" }}
-    "github.com/state-alchemists/ayanami/config"{{ end }}
+	"github.com/state-alchemists/ayanami/config"{{ end }}
 	"github.com/state-alchemists/ayanami/msgbroker"
-    "log"
+	"log"
 )
 
 func main() { {{ if eq .Broker "nats" }}

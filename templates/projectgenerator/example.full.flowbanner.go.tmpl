@@ -73,18 +73,18 @@ func init() {
 	// get error from figlet and send "Internal Server Error" as http response's content
 	flow.AddEvent(gen.Event{
 		InputEventName:  "srvc.cmd.figlet.err.message",
-		UseValue:		true,
-		Value:		   "Internal Server Error",
-		VarName:		 "content",
+		UseValue:        true,
+		Value:           "Internal Server Error",
+		VarName:         "content",
 		OutputEventName: "trig.response.get.banner.in.content",
 	})
 
 	// also, set http response's code into 500
 	flow.AddEvent(gen.Event{
 		InputEventName:  "srvc.cmd.figlet.err.message",
-		UseValue:		true,
-		Value:		   500,
-		VarName:		 "code",
+		UseValue:        true,
+		Value:           500,
+		VarName:         "code",
 		OutputEventName: "trig.response.get.banner.in.code",
 	})
 
