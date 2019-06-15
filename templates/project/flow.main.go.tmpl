@@ -7,7 +7,7 @@ import ({{ if eq .MainFunctionName "main" }}
 	"github.com/state-alchemists/ayanami/msgbroker"
 	"github.com/state-alchemists/ayanami/service"{{ if eq .MainFunctionName "main" }}
 	"log"{{ end }}{{ range .Packages }}
-	"{{$repoName}}/{{.}}"{{ end }}
+	"{{ $repoName }}/{{ . }}"{{ end }}
 )
 
 // {{.MainFunctionName}} declaration
@@ -19,15 +19,15 @@ func {{.MainFunctionName}}({{ if ne .MainFunctionName "main" }}broker msgbroker.
 	}{{ end }}
 	// define services
 	services := service.Services{
-		service.NewFlow("{{.FlowName}}", broker,
+		service.NewFlow("{{ .FlowName }}", broker,
 			// inputs
-			[]string{ {{.Inputs}} },
+			[]string{ {{ .Inputs }} },
 			// outputs
-			[]string{ {{.Outputs}} },
+			[]string{ {{ .Outputs }} },
 			[]service.FlowEvent{ {{ range .Events }}
 				{ {{ range $key, $val := . }}
-					{{$key}}: {{$val}},{{ end }}
-				},{{end}}
+					{{ $key }}: {{ $val }},{{ end }}
+				},{{ end }}
 			},
 		),
 	}

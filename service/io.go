@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log"
 	"strings"
 )
 
@@ -29,7 +30,10 @@ func (ioList IOList) GetTopLevelValues(vars Dictionary) Dictionary {
 		if !vars.Has(io.VarName) {
 			continue
 		}
-		result.Set(io.EventName, vars.Get(io.VarName))
+		err := result.Set(io.EventName, vars.Get(io.VarName))
+		if err != nil {
+			log.Printf("[ERROR] Failed to set %s", io.EventName)
+		}
 	}
 	return result
 }

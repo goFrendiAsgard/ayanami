@@ -18,8 +18,8 @@ func {{.MainFunctionName}}({{ if ne .MainFunctionName "main" }}broker msgbroker.
 	}{{ end }}
 	// define services
 	services := service.Services{ {{ range $methodName, $command := .Commands }}
-		service.NewCmd(serviceName, "{{$methodName}}",
-			[]string{"/bin/sh", "-c", {{$command}}},
+		service.NewCmd(serviceName, "{{ $methodName }}",
+			[]string{"/bin/sh", "-c", {{ $command }}},
 		),{{ end }}
 	}
 	// consume and publish forever

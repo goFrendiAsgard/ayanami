@@ -1,4 +1,4 @@
-{{define "Makefile" }}
+{{ define "Makefile" }}
 test:
 	go test -race ./... -coverprofile=profile.out -count=1 -covermode=atomic
 
@@ -14,4 +14,4 @@ compile:
 run:
 	go build -v -o main && ./main
 
-{{end}}
+{{ end }}

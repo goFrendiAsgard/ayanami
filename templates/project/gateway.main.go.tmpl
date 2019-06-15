@@ -8,10 +8,10 @@ import (
 	"log"{{ end }}
 )
 
-// {{.MainFunctionName}} declaration
-func {{.MainFunctionName}}({{ if ne .MainFunctionName "main" }}broker msgbroker.CommonBroker{{ end }}) {
-	routes := []string{ // define your routes here{{range .Routes}}
-		"{{.}}",{{end}}
+// {{ .MainFunctionName }} declaration
+func {{ .MainFunctionName }}({{ if ne .MainFunctionName "main" }}broker msgbroker.CommonBroker{{ end }}) {
+	routes := []string{ // define your routes here{{ range .Routes }}
+		"{{ . }}",{{ end }}
 	}{{ if eq .MainFunctionName "main" }}
 	broker, err := msgbroker.NewNats(config.GetNatsURL())
 	if err != nil {

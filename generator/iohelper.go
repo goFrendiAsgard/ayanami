@@ -147,4 +147,3 @@ func NewIOHelperByProjectPath(projectPath string) (IOHelper, error) {
 	templatePath := filepath.Join(projectPath, "generator", "templates")
 	return NewIOHelper(sourceCodePath, deployablePath, templatePath)
 }
-

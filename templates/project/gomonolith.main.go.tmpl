@@ -1,23 +1,20 @@
-{{define "gomonolith.main.go"}}
+{{ define "gomonolith.main.go" }}
 package main
 
-import(
-    // TODO: uncomment the following line to use Nats instead of memory
-    // "github.com/state-alchemists/ayanami/config"
+import({{ if eq .Broker "nats" }}
+    "github.com/state-alchemists/ayanami/config"{{ end }}
 	"github.com/state-alchemists/ayanami/msgbroker"
     "log"
 )
 
-func main() {
-    // TODO: uncomment the following line to use Nats instead of memory
-	// broker, err := msgbroker.NewNats(config.GetNatsURL())
-    // TODO: comment the following line to use Nats instead of memory
-	broker, err := msgbroker.NewMemory()
+func main() { {{ if eq .Broker "nats" }}
+	broker, err := msgbroker.NewNats(config.GetNatsURL()){{ else }}
+	broker, err := msgbroker.NewMemory(){{ end }}
 	if err != nil {
 		log.Fatal(err)
 	}
 	forever := make(chan bool){{ range .Functions }}
-	go {{.}}(broker){{ end }}
+	go {{ . }}(broker){{ end }}
 	<-forever
 }
-{{end}}
+{{ end }}

@@ -175,7 +175,7 @@ func init() {
     )
 
     // get http request from "/" and send 200 as http response's code
-    flow.AppendEvent(gen.Event{
+    flow.AddEvent(gen.Event{
         InputEventName:  "trig.request.get.out",
         UseValue:        true,
         Value:           200,
@@ -184,7 +184,7 @@ func init() {
     })
 
     // get http request from "/" and send "Hello there" as http response's content
-    flow.AppendEvent(gen.Event{
+    flow.AddEvent(gen.Event{
         InputEventName:  "trig.request.get.out",
         UseValue:        true,
         Value:           "Hello there",
@@ -350,7 +350,7 @@ func init() {
     )
 
     // get http request from "/hello" and send 200 as http response's code
-    flow.AppendEvent(gen.Event{
+    flow.AddEvent(gen.Event{
         InputEventName:  "trig.request.get.hello.out",
         UseValue:        true,
         Value:           200,
@@ -359,7 +359,7 @@ func init() {
     })
 
     // get http request from "/hello", send it to  and send "Hello there" as http response's content
-    flow.AppendEvent(gen.Event{
+    flow.AddEvent(gen.Event{
         InputEventName:  "trig.request.get.hello.out.requestURI",
         UseFunction:     true,
         FunctionPackage: "greeting",
@@ -400,33 +400,33 @@ func init() {
     )
 
     // get http request from "/banner"
-    flow.AppendEvent(gen.Event{
+    flow.AddEvent(gen.Event{
         InputEventName: "trig.request.get.banner.out",
         VarName:        "request",
     })
 
     // send request.form.text.0 to figlet
-    flow.AppendEvent(gen.Event{
+    flow.AddEvent(gen.Event{
         OutputEventName: "srvc.cmd.figlet.in.input",
         VarName:         "request.form.text.0",
     })
 
     // get output from figlet and send it to pre
-    flow.AppendEvent(gen.Event{
+    flow.AddEvent(gen.Event{
         InputEventName:  "srvc.cmd.figlet.out.output",
         VarName:         "figletOut",
         OutputEventName: "srvc.html.pre.in.input",
     })
 
     // get output from pre and send it as http response's content
-    flow.AppendEvent(gen.Event{
+    flow.AddEvent(gen.Event{
         InputEventName:  "srvc.html.pre.out.output",
         VarName:         "content",
         OutputEventName: "trig.response.get.banner.in.content",
     })
 
     // also, set http response's code into 200
-    flow.AppendEvent(gen.Event{
+    flow.AddEvent(gen.Event{
         InputEventName:  "srvc.html.pre.out.output",
         UseValue:        true,
         Value:           200,
@@ -437,7 +437,7 @@ func init() {
     // the rest of this are error handlers
 
     // get error from pre and send "Internal Server Error" as http response's content
-    flow.AppendEvent(gen.Event{
+    flow.AddEvent(gen.Event{
         InputEventName:  "srvc.html.pre.err.message",
         UseValue:        true,
         Value:           "Internal Server Error",
@@ -446,7 +446,7 @@ func init() {
     })
 
     // also, set http response's code into 500
-    flow.AppendEvent(gen.Event{
+    flow.AddEvent(gen.Event{
         InputEventName:  "srvc.html.pre.err.message",
         UseValue:        true,
         Value:           500,
@@ -455,7 +455,7 @@ func init() {
     })
 
     // get error from figlet and send "Internal Server Error" as http response's content
-    flow.AppendEvent(gen.Event{
+    flow.AddEvent(gen.Event{
         InputEventName:  "srvc.cmd.figlet.err.message",
         UseValue:        true,
         Value:           "Internal Server Error",
@@ -464,7 +464,7 @@ func init() {
     })
 
     // also, set http response's code into 500
-    flow.AppendEvent(gen.Event{
+    flow.AddEvent(gen.Event{
         InputEventName:  "srvc.cmd.figlet.err.message",
         UseValue:        true,
         Value:           500,

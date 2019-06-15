@@ -7,12 +7,12 @@ import ({{ if eq .MainFunctionName "main" }}
 	"github.com/state-alchemists/ayanami/msgbroker"
 	"github.com/state-alchemists/ayanami/service"{{ if eq .MainFunctionName "main" }}
 	"log"{{ end }}{{ range .Packages }}
-	"{{$repoName}}/{{.}}"{{ end }}
+	"{{ $repoName }}/{{ . }}"{{ end }}
 )
 
-// {{.MainFunctionName}} declaration
-func {{.MainFunctionName}}({{ if ne .MainFunctionName "main" }}broker msgbroker.CommonBroker{{ end }}) {
-	serviceName := "{{.ServiceName}}"{{ if eq .MainFunctionName "main" }}
+// {{ .MainFunctionName }} declaration
+func {{ .MainFunctionName }}({{ if ne .MainFunctionName "main" }}broker msgbroker.CommonBroker{{ end }}) {
+	serviceName := "{{ .ServiceName }}"{{ if eq .MainFunctionName "main" }}
 	// define broker
 	broker, err := msgbroker.NewNats(config.GetNatsURL())
 	if err != nil {
@@ -20,15 +20,15 @@ func {{.MainFunctionName}}({{ if ne .MainFunctionName "main" }}broker msgbroker.
 	}{{ end }}
 	// define services
 	services := service.Services{ {{ range $methodName, $function := .Functions }}
-		service.NewService(serviceName, "{{$methodName}}",
-			[]string{ {{$function.JoinedInputs}} },
-			[]string{ {{$function.JoinedOutputs}} },
-			{{$function.FunctionPackage}}.Wrapped{{$function.FunctionName}},
-		),{{end}}
+		service.NewService(serviceName, "{{ $methodName }}",
+			[]string{ {{ $function.JoinedInputs }} },
+			[]string{ {{ $function.JoinedOutputs }} },
+			{{ $function.FunctionPackage }}.Wrapped{{ $function.FunctionName }},
+		),{{ end }}
 	}
 	// consume and publish forever
 	forever := make(chan bool)
 	services.ConsumeAndPublish(broker, serviceName)
 	<-forever
 }
-{{end}}
+{{ end }}

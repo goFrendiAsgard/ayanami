@@ -9,13 +9,21 @@ import (
 	"strings"
 )
 
+// BrokerNats represent monolith using nats broker
+var BrokerNats = "nats"
+
+// BrokerMemory represent monolith using memory broker
+var BrokerMemory = "memory"
+
 // ExposedGomonolithProc GomonolithProc for template
 type ExposedGomonolithProc struct {
+	Broker    string
 	Functions []string
 }
 
 // GoMonolithProc procedureuration to generate GoMonolith
 type GoMonolithProc struct {
+	Broker   string
 	DirName  string
 	RepoName string
 	generator.IOHelper
@@ -23,6 +31,19 @@ type GoMonolithProc struct {
 
 // Validate validating procedure
 func (p GoMonolithProc) Validate(configs generator.Configs) bool {
+	log.Printf("[INFO] VALIDATING GOMONOLITH: %s", p.DirName)
+	if p.Broker != BrokerMemory && p.Broker != BrokerNats {
+		log.Printf("[ERROR] Broker should be either `nats` or `memory`")
+		return false
+	}
+	if p.DirName == "" {
+		log.Printf("[ERROR] Dir name should not be empty")
+		return false
+	}
+	if p.RepoName == "" {
+		log.Printf("[ERROR] Repo name should not be empty")
+		return false
+	}
 	return true
 }
 
@@ -73,7 +94,7 @@ func (p GoMonolithProc) Build(configs generator.Configs) error {
 		}
 	}
 	// write main.go
-	data := ExposedGomonolithProc{Functions: mainFunctionList}
+	data := ExposedGomonolithProc{Broker: p.Broker, Functions: mainFunctionList}
 	mainPath := filepath.Join(depPath, "main.go")
 	err := p.WriteDep(mainPath, "gomonolith.main.go", data)
 	if err != nil {
@@ -103,8 +124,9 @@ func (p GoMonolithProc) Build(configs generator.Configs) error {
 }
 
 // NewGoMonolith make monolithic app
-func NewGoMonolith(g *generator.Generator, dirName, repoName string) GoMonolithProc {
+func NewGoMonolith(g *generator.Generator, broker, dirName, repoName string) GoMonolithProc {
 	return GoMonolithProc{
+		Broker:   broker,
 		DirName:  dirName,
 		RepoName: repoName,
 		IOHelper: g.IOHelper,

@@ -1,8 +1,8 @@
-{{define "example.full.servicehtml.go" }}
+{{ define "example.full.servicehtml.go" }}
 package main
 
 import (
-	"{{.RepoName}}/gen"
+	"{{ .RepoName }}/gen"
 )
 
 func init() {
@@ -24,4 +24,4 @@ func init() {
 	Gen.AddConfig(service)
 
 }
-{{end}}
+{{ end }}

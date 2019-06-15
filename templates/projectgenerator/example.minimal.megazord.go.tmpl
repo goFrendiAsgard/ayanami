@@ -1,14 +1,15 @@
-{{define "example.minimal.megazord.go" }}
+{{ define "example.minimal.megazord.go" }}
 package main
 
 import (
-	"{{.RepoName}}/gen"
+	"{{ .RepoName }}/gen"
 )
 
 func init() {
 
 	// define procedure
 	procedure := gen.NewGoMonolith(&Gen,
+        gen.BrokerMemory,           // use memory broker
 		"megazord",                 // app directory
 		"github.com/nerv/megazord", // repo name
 	)
@@ -17,4 +18,4 @@ func init() {
 	Gen.AddProcedure(procedure)
 
 }
-{{end}}
+{{ end }}

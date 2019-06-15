@@ -1,21 +1,21 @@
 {{ define "gosrvc.function.go" }}
-package {{.FunctionPackage}}
+package {{ .FunctionPackage }}
 
 import (
 	"github.com/state-alchemists/ayanami/service"
 )
 
-// {{.FunctionName}} declaration
-func {{.FunctionName}}({{.InputDeclaration}}) ({{.OutputDeclaration}}) {
-	return {{.FunctionReturn}}
+// {{ .FunctionName }} declaration
+func {{ .FunctionName }}({{ .InputDeclaration }}) ({{ .OutputDeclaration }}) {
+	return {{ .FunctionReturn }}
 }
 
-// Wrapped{{.FunctionName}} wrapper for {{.FunctionName}}
-func Wrapped{{.FunctionName}}(inputs service.Dictionary) (service.Dictionary, error) {
+// Wrapped{{ .FunctionName }} wrapper for {{ .FunctionName }}
+func Wrapped{{ .FunctionName }}(inputs service.Dictionary) (service.Dictionary, error) {
 	Result := make(service.Dictionary){{ range .Inputs }}
-	{{.}} := inputs.Get("{{.}}"){{end}}
-	{{.FunctionAssignment}}{{ range .Outputs }}
-	Result.Set("{{.}}", {{.}}){{ end }}
+	{{ . }} := inputs.Get("{{ . }}"){{ end }}
+	{{ .FunctionAssignment }}{{ range .Outputs }}
+	Result.Set("{{ . }}", {{ . }}){{ end }}
 	return Result, nil
 }
-{{end}}
+{{ end }}

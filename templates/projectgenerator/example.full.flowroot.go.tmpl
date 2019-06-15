@@ -1,8 +1,8 @@
-{{define "example.full.flowroot.go" }}
+{{ define "example.full.flowroot.go" }}
 package main
 
 import (
-	"{{.RepoName}}/gen"
+	"{{ .RepoName }}/gen"
 )
 
 func init() {
@@ -16,7 +16,7 @@ func init() {
 	)
 
 	// get http request from "/" and send 200 as http response's code
-	flow.AppendEvent(gen.Event{
+	flow.AddEvent(gen.Event{
 		InputEventName:  "trig.request.get.out",
 		UseValue:        true,
 		Value:           200,
@@ -25,7 +25,7 @@ func init() {
 	})
 
 	// get http request from "/" run html.CreateDefaultResponse, and use it's return value as http response's content
-	flow.AppendEvent(gen.Event{
+	flow.AddEvent(gen.Event{
 		InputEventName:  "trig.request.get.out",
 		UseFunction:     true,
 		FunctionPackage: "html",
@@ -38,4 +38,4 @@ func init() {
 	Gen.AddConfig(flow)
 	
 }
-{{end}}
+{{ end }}

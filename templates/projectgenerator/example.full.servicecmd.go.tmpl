@@ -1,8 +1,8 @@
-{{define "example.full.servicecmd.go" }}
+{{ define "example.full.servicecmd.go" }}
 package main
 
 import (
-	"{{.RepoName}}/gen"
+	"{{ .RepoName }}/gen"
 )
 
 func init() {
@@ -20,4 +20,4 @@ func init() {
 	Gen.AddConfig(service)
 
 }
-{{end}}
+{{ end }}

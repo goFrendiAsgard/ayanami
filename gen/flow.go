@@ -176,54 +176,9 @@ func (c FlowConfig) CreateProgram(depPath, repoName, mainFunctionName string) er
 	return err
 }
 
-// AppendEvent add new Event object
-func (c *FlowConfig) AppendEvent(event Event) {
+// AddEvent add new Event object
+func (c *FlowConfig) AddEvent(event Event) {
 	c.Events = append(c.Events, event)
-}
-
-// AddEvent add new Event
-func (c *FlowConfig) AddEvent(inputEventName, outputEventName, varName string) {
-	c.AppendEvent(NewEvent(inputEventName, outputEventName, varName))
-}
-
-// AddEventVal add new Event with value
-func (c *FlowConfig) AddEventVal(inputEventName, outputEventName, varName string, value interface{}) {
-	c.AppendEvent(NewEventVal(inputEventName, outputEventName, varName, value))
-}
-
-// AddEventFunc add new Event with function
-func (c *FlowConfig) AddEventFunc(inputEventName, outputEventName, varName, functionPackage, functionName string, functionDependencies []string) {
-	c.AppendEvent(NewEventFunc(inputEventName, outputEventName, varName, functionPackage, functionName, functionDependencies))
-}
-
-// AddInputEvent add new InputEvent
-func (c *FlowConfig) AddInputEvent(eventName, varName string) {
-	c.AppendEvent(NewInputEvent(eventName, varName))
-}
-
-// AddInputEventVal add new InputEvent with value
-func (c *FlowConfig) AddInputEventVal(eventName, varName string, value interface{}) {
-	c.AppendEvent(NewInputEventVal(eventName, varName, value))
-}
-
-// AddInputEventFunc add new InputEvent with function
-func (c *FlowConfig) AddInputEventFunc(eventName, varName, functionPackage, functionName string, functionDependencies []string) {
-	c.AppendEvent(NewInputEventFunc(eventName, varName, functionPackage, functionName, functionDependencies))
-}
-
-// AddOutputEvent create new OutputEvent
-func (c *FlowConfig) AddOutputEvent(eventName, varName string) {
-	c.AppendEvent(NewOutputEvent(eventName, varName))
-}
-
-// AddOutputEventVal create new OutputEvent with value
-func (c *FlowConfig) AddOutputEventVal(eventName, varName string, value interface{}) {
-	c.AppendEvent(NewOutputEventVal(eventName, varName, value))
-}
-
-// AddOutputEventFunc create new OutputEvent with function
-func (c *FlowConfig) AddOutputEventFunc(eventName, varName, functionPackage, functionName string, functionDependencies []string) {
-	c.AppendEvent(NewOutputEventFunc(eventName, varName, functionPackage, functionName, functionDependencies))
 }
 
 func (c *FlowConfig) toExposed(repoName, mainFunctionName string) ExposedFlowConfig {

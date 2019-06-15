@@ -1,4 +1,4 @@
-{{define "Makefile" }}
+{{ define "Makefile"  }}
 test:
 	go test -race ./... -coverprofile=profile.out -count=1 -covermode=atomic
 
@@ -20,4 +20,4 @@ scaffold:
 build:
 	go build -v -o rei && ./rei build
 
-{{end}}
+{{ end }}
