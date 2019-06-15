@@ -205,7 +205,7 @@ This flow is quite simple:
 
 A flow should be started when it got all `inputs`, and it should be ended when all `outputs` are set. For a better ilustration, please see the following diagram:
 
-![flowroot](images/megazord architecture-Flowroot.png)
+![flowroot](images/megazordArchitecture-flowroot.png)
 
 ## Create Custom Composition
 
@@ -228,7 +228,7 @@ Let's plan how everything is going to work.
 
 First, we probably need two services. One to deal with HTML, and another one that deal with Cmd. Next, we need to add two routes into the gateway, and define several flows. Roughly, it our architecture should looks like this:
 
-![Architecture](images/megazord architecture-Components.png)
+![Architecture](images/megazordArchitecture-components.png)
 
 ### Modifying Gateway
 
@@ -327,7 +327,7 @@ Please take a note, that we have to implement `html.pre` later after `scaffoldin
 
 Our `flowhello` should looks like this:
 
-![flowHello](images/megazord architecture-Flowhello.png)
+![flowHello](images/megazordArchitecture-flowhello.png)
 
 To make it work exactly as intended, you have to define it as follow and implement `greeting.Hello` after scaffolding.
 
@@ -378,7 +378,7 @@ func init() {
 
 `flowBanner` is the most complicated flow in our project since it needs to talk to `servicecmd` and `servicehtml`. Conceptually, the flow looks like this:
 
-![flowbanner](images/megazord architecture-Flowbanner.png)
+![flowbanner](images/megazordArchitecture-flowbanner.png)
 
 And to make it work as intended, you should define the flow as follow:
 
