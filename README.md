@@ -580,7 +580,7 @@ Finally, feel free to add your own `gen` and `templates`, you might want to writ
 
 1. Also generate environment and kubernetes.yaml
 2. Support `Python` and `Node.Js` (consequently, we will have several monolithic instead of one)
-3. Also try to `git init` and `git commit` for every build.
+3. ~~Also try to `git init` and `git commit` for every build.~~
 4. Implement logger.
-5. For monolithic, it is better to use `memory broker` instead of `NATS`.
+5. ~~For monolithic, it is better to use `memory broker` instead of `NATS`.~~
 6. Please open issue if you have any other ideas/suggestions.
