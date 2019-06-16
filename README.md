@@ -1,8 +1,8 @@
 # Ayanami
 
-Your genertor's generator. A FaaS-like framework to build your micro-srvices and monolithic.
+Your generator's generator. A FaaS-like framework to build your micro-srvices and test it as monolithic.
 
-The name is inspired from `Evangelion-Unit-00's pilot`: `Ayanami Rei`. The name `Rei` itself has the same pronunciation as in Heraclitus's philosophy, `Panta Rhei` (lit: everything flows). We believe that the developer should focus more on data flows and transformations rather than managing infrastructures.
+Ayanami's name was inspired from `Evangelion-Unit-00's pilot`: `Ayanami Rei`. The name `Rei` itself has the same pronunciation as in Heraclitus's philosophy, `Panta Rhei` (lit: everything flows). We believe that developers should focus on data flows, transformations, and writing codes, rather than managing infrastructures.
 
 ![Ayanami Rei](images/ayanami-rei.png)
 
@@ -11,14 +11,14 @@ The name is inspired from `Evangelion-Unit-00's pilot`: `Ayanami Rei`. The name 
 * FaaS is good since it let you focus on the code instead of infrastructure
 * Any FaaS providers are prone to vendor lock-in
 * Having your own infrastructure (e.g: kubernetes) while developing/deploying in FaaS manner is a good solution
-* At some point, developers need to run the entire infrastructure in their local machine. In this case, installing kubernetes/minikube could be overkill
-* Copy pasting several logics from single domain to another domain is probably inevitable, but it prone to mistakes.
+* At some point, developers need to run the entire infrastructure in their local machine (i.e: for quick testing). In this case, installing kubernetes/minikube could be overkill
+* Copy pasting several logics from single domain to another domain is probably the best way to deal with inconsistencies, but it is prone to mistakes. We think generator can be useful for this cases.
 
 # Goal
 
 Providing an environment with minimum dependencies in order to:
 
-* Build & deploy microservices/monolithic
+* Build microservices and test them out as monolithic
 * Make kubernetes-ready artifacts
 * Run the entire infrastructure locally without kubernetes (either as microservices or as single monolithic)
 
