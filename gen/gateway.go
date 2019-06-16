@@ -56,7 +56,7 @@ func (c GatewayConfig) Build() error {
 		return err
 	}
 	// write common things
-	err = c.WriteDeps(depPath, []string{"go.mod", "Makefile", ".gitignore"}, depPath)
+	err = c.WriteDeps(depPath, []string{"go.mod", "Makefile", ".gitignore"}, c)
 	if err != nil {
 		return err
 	}
