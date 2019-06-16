@@ -100,23 +100,19 @@ func (p GoMonolithProc) Build(configs generator.Configs) error {
 		return err
 	}
 	// write common things
-	for _, templateName := range []string{"go.mod", "Makefile", ".gitignore"} {
-		log.Printf("[INFO] Create %s", templateName)
-		goModPath := filepath.Join(depPath, templateName)
-		err := p.WriteDep(goModPath, templateName, p)
-		if err != nil {
-			return err
-		}
+	err = p.WriteDeps(depPath, []string{"go.mod", "Makefile", ".gitignore"}, p)
+	if err != nil {
+		return err
 	}
 	// git init
 	log.Printf("[INFO] Run git init")
-	err = GitInit(p.IOHelper, filepath.Join(p.GetDepPath(), depPath))
+	err = p.GitInitDep(depPath)
 	if err != nil {
 		return err
 	}
 	// GoFmt
 	log.Printf("[INFO] Run gofmt")
-	err = GoFmt(filepath.Join(p.GetDepPath(), depPath))
+	err = p.GoFmtDep(depPath)
 	if err != nil {
 		return err
 	}

@@ -42,9 +42,9 @@ func (e *Event) Validate() bool {
 // ToMap change event to map
 func (e *Event) ToMap() map[string]string {
 	result := make(map[string]string)
-	e.addQuotedToMapIfNotEmpty(result, "InputEvent", e.InputEventName)
-	e.addQuotedToMapIfNotEmpty(result, "OutputEvent", e.OutputEventName)
-	e.addQuotedToMapIfNotEmpty(result, "VarName", e.VarName)
+	e.addQuotedValToMapIfNotEmpty(result, "InputEvent", e.InputEventName)
+	e.addQuotedValToMapIfNotEmpty(result, "OutputEvent", e.OutputEventName)
+	e.addQuotedValToMapIfNotEmpty(result, "VarName", e.VarName)
 	if e.UseValue {
 		result["UseValue"] = "true"
 		result["Value"] = fmt.Sprintf("%#v", e.Value)
@@ -56,31 +56,8 @@ func (e *Event) ToMap() map[string]string {
 	return result
 }
 
-// ToIndentedMap change event to map with value indented, ready for templating
-func (e *Event) ToIndentedMap() map[string]string {
-	result := e.ToMap()
-	e.addValIndentationToMap(result)
-	return result
-}
-
-func (e *Event) addQuotedToMapIfNotEmpty(m map[string]string, key, val string) {
+func (e *Event) addQuotedValToMapIfNotEmpty(m map[string]string, key, val string) {
 	if val != "" {
 		m[key] = e.Quote(val)
-	}
-}
-
-func (e *Event) addValIndentationToMap(m map[string]string) {
-	// get longest key
-	maxKeyLength := 0
-	for key := range m {
-		keyLength := len(key)
-		if keyLength > maxKeyLength {
-			maxKeyLength = keyLength
-		}
-	}
-	for key := range m {
-		for i := len(key); i < maxKeyLength; i++ {
-			m[key] = " " + m[key]
-		}
 	}
 }

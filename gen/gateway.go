@@ -56,23 +56,19 @@ func (c GatewayConfig) Build() error {
 		return err
 	}
 	// write common things
-	for _, templateName := range []string{"go.mod", "Makefile", ".gitignore"} {
-		log.Printf("[INFO] Create %s", templateName)
-		goModPath := filepath.Join(depPath, templateName)
-		err := c.WriteDep(goModPath, templateName, c)
-		if err != nil {
-			return err
-		}
+	err = c.WriteDeps(depPath, []string{"go.mod", "Makefile", ".gitignore"}, depPath)
+	if err != nil {
+		return err
 	}
 	// git init
 	log.Printf("[INFO] Run git init")
-	err = GitInit(c.IOHelper, filepath.Join(c.GetDepPath(), depPath))
+	err = c.GitInitDep(depPath)
 	if err != nil {
 		return err
 	}
 	// GoFmt
 	log.Printf("[INFO] Run gofmt")
-	err = GoFmt(filepath.Join(c.GetDepPath(), depPath))
+	err = c.GoFmtDep(depPath)
 	if err != nil {
 		return err
 	}
