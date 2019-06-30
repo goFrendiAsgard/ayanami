@@ -40,7 +40,7 @@ func (io *IOHelper) GitInitSource(dirPath string) error {
 
 // GitInitDep run git init for a directory in dep path
 func (io *IOHelper) GitInitDep(dirPath string) error {
-	return io.GitInit(filepath.Join(io.sourcePath, dirPath))
+	return io.GitInit(filepath.Join(io.depPath, dirPath))
 }
 
 // GitInit run git init in a directory

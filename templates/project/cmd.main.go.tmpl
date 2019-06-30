@@ -2,9 +2,9 @@
 package main
 
 import ({{ if eq .MainFunctionName "main" }}
-	"github.com/state-alchemists/ayanami/config"{{ end }}
-	"github.com/state-alchemists/ayanami/msgbroker"
-	"github.com/state-alchemists/ayanami/service"{{ if eq .MainFunctionName "main" }}
+	"github.com/state-alchemists/ayanami-service-go/config"{{ end }}
+	"github.com/state-alchemists/ayanami-service-go/msgbroker"
+	"github.com/state-alchemists/ayanami-service-go/service"{{ if eq .MainFunctionName "main" }}
 	"log"{{ end }}
 )
 
